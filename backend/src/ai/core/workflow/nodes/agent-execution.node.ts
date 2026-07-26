@@ -1,5 +1,5 @@
 import type { typeofAiGraphState } from '../state';
-import { investigationTools, legalTools, analyticsTools, graphTools, recommendationTools } from '@ai/tools/registry';
+import { investigationTools, legalTools, analyticsTools, graphTools, recommendationTools } from '../../tools/registry';
 import { executeAgentReactLoop } from './agent-react-loop';
 import { promptManager } from '@ai/prompts/prompt-manager';
 export async function investigationAgentNode(state: typeofAiGraphState): Promise<Partial<typeofAiGraphState>> {
