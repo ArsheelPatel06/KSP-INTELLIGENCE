@@ -4,6 +4,7 @@ import cors from 'cors';
 import express, { type Express } from 'express';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
+import path from 'node:path';
 import { env } from '../config/env';
 import { logger } from '../core/logger/logger';
 import { errorMiddleware } from '../middleware/error.middleware';
@@ -38,6 +39,19 @@ export function createApp(): Express {
   app.use(rateLimitMiddleware);
 
   registerRoutes(app);
+
+  // Serve frontend static files in production
+  if (env.NODE_ENV === 'production') {
+    const frontendDist = path.join(__dirname, '../../../frontend/dist');
+    app.use(express.static(frontendDist));
+
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith(env.API_PREFIX)) {
+        return next();
+      }
+      res.sendFile(path.join(frontendDist, 'index.html'));
+    });
+  }
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);
