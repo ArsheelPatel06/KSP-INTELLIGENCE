@@ -1,0 +1,2702 @@
+[
+  {
+    "id": "investigation_1",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #5579 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_2",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #9874 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_3",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_4",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #4725 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_5",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #5302 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_6",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #6743 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_7",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_8",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #4978 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_9",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #8570 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_10",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #3611 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_11",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_12",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #1084 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_13",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #3795 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_14",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #9815 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_15",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_16",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #3052 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_17",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #3715 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_18",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #970 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_19",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_20",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #3502 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_21",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #6278 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_22",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #6403 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_23",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_24",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #9497 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_25",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #4804 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_26",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #9443 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_27",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_28",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #440 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_29",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #8962 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_30",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #3962 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_31",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_32",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #4612 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_33",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #6022 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_34",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #9395 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_35",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_36",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #9404 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_37",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #1647 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_38",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #784 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_39",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_40",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #5427 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_41",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #5919 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_42",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #9329 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_43",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_44",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #9900 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_45",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #5903 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_46",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #1060 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_47",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_48",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #9973 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_49",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #8174 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_50",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #771 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_51",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_52",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #3737 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_53",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #5960 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_54",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #7668 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_55",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_56",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #3767 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_57",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #9553 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_58",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #631 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_59",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_60",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #3629 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_61",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #5793 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_62",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #9644 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_63",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_64",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #6411 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_65",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #514 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_66",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #8973 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_67",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_68",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #7016 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_69",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #9923 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_70",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #5157 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_71",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_72",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #29 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_73",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #2402 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_74",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #3694 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_75",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_76",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #2983 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_77",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #5762 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_78",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #38 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_79",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_80",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #8834 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_81",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #9788 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_82",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #519 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_83",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_84",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #7399 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_85",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #7948 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_86",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #6041 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_87",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_88",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #2167 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_89",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #4311 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_90",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #8370 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_91",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_92",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #989 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_93",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #4048 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_94",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #7794 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_95",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_96",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #3236 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_97",
+    "category": "INVESTIGATION",
+    "query": "What is the next logical step in case #2831 considering the suspect fled?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_98",
+    "category": "INVESTIGATION",
+    "query": "Review FIR #14 and suggest missing evidence.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_99",
+    "category": "INVESTIGATION",
+    "query": "What similar modus operandi cases exist for burglary in District Bengaluru?",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "investigation_100",
+    "category": "INVESTIGATION",
+    "query": "Analyze the witness statements for case #3900 and find contradictions.",
+    "expectedIntent": "investigation",
+    "expectedAgents": [
+      "investigation"
+    ]
+  },
+  {
+    "id": "legal_1",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_2",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #2328 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_3",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_4",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_5",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_6",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #4884 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_7",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_8",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_9",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_10",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #8025 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_11",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_12",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_13",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_14",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #2085 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_15",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_16",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_17",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_18",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #6943 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_19",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_20",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_21",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_22",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #46 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_23",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_24",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_25",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_26",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #5481 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_27",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_28",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_29",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_30",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #673 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_31",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_32",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_33",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_34",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #6791 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_35",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_36",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_37",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_38",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #7327 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_39",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_40",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_41",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_42",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #5840 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_43",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_44",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_45",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_46",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #6201 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_47",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_48",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_49",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_50",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #3465 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_51",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_52",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_53",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_54",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #5331 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_55",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_56",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_57",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_58",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #2661 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_59",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_60",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_61",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_62",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #4534 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_63",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_64",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_65",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_66",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #9134 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_67",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_68",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_69",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_70",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #7271 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_71",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_72",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_73",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_74",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #4528 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_75",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_76",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_77",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_78",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #1509 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_79",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_80",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_81",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_82",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #6005 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_83",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_84",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_85",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_86",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #3057 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_87",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_88",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_89",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_90",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #5186 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_91",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_92",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_93",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_94",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #2051 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_95",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_96",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_97",
+    "category": "LEGAL",
+    "query": "What IPC sections apply if a suspect uses a fake identity online?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_98",
+    "category": "LEGAL",
+    "query": "Are there missing charges in case #3501 for assault on a public servant?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_99",
+    "category": "LEGAL",
+    "query": "What is the maximum penalty under BNS for extortion?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "legal_100",
+    "category": "LEGAL",
+    "query": "Can you validate if section 302 IPC is applicable given the autopsy report?",
+    "expectedIntent": "legal_analysis",
+    "expectedAgents": [
+      "legal"
+    ]
+  },
+  {
+    "id": "analytics_1",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_2",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_3",
+    "category": "ANALYTICS",
+    "query": "Are there seasonal patterns in domestic violence cases?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_4",
+    "category": "ANALYTICS",
+    "query": "Compare the resolution rate between District A and District B.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_5",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_6",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_7",
+    "category": "ANALYTICS",
+    "query": "Are there seasonal patterns in domestic violence cases?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_8",
+    "category": "ANALYTICS",
+    "query": "Compare the resolution rate between District A and District B.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_9",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_10",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_11",
+    "category": "ANALYTICS",
+    "query": "Are there seasonal patterns in domestic violence cases?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_12",
+    "category": "ANALYTICS",
+    "query": "Compare the resolution rate between District A and District B.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_13",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_14",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_15",
+    "category": "ANALYTICS",
+    "query": "Are there seasonal patterns in domestic violence cases?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_16",
+    "category": "ANALYTICS",
+    "query": "Compare the resolution rate between District A and District B.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_17",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_18",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_19",
+    "category": "ANALYTICS",
+    "query": "Are there seasonal patterns in domestic violence cases?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_20",
+    "category": "ANALYTICS",
+    "query": "Compare the resolution rate between District A and District B.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_21",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_22",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_23",
+    "category": "ANALYTICS",
+    "query": "Are there seasonal patterns in domestic violence cases?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_24",
+    "category": "ANALYTICS",
+    "query": "Compare the resolution rate between District A and District B.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_25",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_26",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_27",
+    "category": "ANALYTICS",
+    "query": "Are there seasonal patterns in domestic violence cases?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_28",
+    "category": "ANALYTICS",
+    "query": "Compare the resolution rate between District A and District B.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_29",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_30",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_31",
+    "category": "ANALYTICS",
+    "query": "Are there seasonal patterns in domestic violence cases?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_32",
+    "category": "ANALYTICS",
+    "query": "Compare the resolution rate between District A and District B.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_33",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_34",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_35",
+    "category": "ANALYTICS",
+    "query": "Are there seasonal patterns in domestic violence cases?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_36",
+    "category": "ANALYTICS",
+    "query": "Compare the resolution rate between District A and District B.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_37",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_38",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_39",
+    "category": "ANALYTICS",
+    "query": "Are there seasonal patterns in domestic violence cases?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_40",
+    "category": "ANALYTICS",
+    "query": "Compare the resolution rate between District A and District B.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_41",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_42",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_43",
+    "category": "ANALYTICS",
+    "query": "Are there seasonal patterns in domestic violence cases?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_44",
+    "category": "ANALYTICS",
+    "query": "Compare the resolution rate between District A and District B.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_45",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_46",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_47",
+    "category": "ANALYTICS",
+    "query": "Are there seasonal patterns in domestic violence cases?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_48",
+    "category": "ANALYTICS",
+    "query": "Compare the resolution rate between District A and District B.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_49",
+    "category": "ANALYTICS",
+    "query": "Show me the crime trends for cyber fraud in Bengaluru over the last 6 months.",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "analytics_50",
+    "category": "ANALYTICS",
+    "query": "Which district has the highest rate of vehicle theft this year?",
+    "expectedIntent": "analytics",
+    "expectedAgents": [
+      "analytics"
+    ]
+  },
+  {
+    "id": "graph_1",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_2",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_3",
+    "category": "GRAPH",
+    "query": "Show the network of repeat offenders in gang Local Syndicate.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_4",
+    "category": "GRAPH",
+    "query": "Discover hidden links between Officer Insp. Patil and the recently closed case #6540.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_5",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_6",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_7",
+    "category": "GRAPH",
+    "query": "Show the network of repeat offenders in gang Local Syndicate.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_8",
+    "category": "GRAPH",
+    "query": "Discover hidden links between Officer Insp. Patil and the recently closed case #9993.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_9",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_10",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_11",
+    "category": "GRAPH",
+    "query": "Show the network of repeat offenders in gang Local Syndicate.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_12",
+    "category": "GRAPH",
+    "query": "Discover hidden links between Officer Insp. Patil and the recently closed case #6454.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_13",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_14",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_15",
+    "category": "GRAPH",
+    "query": "Show the network of repeat offenders in gang Local Syndicate.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_16",
+    "category": "GRAPH",
+    "query": "Discover hidden links between Officer Insp. Patil and the recently closed case #5151.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_17",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_18",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_19",
+    "category": "GRAPH",
+    "query": "Show the network of repeat offenders in gang Local Syndicate.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_20",
+    "category": "GRAPH",
+    "query": "Discover hidden links between Officer Insp. Patil and the recently closed case #5102.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_21",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_22",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_23",
+    "category": "GRAPH",
+    "query": "Show the network of repeat offenders in gang Local Syndicate.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_24",
+    "category": "GRAPH",
+    "query": "Discover hidden links between Officer Insp. Patil and the recently closed case #601.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_25",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_26",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_27",
+    "category": "GRAPH",
+    "query": "Show the network of repeat offenders in gang Local Syndicate.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_28",
+    "category": "GRAPH",
+    "query": "Discover hidden links between Officer Insp. Patil and the recently closed case #4031.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_29",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_30",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_31",
+    "category": "GRAPH",
+    "query": "Show the network of repeat offenders in gang Local Syndicate.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_32",
+    "category": "GRAPH",
+    "query": "Discover hidden links between Officer Insp. Patil and the recently closed case #3946.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_33",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_34",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_35",
+    "category": "GRAPH",
+    "query": "Show the network of repeat offenders in gang Local Syndicate.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_36",
+    "category": "GRAPH",
+    "query": "Discover hidden links between Officer Insp. Patil and the recently closed case #450.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_37",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_38",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_39",
+    "category": "GRAPH",
+    "query": "Show the network of repeat offenders in gang Local Syndicate.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_40",
+    "category": "GRAPH",
+    "query": "Discover hidden links between Officer Insp. Patil and the recently closed case #1323.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_41",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_42",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_43",
+    "category": "GRAPH",
+    "query": "Show the network of repeat offenders in gang Local Syndicate.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_44",
+    "category": "GRAPH",
+    "query": "Discover hidden links between Officer Insp. Patil and the recently closed case #8699.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_45",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_46",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_47",
+    "category": "GRAPH",
+    "query": "Show the network of repeat offenders in gang Local Syndicate.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_48",
+    "category": "GRAPH",
+    "query": "Discover hidden links between Officer Insp. Patil and the recently closed case #4329.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_49",
+    "category": "GRAPH",
+    "query": "Find the shortest path between suspect John Doe and victim Jane Smith.",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  },
+  {
+    "id": "graph_50",
+    "category": "GRAPH",
+    "query": "What are the connections of phone number +919999999999?",
+    "expectedIntent": "graph_traversal",
+    "expectedAgents": [
+      "graph"
+    ]
+  }
+]

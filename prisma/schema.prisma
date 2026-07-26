@@ -1,0 +1,1828 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  DGP
+  IG
+  SP
+  DSP
+  INSPECTOR
+  SI
+  CONSTABLE
+  CRIME_ANALYST
+  POLICY_MAKER
+}
+
+enum AuthAuditEvent {
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  TOKEN_REFRESH
+  TOKEN_REFRESH_FAILURE
+  TOKEN_REUSE_DETECTED
+  LOGOUT
+  ACCESS_DENIED
+}
+
+model User {
+  id            String         @id @default(cuid())
+  username      String         @unique @db.VarChar(100)
+  email         String?        @unique @db.VarChar(255)
+  passwordHash  String         @map("password_hash") @db.VarChar(255)
+  role          Role
+  employeeId    BigInt?        @map("employee_id")
+  isActive      Boolean        @default(true) @map("is_active")
+  tokenVersion  Int            @default(0) @map("token_version")
+  lastLoginAt   DateTime?      @map("last_login_at")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  refreshTokens RefreshToken[]
+  auditLogs     AuthAuditLog[]
+
+  @@index([role, isActive])
+  @@map("auth_user")
+}
+
+model RefreshToken {
+  id                String    @id
+  userId            String    @map("user_id")
+  tokenHash         String    @unique @map("token_hash") @db.VarChar(64)
+  familyId          String    @map("family_id") @db.VarChar(50)
+  expiresAt         DateTime  @map("expires_at")
+  revokedAt         DateTime? @map("revoked_at")
+  replacedByTokenId String?   @map("replaced_by_token_id") @db.VarChar(50)
+  ipAddress         String?   @map("ip_address") @db.VarChar(64)
+  userAgent         String?   @map("user_agent") @db.VarChar(500)
+  createdAt         DateTime  @default(now()) @map("created_at")
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt, expiresAt])
+  @@index([familyId])
+  @@map("auth_refresh_token")
+}
+
+model AuthAuditLog {
+  id        String         @id @default(cuid())
+  userId    String?        @map("user_id")
+  event     AuthAuditEvent
+  success   Boolean
+  ipAddress String?        @map("ip_address") @db.VarChar(64)
+  userAgent String?        @map("user_agent") @db.VarChar(500)
+  requestId String?        @map("request_id") @db.VarChar(100)
+  details   String?        @db.Text
+  createdAt DateTime       @default(now()) @map("created_at")
+  user      User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([event, createdAt])
+  @@map("auth_audit_log")
+}
+
+model DataSource {
+  id                  BigInt                       @id @default(autoincrement()) @map("data_source_id")
+  sourceName          String                       @map("source_name") @db.VarChar(255)
+  sourceType          String                       @map("source_type") @db.VarChar(50)
+  sourcePath          String?                      @map("source_path") @db.Text
+  sourceBatch         String?                      @map("source_batch") @db.VarChar(50)
+  reportingMonth      Int?                         @map("reporting_month")
+  reportingYear       Int?                         @map("reporting_year")
+  extractedOn         DateTime?                    @map("extracted_on") @db.Timestamp(6)
+  rowCount            BigInt?                      @map("row_count")
+  pageCount           Int?                         @map("page_count")
+  checksum            String?                      @unique @db.VarChar(128)
+  qualitySummary      String?                      @map("quality_summary") @db.Text
+  isDuplicate         Boolean                      @default(false) @map("is_duplicate")
+  notes               String?                      @db.Text
+  createdAt           DateTime                     @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt           DateTime                     @default(now()) @map("updated_at") @db.Timestamp(6)
+  cases               CaseMaster[]
+  crimeReviewReports  CrimeReviewReport[]
+  crimeStatistics     CrimeStatistic[]
+  victimStatistics    VictimDemographicStatistic[]
+  cyberStatistics     CyberSuspectStatistic[]
+  roadStatistics      RoadAccidentStatistic[]
+  serviceMetrics      ServicePerformanceMetric[]
+  legalDocuments      LegalDocumentSource[]
+  ipcReferences       IpcSectionReference[]
+  ragDocuments        RagDocument[]
+  dataQualityIssues   DataQualityIssue[]
+  evidence            Evidence[]
+  documentAttachments DocumentAttachment[]
+  socialRelationships SocialRelationship[]
+  featureVectors      FeatureVectorRef[]
+  knowledgeGraphNodes KgNode[]
+  knowledgeGraphEdges KgEdge[]
+
+  @@map("data_source")
+}
+
+model GenderMaster {
+  id           BigInt        @id @default(autoincrement()) @map("gender_id")
+  name         String        @unique @map("gender_name") @db.VarChar(100)
+  active       Boolean       @default(true)
+  employees    Employee[]
+  complainants Complainant[]
+  victims      Victim[]
+  accused      Accused[]
+  witnesses    Witness[]
+
+  @@map("gender_master")
+}
+
+model State {
+  id               BigInt                       @id @default(autoincrement()) @map("state_id")
+  name             String                       @unique @map("state_name") @db.VarChar(150)
+  nationalityId    BigInt?                      @map("nationality_id")
+  active           Boolean                      @default(true)
+  districts        District[]
+  units            Unit[]
+  courts           Court[]
+  arrests          ArrestSurrender[]
+  victimStatistics VictimDemographicStatistic[]
+  cyberStatistics  CyberSuspectStatistic[]
+  jails            Jail[]
+  addresses        AddressHistory[]
+  organizations    Organization[]
+
+  @@map("state")
+}
+
+model District {
+  id                     BigInt                     @id @default(autoincrement()) @map("district_id")
+  name                   String                     @map("district_name") @db.VarChar(150)
+  stateId                BigInt                     @map("state_id")
+  active                 Boolean                    @default(true)
+  state                  State                      @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  units                  Unit[]
+  employees              Employee[]
+  courts                 Court[]
+  arrests                ArrestSurrender[]
+  crimeStatistics        CrimeStatistic[]
+  roadStatistics         RoadAccidentStatistic[]
+  serviceMetrics         ServicePerformanceMetric[]
+  jails                  Jail[]
+  repeatOffenderProfiles RepeatOffenderProfile[]
+  gangNetworks           GangNetwork[]
+  addresses              AddressHistory[]
+  organizations          Organization[]
+  hotspots               Hotspot[]
+
+  @@unique([name, stateId])
+  @@index([stateId])
+  @@map("district")
+}
+
+model UnitType {
+  id             BigInt  @id @default(autoincrement()) @map("unit_type_id")
+  name           String  @unique @map("unit_type_name") @db.VarChar(150)
+  cityDistState  String? @map("city_dist_state") @db.VarChar(100)
+  hierarchyLevel Int?    @map("hierarchy_level")
+  active         Boolean @default(true)
+  units          Unit[]
+
+  @@map("unit_type")
+}
+
+model Unit {
+  id              BigInt                     @id @default(autoincrement()) @map("unit_id")
+  name            String                     @map("unit_name") @db.VarChar(255)
+  unitTypeId      BigInt?                    @map("unit_type_id")
+  parentUnitId    BigInt?                    @map("parent_unit_id")
+  nationalityId   BigInt?                    @map("nationality_id")
+  stateId         BigInt?                    @map("state_id")
+  districtId      BigInt?                    @map("district_id")
+  active          Boolean                    @default(true)
+  sourceUnitCode  String?                    @map("source_unit_code") @db.VarChar(100)
+  unitType        UnitType?                  @relation(fields: [unitTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parent          Unit?                      @relation("UnitHierarchy", fields: [parentUnitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children        Unit[]                     @relation("UnitHierarchy")
+  state           State?                     @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  district        District?                  @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  employees       Employee[]
+  cases           CaseMaster[]
+  arrests         ArrestSurrender[]
+  crimeStatistics CrimeStatistic[]
+  roadStatistics  RoadAccidentStatistic[]
+  serviceMetrics  ServicePerformanceMetric[]
+  gangNetworks    GangNetwork[]
+  hotspots        Hotspot[]
+  riskScores      RiskScore[]
+  alerts          Alert[]
+
+  @@unique([name, districtId])
+  @@index([districtId])
+  @@index([parentUnitId])
+  @@map("unit")
+}
+
+model Rank {
+  id             BigInt     @id @default(autoincrement()) @map("rank_id")
+  name           String     @unique @map("rank_name") @db.VarChar(150)
+  hierarchyLevel Int?       @map("hierarchy_level")
+  active         Boolean    @default(true)
+  employees      Employee[]
+
+  @@map("rank_master")
+}
+
+model Designation {
+  id        BigInt     @id @default(autoincrement()) @map("designation_id")
+  name      String     @unique @map("designation_name") @db.VarChar(150)
+  active    Boolean    @default(true)
+  sortOrder Int?       @map("sort_order")
+  employees Employee[]
+
+  @@map("designation")
+}
+
+model Employee {
+  id                          BigInt                      @id @default(autoincrement()) @map("employee_id")
+  districtId                  BigInt?                     @map("district_id")
+  unitId                      BigInt?                     @map("unit_id")
+  rankId                      BigInt?                     @map("rank_id")
+  designationId               BigInt?                     @map("designation_id")
+  kgid                        String?                     @unique @db.VarChar(100)
+  firstName                   String?                     @map("first_name") @db.VarChar(255)
+  employeeDob                 DateTime?                   @map("employee_dob") @db.Date
+  genderId                    BigInt?                     @map("gender_id")
+  bloodGroupId                BigInt?                     @map("blood_group_id")
+  physicallyChallenged        Boolean?                    @map("physically_challenged")
+  appointmentDate             DateTime?                   @map("appointment_date") @db.Date
+  active                      Boolean                     @default(true)
+  district                    District?                   @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  unit                        Unit?                       @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rank                        Rank?                       @relation(fields: [rankId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  designation                 Designation?                @relation(fields: [designationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gender                      GenderMaster?               @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  registeredCases             CaseMaster[]                @relation("CasePolicePerson")
+  arrestInvestigations        ArrestSurrender[]           @relation("ArrestInvestigatingOfficer")
+  chargesheets                ChargesheetDetails[]
+  collectedEvidence           Evidence[]
+  diaryEntries                CaseDiaryEntry[]
+  offenderLinkReviews         RepeatOffenderAccusedLink[]
+  riskScoreReviews            RiskScore[]
+  recommendationReviews       Recommendation[]
+  similarityReviews           CaseSimilarity[]
+  assignedAlerts              Alert[]
+  assignedTasks               Task[]
+  ragRetrievals               RagRetrievalLog[]
+  modelRuns                   ModelAuditLog[]
+  chatSessions                ChatSession[]
+  searchRequests              SearchRequest[]
+  reviewedKnowledgeGraphEdges KgEdge[]
+
+  @@index([unitId])
+  @@index([districtId])
+  @@index([rankId])
+  @@map("employee")
+}
+
+model Court {
+  id              BigInt            @id @default(autoincrement()) @map("court_id")
+  name            String            @map("court_name") @db.VarChar(255)
+  districtId      BigInt?           @map("district_id")
+  stateId         BigInt?           @map("state_id")
+  active          Boolean           @default(true)
+  district        District?         @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  state           State?            @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cases           CaseMaster[]
+  arrests         ArrestSurrender[]
+  proceedings     CourtProceeding[]
+  custodyStatuses CustodyStatus[]
+
+  @@unique([name, districtId])
+  @@map("court")
+}
+
+model CaseCategory {
+  id          BigInt       @id @default(autoincrement()) @map("case_category_id")
+  lookupValue String       @unique @map("lookup_value") @db.VarChar(150)
+  active      Boolean      @default(true)
+  cases       CaseMaster[]
+
+  @@map("case_category")
+}
+
+model GravityOffence {
+  id          BigInt       @id @default(autoincrement()) @map("gravity_offence_id")
+  lookupValue String       @unique @map("lookup_value") @db.VarChar(150)
+  active      Boolean      @default(true)
+  cases       CaseMaster[]
+
+  @@map("gravity_offence")
+}
+
+model CaseStatus {
+  id     BigInt       @id @default(autoincrement()) @map("case_status_id")
+  name   String       @unique @map("case_status_name") @db.VarChar(200)
+  active Boolean      @default(true)
+  cases  CaseMaster[]
+
+  @@map("case_status_master")
+}
+
+model Occupation {
+  id           BigInt        @id @default(autoincrement()) @map("occupation_id")
+  name         String        @unique @map("occupation_name") @db.VarChar(200)
+  active       Boolean       @default(true)
+  complainants Complainant[]
+
+  @@map("occupation_master")
+}
+
+model Religion {
+  id           BigInt        @id @default(autoincrement()) @map("religion_id")
+  name         String        @unique @map("religion_name") @db.VarChar(150)
+  active       Boolean       @default(true)
+  complainants Complainant[]
+
+  @@map("religion_master")
+}
+
+model Caste {
+  id           BigInt        @id @default(autoincrement()) @map("caste_master_id")
+  name         String        @unique @map("caste_master_name") @db.VarChar(200)
+  active       Boolean       @default(true)
+  complainants Complainant[]
+
+  @@map("caste_master")
+}
+
+model Act {
+  code           String                @id @map("act_code") @db.VarChar(50)
+  description    String                @map("act_description") @db.Text
+  shortName      String?               @map("short_name") @db.VarChar(150)
+  active         Boolean               @default(true)
+  sections       LegalSection[]
+  legalDocuments LegalDocumentSource[]
+
+  @@map("act")
+}
+
+model LegalSection {
+  actCode                String                       @map("act_code") @db.VarChar(50)
+  sectionCode            String                       @map("section_code") @db.VarChar(100)
+  description            String?                      @map("section_description") @db.Text
+  active                 Boolean                      @default(true)
+  act                    Act                          @relation(fields: [actCode], references: [code], onDelete: NoAction, onUpdate: NoAction)
+  crimeHeadMappings      CrimeHeadActSection[]
+  caseAssociations       ActSectionAssociation[]
+  ipcReferences          IpcSectionReference[]
+  keywordMappings        LegalSectionKeyword[]
+  recommendationMappings RecommendationLegalSection[]
+
+  @@id([actCode, sectionCode])
+  @@map("section")
+}
+
+model CrimeHead {
+  id              BigInt                @id @default(autoincrement()) @map("crime_head_id")
+  groupName       String                @unique @map("crime_group_name") @db.VarChar(255)
+  active          Boolean               @default(true)
+  subHeads        CrimeSubHead[]
+  sectionMappings CrimeHeadActSection[]
+  majorCases      CaseMaster[]          @relation("CaseMajorCrimeHead")
+  reportSections  ReportSection[]
+  crimeStatistics CrimeStatistic[]
+  gangNetworks    GangNetwork[]
+  modusOperandi   ModusOperandi[]
+  hotspots        Hotspot[]
+
+  @@map("crime_head")
+}
+
+model CrimeSubHead {
+  id              BigInt           @id @default(autoincrement()) @map("crime_sub_head_id")
+  crimeHeadId     BigInt           @map("crime_head_id")
+  name            String           @map("crime_head_name") @db.VarChar(255)
+  sequenceId      Int?             @map("seq_id")
+  active          Boolean          @default(true)
+  crimeHead       CrimeHead        @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  minorCases      CaseMaster[]     @relation("CaseMinorCrimeHead")
+  crimeStatistics CrimeStatistic[]
+  hotspots        Hotspot[]
+
+  @@unique([crimeHeadId, name])
+  @@map("crime_sub_head")
+}
+
+model CrimeHeadActSection {
+  crimeHeadId BigInt       @map("crime_head_id")
+  actCode     String       @map("act_code") @db.VarChar(50)
+  sectionCode String       @map("section_code") @db.VarChar(100)
+  crimeHead   CrimeHead    @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  section     LegalSection @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([crimeHeadId, actCode, sectionCode])
+  @@map("crime_head_act_section")
+}
+
+model CaseMaster {
+  id                    BigInt                      @id @default(autoincrement()) @map("case_master_id")
+  crimeNo               String?                     @unique @map("crime_no") @db.VarChar(100)
+  caseNo                String?                     @unique @map("case_no") @db.VarChar(100)
+  crimeRegisteredDate   DateTime?                   @map("crime_registered_date") @db.Timestamp(6)
+  policePersonId        BigInt?                     @map("police_person_id")
+  policeStationId       BigInt?                     @map("police_station_id")
+  caseCategoryId        BigInt?                     @map("case_category_id")
+  gravityOffenceId      BigInt?                     @map("gravity_offence_id")
+  crimeMajorHeadId      BigInt?                     @map("crime_major_head_id")
+  crimeMinorHeadId      BigInt?                     @map("crime_minor_head_id")
+  caseStatusId          BigInt?                     @map("case_status_id")
+  courtId               BigInt?                     @map("court_id")
+  incidentFromDate      DateTime?                   @map("incident_from_date") @db.Timestamp(6)
+  incidentToDate        DateTime?                   @map("incident_to_date") @db.Timestamp(6)
+  infoReceivedPsDate    DateTime?                   @map("info_received_ps_date") @db.Timestamp(6)
+  latitude              Decimal?                    @db.Decimal(10, 7)
+  longitude             Decimal?                    @db.Decimal(10, 7)
+  briefFacts            String?                     @map("brief_facts") @db.Text
+  dataSourceId          BigInt?                     @map("data_source_id")
+  sourceRowNumber       BigInt?                     @map("source_row_number")
+  sourceCaseKey         String?                     @map("source_case_key") @db.VarChar(255)
+  createdAt             DateTime                    @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt             DateTime                    @default(now()) @map("updated_at") @db.Timestamp(6)
+  policePerson          Employee?                   @relation("CasePolicePerson", fields: [policePersonId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  policeStation         Unit?                       @relation(fields: [policeStationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  category              CaseCategory?               @relation(fields: [caseCategoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gravity               GravityOffence?             @relation(fields: [gravityOffenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  majorCrimeHead        CrimeHead?                  @relation("CaseMajorCrimeHead", fields: [crimeMajorHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  minorCrimeHead        CrimeSubHead?               @relation("CaseMinorCrimeHead", fields: [crimeMinorHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status                CaseStatus?                 @relation(fields: [caseStatusId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  court                 Court?                      @relation(fields: [courtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dataSource            DataSource?                 @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  complainants          Complainant[]
+  victims               Victim[]
+  accused               Accused[]
+  arrests               ArrestSurrender[]
+  actSections           ActSectionAssociation[]
+  chargesheets          ChargesheetDetails[]
+  occurrence            InvestigationOccurrence?
+  ragDocuments          RagDocument[]
+  ragRetrievals         RagRetrievalLog[]
+  featureSnapshots      CaseFeatureSnapshot[]
+  geoLocations          GeoLocation[]
+  evidence              Evidence[]
+  propertyAssets        PropertyAsset[]
+  vehicles              Vehicle[]
+  digitalIdentifiers    PhoneDigitalIdentifier[]
+  financialAccounts     FinancialAccount[]
+  financialTransactions FinancialTransaction[]
+  weapons               Weapon[]
+  documents             DocumentAttachment[]
+  forensicReports       ForensicReport[]
+  witnesses             Witness[]
+  diaryEntries          CaseDiaryEntry[]
+  courtProceedings      CourtProceeding[]
+  custodyStatuses       CustodyStatus[]
+  offenderLinks         RepeatOffenderAccusedLink[]
+  modusOperandi         ModusOperandi[]
+  socialRelationships   SocialRelationship[]
+  hotspotLinks          HotspotCase[]
+  riskScores            RiskScore[]
+  recommendations       Recommendation[]
+  sourceSimilarities    CaseSimilarity[]            @relation("SimilaritySourceCase")
+  matchedSimilarities   CaseSimilarity[]            @relation("SimilarityMatchedCase")
+  alerts                Alert[]
+  tasks                 Task[]
+  chatSessions          ChatSession[]
+  searchRequests        SearchRequest[]
+
+  @@index([crimeRegisteredDate])
+  @@index([policeStationId, crimeRegisteredDate])
+  @@index([caseStatusId])
+  @@index([crimeMajorHeadId, crimeMinorHeadId])
+  @@index([courtId])
+  @@index([sourceCaseKey])
+  @@index([latitude, longitude])
+  @@map("case_master")
+}
+
+model Complainant {
+  id                  BigInt                   @id @default(autoincrement()) @map("complainant_id")
+  caseMasterId        BigInt                   @map("case_master_id")
+  complainantNameHash String?                  @map("complainant_name_hash") @db.VarChar(256)
+  ageYear             Int?                     @map("age_year")
+  occupationId        BigInt?                  @map("occupation_id")
+  religionId          BigInt?                  @map("religion_id")
+  casteId             BigInt?                  @map("caste_id")
+  genderId            BigInt?                  @map("gender_id")
+  case                CaseMaster               @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  occupation          Occupation?              @relation(fields: [occupationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  religion            Religion?                @relation(fields: [religionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  caste               Caste?                   @relation(fields: [casteId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gender              GenderMaster?            @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  digitalIdentifiers  PhoneDigitalIdentifier[]
+
+  @@index([caseMasterId])
+  @@map("complainant_details")
+}
+
+model Victim {
+  id                 BigInt                   @id @default(autoincrement()) @map("victim_master_id")
+  caseMasterId       BigInt                   @map("case_master_id")
+  victimNameHash     String?                  @map("victim_name_hash") @db.VarChar(256)
+  ageYear            Int?                     @map("age_year")
+  genderId           BigInt?                  @map("gender_id")
+  victimPolice       Boolean?                 @map("victim_police")
+  case               CaseMaster               @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gender             GenderMaster?            @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  propertyAssets     PropertyAsset[]
+  vehicles           Vehicle[]
+  digitalIdentifiers PhoneDigitalIdentifier[]
+  financialAccounts  FinancialAccount[]
+  weapons            Weapon[]
+  riskScores         RiskScore[]
+
+  @@index([caseMasterId])
+  @@map("victim")
+}
+
+model Accused {
+  id                 BigInt                      @id @default(autoincrement()) @map("accused_master_id")
+  caseMasterId       BigInt                      @map("case_master_id")
+  accusedNameHash    String?                     @map("accused_name_hash") @db.VarChar(256)
+  ageYear            Int?                        @map("age_year")
+  genderId           BigInt?                     @map("gender_id")
+  personId           String?                     @map("person_id") @db.VarChar(50)
+  case               CaseMaster                  @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gender             GenderMaster?               @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  primaryArrests     ArrestSurrender[]           @relation("ArrestPrimaryAccused")
+  arrestLinks        ArrestSurrenderAccused[]
+  vehicles           Vehicle[]
+  digitalIdentifiers PhoneDigitalIdentifier[]
+  financialAccounts  FinancialAccount[]
+  weapons            Weapon[]
+  custodyStatuses    CustodyStatus[]
+  offenderLinks      RepeatOffenderAccusedLink[]
+  gangMemberships    GangNetworkMember[]
+  riskScores         RiskScore[]
+
+  @@index([caseMasterId])
+  @@map("accused")
+}
+
+model ArrestSurrender {
+  id                        BigInt                   @id @default(autoincrement()) @map("arrest_surrender_id")
+  caseMasterId              BigInt                   @map("case_master_id")
+  arrestSurrenderTypeId     BigInt?                  @map("arrest_surrender_type_id")
+  arrestSurrenderDate       DateTime?                @map("arrest_surrender_date") @db.Timestamp(6)
+  arrestSurrenderStateId    BigInt?                  @map("arrest_surrender_state_id")
+  arrestSurrenderDistrictId BigInt?                  @map("arrest_surrender_district_id")
+  policeStationId           BigInt?                  @map("police_station_id")
+  ioId                      BigInt?                  @map("io_id")
+  courtId                   BigInt?                  @map("court_id")
+  accusedMasterId           BigInt?                  @map("accused_master_id")
+  isAccused                 Boolean?                 @map("is_accused")
+  isComplainantAccused      Boolean?                 @map("is_complainant_accused")
+  case                      CaseMaster               @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  state                     State?                   @relation(fields: [arrestSurrenderStateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  district                  District?                @relation(fields: [arrestSurrenderDistrictId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  policeStation             Unit?                    @relation(fields: [policeStationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  investigatingOfficer      Employee?                @relation("ArrestInvestigatingOfficer", fields: [ioId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  court                     Court?                   @relation(fields: [courtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  primaryAccused            Accused?                 @relation("ArrestPrimaryAccused", fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accusedLinks              ArrestSurrenderAccused[]
+
+  @@index([caseMasterId])
+  @@index([accusedMasterId])
+  @@index([arrestSurrenderDate])
+  @@map("arrest_surrender")
+}
+
+model ArrestSurrenderAccused {
+  arrestSurrenderId BigInt          @map("arrest_surrender_id")
+  accusedMasterId   BigInt          @map("accused_master_id")
+  arrest            ArrestSurrender @relation(fields: [arrestSurrenderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accused           Accused         @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([arrestSurrenderId, accusedMasterId])
+  @@map("inv_arrest_surrender_accused")
+}
+
+model ActSectionAssociation {
+  caseMasterId   BigInt       @map("case_master_id")
+  actCode        String       @map("act_code") @db.VarChar(50)
+  sectionCode    String       @map("section_code") @db.VarChar(100)
+  actOrderId     Int          @default(1) @map("act_order_id")
+  sectionOrderId Int          @default(1) @map("section_order_id")
+  case           CaseMaster   @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  section        LegalSection @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([caseMasterId, actCode, sectionCode, actOrderId, sectionOrderId])
+  @@index([caseMasterId])
+  @@index([actCode, sectionCode])
+  @@map("act_section_association")
+}
+
+model ChargesheetDetails {
+  id             BigInt     @id @default(autoincrement()) @map("cs_id")
+  caseMasterId   BigInt     @map("case_master_id")
+  date           DateTime?  @map("cs_date") @db.Date
+  type           String?    @map("cs_type") @db.VarChar(100)
+  policePersonId BigInt?    @map("police_person_id")
+  case           CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  policePerson   Employee?  @relation(fields: [policePersonId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([caseMasterId])
+  @@map("chargesheet_details")
+}
+
+model InvestigationOccurrence {
+  caseMasterId        BigInt     @id @map("case_master_id")
+  occurrenceFrom      DateTime?  @map("occurrence_from") @db.Timestamp(6)
+  occurrenceTo        DateTime?  @map("occurrence_to") @db.Timestamp(6)
+  occurrencePlaceText String?    @map("occurrence_place_text") @db.Text
+  occurrenceNotes     String?    @map("occurrence_notes") @db.Text
+  case                CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("inv_occurrence_time")
+}
+
+model CrimeReviewReport {
+  id                     BigInt          @id @default(autoincrement()) @map("crime_review_report_id")
+  dataSourceId           BigInt          @map("data_source_id")
+  reportTitle            String?         @map("report_title") @db.VarChar(500)
+  reportMonth            Int?            @map("report_month")
+  reportYear             Int?            @map("report_year")
+  publishedBy            String?         @map("published_by") @db.VarChar(255)
+  classificationAsOfDate DateTime?       @map("classification_as_of_date") @db.Date
+  isProvisional          Boolean         @default(false) @map("is_provisional")
+  summaryText            String?         @map("summary_text") @db.Text
+  dataSource             DataSource      @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sections               ReportSection[]
+
+  @@index([reportYear, reportMonth])
+  @@map("crime_review_report")
+}
+
+model ReportSection {
+  id                       BigInt            @id @default(autoincrement()) @map("report_section_id")
+  crimeReviewReportId      BigInt            @map("crime_review_report_id")
+  sectionNumber            String?           @map("section_number") @db.VarChar(50)
+  sectionTitle             String?           @map("section_title") @db.VarChar(500)
+  relatedCrimeHeadId       BigInt?           @map("related_crime_head_id")
+  narrativeText            String?           @map("narrative_text") @db.Text
+  currentPeriodObservation String?           @map("current_period_observation") @db.Text
+  previousPeriodComparison String?           @map("previous_period_comparison") @db.Text
+  previousYearComparison   String?           @map("previous_year_comparison") @db.Text
+  report                   CrimeReviewReport @relation(fields: [crimeReviewReportId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  relatedCrimeHead         CrimeHead?        @relation(fields: [relatedCrimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([relatedCrimeHeadId])
+  @@map("report_section")
+}
+
+model CrimeStatistic {
+  id                             BigInt        @id @default(autoincrement()) @map("crime_statistic_id")
+  dataSourceId                   BigInt        @map("data_source_id")
+  reportMonth                    Int?          @map("report_month")
+  reportYear                     Int           @map("report_year")
+  districtId                     BigInt?       @map("district_id")
+  unitId                         BigInt?       @map("unit_id")
+  crimeHeadId                    BigInt?       @map("crime_head_id")
+  crimeSubHeadId                 BigInt?       @map("crime_sub_head_id")
+  rawActLabel                    String?       @map("raw_act_label") @db.VarChar(500)
+  rawMajorHead                   String?       @map("raw_major_head") @db.VarChar(500)
+  rawMinorHead                   String?       @map("raw_minor_head") @db.VarChar(500)
+  currentMonthCount              Decimal?      @map("current_month_count") @db.Decimal(18, 2)
+  yearToDateCount                Decimal?      @map("year_to_date_count") @db.Decimal(18, 2)
+  previousMonthCount             Decimal?      @map("previous_month_count") @db.Decimal(18, 2)
+  correspondingPreviousYearCount Decimal?      @map("corresponding_previous_year_count") @db.Decimal(18, 2)
+  measureNotes                   String?       @map("measure_notes") @db.Text
+  isProvisional                  Boolean       @default(false) @map("is_provisional")
+  dataSource                     DataSource    @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  district                       District?     @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  unit                           Unit?         @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  crimeHead                      CrimeHead?    @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  crimeSubHead                   CrimeSubHead? @relation(fields: [crimeSubHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([reportYear, reportMonth])
+  @@index([districtId, reportYear, reportMonth])
+  @@index([unitId, reportYear, reportMonth])
+  @@index([crimeHeadId, reportYear, reportMonth])
+  @@map("crime_statistic")
+}
+
+model VictimDemographicStatistic {
+  id             BigInt     @id @default(autoincrement()) @map("victim_demographic_statistic_id")
+  dataSourceId   BigInt     @map("data_source_id")
+  stateId        BigInt?    @map("state_id")
+  stateUtNameRaw String?    @map("state_ut_name_raw") @db.VarChar(200)
+  statisticYear  Int        @map("statistic_year")
+  crimeContext   String?    @map("crime_context") @db.VarChar(255)
+  purposeLabel   String?    @map("purpose_label") @db.VarChar(255)
+  genderLabel    String?    @map("gender_label") @db.VarChar(100)
+  ageBandLabel   String?    @map("age_band_label") @db.VarChar(100)
+  caseCount      Decimal?   @map("case_count") @db.Decimal(18, 2)
+  victimCount    Decimal?   @map("victim_count") @db.Decimal(18, 2)
+  maleCount      Decimal?   @map("male_count") @db.Decimal(18, 2)
+  femaleCount    Decimal?   @map("female_count") @db.Decimal(18, 2)
+  grandTotal     Decimal?   @map("grand_total") @db.Decimal(18, 2)
+  dataSource     DataSource @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  state          State?     @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([statisticYear, stateId])
+  @@map("victim_demographic_statistic")
+}
+
+model CyberSuspectStatistic {
+  id              BigInt     @id @default(autoincrement()) @map("cyber_suspect_statistic_id")
+  dataSourceId    BigInt     @map("data_source_id")
+  stateId         BigInt?    @map("state_id")
+  stateUtNameRaw  String?    @map("state_ut_name_raw") @db.VarChar(200)
+  statisticYear   Int        @map("statistic_year")
+  crimeHeadLabel  String?    @map("crime_head_label") @db.VarChar(255)
+  suspectCategory String?    @map("suspect_category") @db.VarChar(255)
+  suspectCount    Decimal?   @map("suspect_count") @db.Decimal(18, 2)
+  totalCount      Decimal?   @map("total_count") @db.Decimal(18, 2)
+  dataSource      DataSource @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  state           State?     @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([statisticYear, stateId])
+  @@map("cyber_suspect_statistic")
+}
+
+model RoadAccidentStatistic {
+  id            BigInt     @id @default(autoincrement()) @map("road_accident_statistic_id")
+  dataSourceId  BigInt     @map("data_source_id")
+  districtId    BigInt?    @map("district_id")
+  unitId        BigInt?    @map("unit_id")
+  cityNameRaw   String?    @map("city_name_raw") @db.VarChar(200)
+  statisticYear Int?       @map("statistic_year")
+  financialYear String?    @map("financial_year") @db.VarChar(20)
+  roadTypeLabel String?    @map("road_type_label") @db.VarChar(255)
+  fatalCount    Decimal?   @map("fatal_count") @db.Decimal(18, 2)
+  nonFatalCount Decimal?   @map("non_fatal_count") @db.Decimal(18, 2)
+  killedCount   Decimal?   @map("killed_count") @db.Decimal(18, 2)
+  injuredCount  Decimal?   @map("injured_count") @db.Decimal(18, 2)
+  totalCount    Decimal?   @map("total_count") @db.Decimal(18, 2)
+  qualityStatus String?    @map("quality_status") @db.VarChar(100)
+  dataSource    DataSource @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  district      District?  @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  unit          Unit?      @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([statisticYear, districtId])
+  @@map("road_accident_statistic")
+}
+
+model ServicePerformanceMetric {
+  id            BigInt     @id @default(autoincrement()) @map("service_performance_metric_id")
+  dataSourceId  BigInt     @map("data_source_id")
+  metricDomain  String     @map("metric_domain") @db.VarChar(150)
+  reportMonth   Int?       @map("report_month")
+  reportYear    Int?       @map("report_year")
+  districtId    BigInt?    @map("district_id")
+  unitId        BigInt?    @map("unit_id")
+  serviceName   String?    @map("service_name") @db.VarChar(255)
+  metricName    String?    @map("metric_name") @db.VarChar(255)
+  metricValue   Decimal?   @map("metric_value") @db.Decimal(18, 2)
+  metricUnit    String?    @map("metric_unit") @db.VarChar(50)
+  pendingCount  Decimal?   @map("pending_count") @db.Decimal(18, 2)
+  disposedCount Decimal?   @map("disposed_count") @db.Decimal(18, 2)
+  receivedCount Decimal?   @map("received_count") @db.Decimal(18, 2)
+  remarks       String?    @db.Text
+  dataSource    DataSource @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  district      District?  @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  unit          Unit?      @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([reportYear, reportMonth, metricDomain])
+  @@map("service_performance_metric")
+}
+
+model LegalDocumentSource {
+  id                   BigInt        @id @default(autoincrement()) @map("legal_document_source_id")
+  dataSourceId         BigInt?       @map("data_source_id")
+  actCode              String?       @map("act_code") @db.VarChar(50)
+  title                String        @db.VarChar(500)
+  sourceName           String?       @map("source_name") @db.VarChar(255)
+  jurisdictionPlace    String?       @map("jurisdiction_place") @db.VarChar(255)
+  publishedDateText    String?       @map("published_date_text") @db.VarChar(100)
+  commencementDateText String?       @map("commencement_date_text") @db.VarChar(100)
+  sourceUrl            String?       @map("source_url") @db.Text
+  parseQualityStatus   String?       @map("parse_quality_status") @db.VarChar(100)
+  dataSource           DataSource?   @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  act                  Act?          @relation(fields: [actCode], references: [code], onDelete: NoAction, onUpdate: NoAction)
+  ragDocuments         RagDocument[]
+
+  @@index([actCode])
+  @@map("legal_document_source")
+}
+
+model IpcSectionReference {
+  id                 BigInt        @id @default(autoincrement()) @map("ipc_section_reference_id")
+  dataSourceId       BigInt?       @map("data_source_id")
+  actCode            String?       @map("act_code") @db.VarChar(50)
+  sectionCode        String?       @map("section_code") @db.VarChar(100)
+  rawSectionLabel    String?       @map("raw_section_label") @db.VarChar(200)
+  descriptionText    String?       @map("description_text") @db.Text
+  offenseText        String?       @map("offense_text") @db.Text
+  punishmentText     String?       @map("punishment_text") @db.Text
+  parseQualityStatus String?       @map("parse_quality_status") @db.VarChar(100)
+  dataSource         DataSource?   @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  section            LegalSection? @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([actCode, sectionCode])
+  @@map("ipc_section_reference")
+}
+
+model LegalKeyword {
+  id              BigInt                @id @default(autoincrement()) @map("legal_keyword_id")
+  text            String                @map("keyword_text") @db.VarChar(255)
+  type            String?               @map("keyword_type") @db.VarChar(100)
+  active          Boolean               @default(true)
+  sectionMappings LegalSectionKeyword[]
+
+  @@unique([text, type])
+  @@index([text])
+  @@map("legal_keyword")
+}
+
+model LegalSectionKeyword {
+  id              BigInt       @id @default(autoincrement()) @map("legal_section_keyword_id")
+  actCode         String       @map("act_code") @db.VarChar(50)
+  sectionCode     String       @map("section_code") @db.VarChar(100)
+  legalKeywordId  BigInt       @map("legal_keyword_id")
+  relevanceWeight Decimal?     @default(1.0) @map("relevance_weight") @db.Decimal(8, 4)
+  notes           String?      @db.Text
+  section         LegalSection @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction)
+  keyword         LegalKeyword @relation(fields: [legalKeywordId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([actCode, sectionCode, legalKeywordId])
+  @@map("legal_section_keyword")
+}
+
+model RagCorpus {
+  id          BigInt        @id @default(autoincrement()) @map("rag_corpus_id")
+  name        String        @unique @map("corpus_name") @db.VarChar(255)
+  type        String        @map("corpus_type") @db.VarChar(100)
+  description String?       @db.Text
+  accessLevel String?       @map("access_level") @db.VarChar(100)
+  active      Boolean       @default(true)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamp(6)
+  documents   RagDocument[]
+
+  @@map("rag_corpus")
+}
+
+model RagDocument {
+  id                    BigInt               @id @default(autoincrement()) @map("rag_document_id")
+  ragCorpusId           BigInt               @map("rag_corpus_id")
+  dataSourceId          BigInt?              @map("data_source_id")
+  legalDocumentSourceId BigInt?              @map("legal_document_source_id")
+  caseMasterId          BigInt?              @map("case_master_id")
+  documentTitle         String               @map("document_title") @db.VarChar(500)
+  documentType          String?              @map("document_type") @db.VarChar(100)
+  documentDate          DateTime?            @map("document_date") @db.Date
+  sourceUri             String?              @map("source_uri") @db.Text
+  sourceHash            String?              @map("source_hash") @db.VarChar(128)
+  extractionStatus      String?              @map("extraction_status") @db.VarChar(100)
+  sensitivityLevel      String?              @map("sensitivity_level") @db.VarChar(100)
+  summaryText           String?              @map("summary_text") @db.Text
+  createdAt             DateTime             @default(now()) @map("created_at") @db.Timestamp(6)
+  corpus                RagCorpus            @relation(fields: [ragCorpusId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dataSource            DataSource?          @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  legalDocumentSource   LegalDocumentSource? @relation(fields: [legalDocumentSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                  CaseMaster?          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  chunks                RagChunk[]
+
+  @@index([ragCorpusId])
+  @@index([caseMasterId])
+  @@map("rag_document")
+}
+
+model RagChunk {
+  id               BigInt               @id @default(autoincrement()) @map("rag_chunk_id")
+  ragDocumentId    BigInt               @map("rag_document_id")
+  chunkSequence    Int                  @map("chunk_sequence")
+  chunkTitle       String?              @map("chunk_title") @db.VarChar(500)
+  chunkText        String               @map("chunk_text") @db.Text
+  tokenCount       Int?                 @map("token_count")
+  languageCode     String?              @default("en") @map("language_code") @db.VarChar(20)
+  pageNumber       Int?                 @map("page_number")
+  sectionReference String?              @map("section_reference") @db.VarChar(255)
+  qualityStatus    String?              @map("quality_status") @db.VarChar(100)
+  createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamp(6)
+  document         RagDocument          @relation(fields: [ragDocumentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  embeddings       RagEmbeddingRef[]
+  retrievalResults RagRetrievalResult[]
+
+  @@unique([ragDocumentId, chunkSequence])
+  @@index([ragDocumentId, chunkSequence])
+  @@map("rag_chunk")
+}
+
+model RagEmbeddingRef {
+  id                    BigInt   @id @default(autoincrement()) @map("rag_embedding_ref_id")
+  ragChunkId            BigInt   @map("rag_chunk_id")
+  embeddingModel        String   @map("embedding_model") @db.VarChar(255)
+  embeddingModelVersion String?  @map("embedding_model_version") @db.VarChar(100)
+  vectorStoreName       String?  @map("vector_store_name") @db.VarChar(255)
+  vectorStoreReference  String   @map("vector_store_reference") @db.Text
+  vectorDimension       Int?     @map("vector_dimension")
+  generatedOn           DateTime @default(now()) @map("generated_on") @db.Timestamp(6)
+  active                Boolean  @default(true)
+  chunk                 RagChunk @relation(fields: [ragChunkId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([ragChunkId, embeddingModel, embeddingModelVersion])
+  @@index([ragChunkId])
+  @@map("rag_embedding_ref")
+}
+
+model RagRetrievalLog {
+  id            BigInt               @id @default(autoincrement()) @map("rag_retrieval_log_id")
+  employeeId    BigInt?              @map("employee_id")
+  caseMasterId  BigInt?              @map("case_master_id")
+  queryText     String               @map("query_text") @db.Text
+  intentLabel   String?              @map("intent_label") @db.VarChar(150)
+  retrievedOn   DateTime             @default(now()) @map("retrieved_on") @db.Timestamp(6)
+  modelVersion  String?              @map("model_version") @db.VarChar(100)
+  resultSummary String?              @map("result_summary") @db.Text
+  employee      Employee?            @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case          CaseMaster?          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  results       RagRetrievalResult[]
+
+  @@index([caseMasterId, retrievedOn])
+  @@map("rag_retrieval_log")
+}
+
+model RagRetrievalResult {
+  id                BigInt          @id @default(autoincrement()) @map("rag_retrieval_result_id")
+  ragRetrievalLogId BigInt          @map("rag_retrieval_log_id")
+  ragChunkId        BigInt          @map("rag_chunk_id")
+  rankOrder         Int             @map("rank_order")
+  similarityScore   Decimal?        @map("similarity_score") @db.Decimal(10, 6)
+  reasonText        String?         @map("reason_text") @db.Text
+  retrievalLog      RagRetrievalLog @relation(fields: [ragRetrievalLogId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  chunk             RagChunk        @relation(fields: [ragChunkId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([ragRetrievalLogId, rankOrder])
+  @@index([ragRetrievalLogId, rankOrder])
+  @@map("rag_retrieval_result")
+}
+
+model DataQualityIssue {
+  id                 BigInt      @id @default(autoincrement()) @map("data_quality_issue_id")
+  dataSourceId       BigInt?     @map("data_source_id")
+  officialEntityName String?     @map("official_entity_name") @db.VarChar(150)
+  officialRecordId   String?     @map("official_record_id") @db.VarChar(150)
+  aiEntityName       String?     @map("ai_entity_name") @db.VarChar(150)
+  aiRecordId         String?     @map("ai_record_id") @db.VarChar(150)
+  fieldName          String?     @map("field_name") @db.VarChar(150)
+  issueType          String      @map("issue_type") @db.VarChar(150)
+  severity           String?     @db.VarChar(50)
+  issueDescription   String?     @map("issue_description") @db.Text
+  detectedOn         DateTime    @default(now()) @map("detected_on") @db.Timestamp(6)
+  resolutionStatus   String?     @default("open") @map("resolution_status") @db.VarChar(100)
+  dataSource         DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("data_quality_issue")
+}
+
+model CaseFeatureSnapshot {
+  id                        BigInt     @id @default(autoincrement()) @map("case_feature_snapshot_id")
+  caseMasterId              BigInt     @map("case_master_id")
+  featureSetName            String     @map("feature_set_name") @db.VarChar(150)
+  featureSetVersion         String     @map("feature_set_version") @db.VarChar(100)
+  generatedOn               DateTime   @default(now()) @map("generated_on") @db.Timestamp(6)
+  crimeAgeDays              Int?       @map("crime_age_days")
+  hasValidGeo               Boolean?   @map("has_valid_geo")
+  victimTotalDerived        Int?       @map("victim_total_derived")
+  accusedTotalDerived       Int?       @map("accused_total_derived")
+  arrestTotalDerived        Int?       @map("arrest_total_derived")
+  chargesheetedTotalDerived Int?       @map("chargesheeted_total_derived")
+  convictionTotalDerived    Int?       @map("conviction_total_derived")
+  textFeatureSummary        String?    @map("text_feature_summary") @db.Text
+  sourceDataQualityLevel    String?    @map("source_data_quality_level") @db.VarChar(100)
+  case                      CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([caseMasterId, featureSetName, featureSetVersion])
+  @@map("case_feature_snapshot")
+}
+
+model GeoLocation {
+  id                        BigInt      @id @default(autoincrement()) @map("geo_location_id")
+  caseMasterId              BigInt?     @map("case_master_id")
+  rawLatitude               Decimal?    @map("raw_latitude") @db.Decimal(12, 8)
+  rawLongitude              Decimal?    @map("raw_longitude") @db.Decimal(12, 8)
+  validatedLatitude         Decimal?    @map("validated_latitude") @db.Decimal(12, 8)
+  validatedLongitude        Decimal?    @map("validated_longitude") @db.Decimal(12, 8)
+  coordinateStatus          String?     @map("coordinate_status") @db.VarChar(100)
+  placeText                 String?     @map("place_text") @db.Text
+  distanceFromPoliceStation String?     @map("distance_from_police_station") @db.VarChar(100)
+  beatName                  String?     @map("beat_name") @db.VarChar(255)
+  villageAreaName           String?     @map("village_area_name") @db.VarChar(255)
+  geoConfidence             Decimal?    @map("geo_confidence") @db.Decimal(6, 4)
+  validationNotes           String?     @map("validation_notes") @db.Text
+  case                      CaseMaster? @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([caseMasterId])
+  @@index([validatedLatitude, validatedLongitude])
+  @@map("geo_location")
+}
+
+model Evidence {
+  id                    BigInt                   @id @default(autoincrement()) @map("evidence_id")
+  caseMasterId          BigInt                   @map("case_master_id")
+  evidenceType          String                   @map("evidence_type") @db.VarChar(150)
+  evidenceDescription   String?                  @map("evidence_description") @db.Text
+  collectionDate        DateTime?                @map("collection_date") @db.Timestamp(6)
+  collectedByEmployeeId BigInt?                  @map("collected_by_employee_id")
+  sourceLocationText    String?                  @map("source_location_text") @db.Text
+  forensicStatus        String?                  @map("forensic_status") @db.VarChar(100)
+  chainOfCustodyStatus  String?                  @map("chain_of_custody_status") @db.VarChar(100)
+  evidenceConfidence    Decimal?                 @map("evidence_confidence") @db.Decimal(6, 4)
+  dataSourceId          BigInt?                  @map("data_source_id")
+  createdAt             DateTime                 @default(now()) @map("created_at") @db.Timestamp(6)
+  case                  CaseMaster               @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  collectedBy           Employee?                @relation(fields: [collectedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dataSource            DataSource?              @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  propertyAssets        PropertyAsset[]
+  vehicles              Vehicle[]
+  digitalIdentifiers    PhoneDigitalIdentifier[]
+  financialAccounts     FinancialAccount[]
+  financialTransactions FinancialTransaction[]
+  weapons               Weapon[]
+  forensicReports       ForensicReport[]
+  gangMemberships       GangNetworkMember[]
+  socialRelationships   SocialRelationship[]
+  addressHistory        AddressHistory[]
+  knowledgeGraphEdges   KgEdge[]
+
+  @@index([caseMasterId])
+  @@index([evidenceType])
+  @@map("evidence")
+}
+
+model PropertyAsset {
+  id                   BigInt     @id @default(autoincrement()) @map("property_asset_id")
+  caseMasterId         BigInt     @map("case_master_id")
+  propertyType         String?    @map("property_type") @db.VarChar(150)
+  description          String?    @db.Text
+  estimatedValue       Decimal?   @map("estimated_value") @db.Decimal(18, 2)
+  ownerVictimId        BigInt?    @map("owner_victim_id")
+  recoveryStatus       String?    @map("recovery_status") @db.VarChar(100)
+  stolenDate           DateTime?  @map("stolen_date") @db.Date
+  recoveredDate        DateTime?  @map("recovered_date") @db.Date
+  recoveryLocationText String?    @map("recovery_location_text") @db.Text
+  evidenceId           BigInt?    @map("evidence_id")
+  case                 CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ownerVictim          Victim?    @relation(fields: [ownerVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evidence             Evidence?  @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([caseMasterId])
+  @@map("property_asset")
+}
+
+model Vehicle {
+  id                     BigInt      @id @default(autoincrement()) @map("vehicle_id")
+  caseMasterId           BigInt?     @map("case_master_id")
+  registrationNumberHash String?     @map("registration_number_hash") @db.VarChar(256)
+  vehicleType            String?     @map("vehicle_type") @db.VarChar(150)
+  ownerPersonType        String?     @map("owner_person_type") @db.VarChar(100)
+  ownerVictimId          BigInt?     @map("owner_victim_id")
+  ownerAccusedId         BigInt?     @map("owner_accused_id")
+  involvementType        String?     @map("involvement_type") @db.VarChar(150)
+  theftStatus            String?     @map("theft_status") @db.VarChar(100)
+  accidentStatus         String?     @map("accident_status") @db.VarChar(100)
+  recoveryStatus         String?     @map("recovery_status") @db.VarChar(100)
+  evidenceId             BigInt?     @map("evidence_id")
+  case                   CaseMaster? @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ownerVictim            Victim?     @relation(fields: [ownerVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ownerAccused           Accused?    @relation(fields: [ownerAccusedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evidence               Evidence?   @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([caseMasterId])
+  @@index([registrationNumberHash])
+  @@map("vehicle")
+}
+
+model PhoneDigitalIdentifier {
+  id                  BigInt       @id @default(autoincrement()) @map("digital_identifier_id")
+  caseMasterId        BigInt?      @map("case_master_id")
+  identifierType      String       @map("identifier_type") @db.VarChar(100)
+  identifierHash      String       @map("identifier_hash") @db.VarChar(256)
+  platformName        String?      @map("platform_name") @db.VarChar(150)
+  linkedVictimId      BigInt?      @map("linked_victim_id")
+  linkedAccusedId     BigInt?      @map("linked_accused_id")
+  linkedComplainantId BigInt?      @map("linked_complainant_id")
+  firstSeenDate       DateTime?    @map("first_seen_date") @db.Date
+  lastSeenDate        DateTime?    @map("last_seen_date") @db.Date
+  verificationStatus  String?      @map("verification_status") @db.VarChar(100)
+  evidenceId          BigInt?      @map("evidence_id")
+  case                CaseMaster?  @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  victim              Victim?      @relation(fields: [linkedVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accused             Accused?     @relation(fields: [linkedAccusedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  complainant         Complainant? @relation(fields: [linkedComplainantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evidence            Evidence?    @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([caseMasterId])
+  @@index([identifierHash])
+  @@map("phone_digital_identifier")
+}
+
+model FinancialAccount {
+  id                    BigInt                 @id @default(autoincrement()) @map("financial_account_id")
+  caseMasterId          BigInt?                @map("case_master_id")
+  accountIdentifierHash String                 @map("account_identifier_hash") @db.VarChar(256)
+  institutionName       String?                @map("institution_name") @db.VarChar(255)
+  accountType           String?                @map("account_type") @db.VarChar(100)
+  ownerAccusedId        BigInt?                @map("owner_accused_id")
+  ownerVictimId         BigInt?                @map("owner_victim_id")
+  kycStatus             String?                @map("kyc_status") @db.VarChar(100)
+  freezeStatus          String?                @map("freeze_status") @db.VarChar(100)
+  evidenceId            BigInt?                @map("evidence_id")
+  case                  CaseMaster?            @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ownerAccused          Accused?               @relation(fields: [ownerAccusedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ownerVictim           Victim?                @relation(fields: [ownerVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evidence              Evidence?              @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  outgoingTransactions  FinancialTransaction[] @relation("TransactionFromAccount")
+  incomingTransactions  FinancialTransaction[] @relation("TransactionToAccount")
+
+  @@index([accountIdentifierHash])
+  @@map("financial_account")
+}
+
+model FinancialTransaction {
+  id                       BigInt            @id @default(autoincrement()) @map("financial_transaction_id")
+  caseMasterId             BigInt?           @map("case_master_id")
+  fromFinancialAccountId   BigInt?           @map("from_financial_account_id")
+  toFinancialAccountId     BigInt?           @map("to_financial_account_id")
+  transactionReferenceHash String?           @map("transaction_reference_hash") @db.VarChar(256)
+  transactionDateTime      DateTime?         @map("transaction_date_time") @db.Timestamp(6)
+  amount                   Decimal?          @db.Decimal(18, 2)
+  currency                 String?           @default("INR") @db.VarChar(20)
+  paymentChannel           String?           @map("payment_channel") @db.VarChar(100)
+  freezeStatus             String?           @map("freeze_status") @db.VarChar(100)
+  recoveryStatus           String?           @map("recovery_status") @db.VarChar(100)
+  evidenceId               BigInt?           @map("evidence_id")
+  case                     CaseMaster?       @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  fromAccount              FinancialAccount? @relation("TransactionFromAccount", fields: [fromFinancialAccountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  toAccount                FinancialAccount? @relation("TransactionToAccount", fields: [toFinancialAccountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evidence                 Evidence?         @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([caseMasterId])
+  @@index([fromFinancialAccountId])
+  @@index([toFinancialAccountId])
+  @@index([transactionDateTime])
+  @@map("financial_transaction")
+}
+
+model Weapon {
+  id              BigInt     @id @default(autoincrement()) @map("weapon_id")
+  caseMasterId    BigInt     @map("case_master_id")
+  weaponType      String?    @map("weapon_type") @db.VarChar(150)
+  description     String?    @db.Text
+  licenseStatus   String?    @map("license_status") @db.VarChar(100)
+  recoveryStatus  String?    @map("recovery_status") @db.VarChar(100)
+  recoveredDate   DateTime?  @map("recovered_date") @db.Date
+  evidenceId      BigInt?    @map("evidence_id")
+  linkedAccusedId BigInt?    @map("linked_accused_id")
+  linkedVictimId  BigInt?    @map("linked_victim_id")
+  case            CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evidence        Evidence?  @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accused         Accused?   @relation(fields: [linkedAccusedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  victim          Victim?    @relation(fields: [linkedVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([caseMasterId])
+  @@map("weapon")
+}
+
+model DocumentAttachment {
+  id                   BigInt            @id @default(autoincrement()) @map("document_attachment_id")
+  dataSourceId         BigInt?           @map("data_source_id")
+  caseMasterId         BigInt?           @map("case_master_id")
+  documentType         String?           @map("document_type") @db.VarChar(150)
+  documentTitle        String?           @map("document_title") @db.VarChar(500)
+  documentDate         DateTime?         @map("document_date") @db.Date
+  fileReference        String?           @map("file_reference") @db.Text
+  fileHash             String?           @map("file_hash") @db.VarChar(128)
+  extractionStatus     String?           @map("extraction_status") @db.VarChar(100)
+  extractedTextSummary String?           @map("extracted_text_summary") @db.Text
+  sensitivityLevel     String?           @map("sensitivity_level") @db.VarChar(100)
+  dataSource           DataSource?       @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                 CaseMaster?       @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  forensicReports      ForensicReport[]
+  diaryEntries         CaseDiaryEntry[]
+  courtProceedings     CourtProceeding[]
+
+  @@map("document_attachment")
+}
+
+model ForensicReport {
+  id                   BigInt              @id @default(autoincrement()) @map("forensic_report_id")
+  caseMasterId         BigInt              @map("case_master_id")
+  evidenceId           BigInt?             @map("evidence_id")
+  labName              String?             @map("lab_name") @db.VarChar(255)
+  testType             String?             @map("test_type") @db.VarChar(150)
+  requestDate          DateTime?           @map("request_date") @db.Date
+  reportDate           DateTime?           @map("report_date") @db.Date
+  resultSummary        String?             @map("result_summary") @db.Text
+  resultStatus         String?             @map("result_status") @db.VarChar(100)
+  confidenceLevel      String?             @map("confidence_level") @db.VarChar(100)
+  documentAttachmentId BigInt?             @map("document_attachment_id")
+  case                 CaseMaster          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evidence             Evidence?           @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  document             DocumentAttachment? @relation(fields: [documentAttachmentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([caseMasterId])
+  @@map("forensic_report")
+}
+
+model Witness {
+  id                     BigInt        @id @default(autoincrement()) @map("witness_id")
+  caseMasterId           BigInt        @map("case_master_id")
+  witnessNameHash        String?       @map("witness_name_hash") @db.VarChar(256)
+  ageYear                Int?          @map("age_year")
+  genderId               BigInt?       @map("gender_id")
+  witnessRole            String?       @map("witness_role") @db.VarChar(150)
+  statementDate          DateTime?     @map("statement_date") @db.Date
+  protectionStatus       String?       @map("protection_status") @db.VarChar(100)
+  credibilityNotes       String?       @map("credibility_notes") @db.Text
+  contactRestrictionFlag Boolean?      @default(false) @map("contact_restriction_flag")
+  case                   CaseMaster    @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gender                 GenderMaster? @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([caseMasterId])
+  @@map("witness")
+}
+
+model CaseDiaryEntry {
+  id               BigInt              @id @default(autoincrement()) @map("case_diary_entry_id")
+  caseMasterId     BigInt              @map("case_master_id")
+  employeeId       BigInt?             @map("employee_id")
+  entryDateTime    DateTime            @map("entry_date_time") @db.Timestamp(6)
+  entryType        String?             @map("entry_type") @db.VarChar(150)
+  entryText        String?             @map("entry_text") @db.Text
+  actionTaken      String?             @map("action_taken") @db.Text
+  nextAction       String?             @map("next_action") @db.Text
+  sourceDocumentId BigInt?             @map("source_document_id")
+  sensitivityLevel String?             @map("sensitivity_level") @db.VarChar(100)
+  case             CaseMaster          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  employee         Employee?           @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sourceDocument   DocumentAttachment? @relation(fields: [sourceDocumentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([caseMasterId, entryDateTime])
+  @@map("case_diary_entry")
+}
+
+model CourtProceeding {
+  id                   BigInt              @id @default(autoincrement()) @map("court_proceeding_id")
+  caseMasterId         BigInt              @map("case_master_id")
+  courtId              BigInt?             @map("court_id")
+  proceedingDate       DateTime?           @map("proceeding_date") @db.Date
+  proceedingType       String?             @map("proceeding_type") @db.VarChar(150)
+  orderSummary         String?             @map("order_summary") @db.Text
+  nextDate             DateTime?           @map("next_date") @db.Date
+  proceedingStatus     String?             @map("proceeding_status") @db.VarChar(100)
+  documentAttachmentId BigInt?             @map("document_attachment_id")
+  case                 CaseMaster          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  court                Court?              @relation(fields: [courtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  document             DocumentAttachment? @relation(fields: [documentAttachmentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([caseMasterId, proceedingDate])
+  @@map("court_proceeding")
+}
+
+model Jail {
+  id              BigInt          @id @default(autoincrement()) @map("jail_id")
+  name            String          @map("jail_name") @db.VarChar(255)
+  districtId      BigInt?         @map("district_id")
+  stateId         BigInt?         @map("state_id")
+  capacity        Int?
+  active          Boolean         @default(true)
+  notes           String?         @db.Text
+  district        District?       @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  state           State?          @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  custodyStatuses CustodyStatus[]
+
+  @@unique([name, districtId])
+  @@map("jail")
+}
+
+model CustodyStatus {
+  id              BigInt     @id @default(autoincrement()) @map("custody_status_id")
+  caseMasterId    BigInt     @map("case_master_id")
+  accusedMasterId BigInt     @map("accused_master_id")
+  courtId         BigInt?    @map("court_id")
+  jailId          BigInt?    @map("jail_id")
+  custodyType     String?    @map("custody_type") @db.VarChar(150)
+  startDate       DateTime?  @map("start_date") @db.Date
+  endDate         DateTime?  @map("end_date") @db.Date
+  bailConditions  String?    @map("bail_conditions") @db.Text
+  statusNotes     String?    @map("status_notes") @db.Text
+  case            CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accused         Accused    @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  court           Court?     @relation(fields: [courtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  jail            Jail?      @relation(fields: [jailId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([accusedMasterId, startDate, endDate])
+  @@map("custody_status")
+}
+
+model RepeatOffenderProfile {
+  id                 BigInt                      @id @default(autoincrement()) @map("repeat_offender_profile_id")
+  profileNameHash    String?                     @map("profile_name_hash") @db.VarChar(256)
+  identityConfidence Decimal?                    @map("identity_confidence") @db.Decimal(6, 4)
+  primaryDistrictId  BigInt?                     @map("primary_district_id")
+  knownAliasText     String?                     @map("known_alias_text") @db.Text
+  firstKnownCaseDate DateTime?                   @map("first_known_case_date") @db.Date
+  lastKnownCaseDate  DateTime?                   @map("last_known_case_date") @db.Date
+  totalLinkedCases   Int?                        @default(0) @map("total_linked_cases")
+  totalConvictions   Int?                        @default(0) @map("total_convictions")
+  riskLevel          String?                     @map("risk_level") @db.VarChar(100)
+  profileStatus      String?                     @map("profile_status") @db.VarChar(100)
+  primaryDistrict    District?                   @relation(fields: [primaryDistrictId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accusedLinks       RepeatOffenderAccusedLink[]
+  gangMemberships    GangNetworkMember[]
+
+  @@index([primaryDistrictId])
+  @@map("repeat_offender_profile")
+}
+
+model RepeatOffenderAccusedLink {
+  id                      BigInt                @id @default(autoincrement()) @map("repeat_offender_accused_link_id")
+  repeatOffenderProfileId BigInt                @map("repeat_offender_profile_id")
+  accusedMasterId         BigInt                @map("accused_master_id")
+  caseMasterId            BigInt                @map("case_master_id")
+  matchMethod             String?               @map("match_method") @db.VarChar(150)
+  matchConfidence         Decimal?              @map("match_confidence") @db.Decimal(6, 4)
+  reviewedByEmployeeId    BigInt?               @map("reviewed_by_employee_id")
+  reviewStatus            String?               @default("pending") @map("review_status") @db.VarChar(100)
+  profile                 RepeatOffenderProfile @relation(fields: [repeatOffenderProfileId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accused                 Accused               @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                    CaseMaster            @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviewedBy              Employee?             @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([repeatOffenderProfileId, accusedMasterId, caseMasterId])
+  @@index([accusedMasterId])
+  @@index([caseMasterId])
+  @@map("repeat_offender_accused_link")
+}
+
+model GangNetwork {
+  id                BigInt              @id @default(autoincrement()) @map("gang_network_id")
+  networkName       String?             @map("network_name") @db.VarChar(255)
+  aliasNames        String?             @map("alias_names") @db.Text
+  primaryDistrictId BigInt?             @map("primary_district_id")
+  primaryUnitId     BigInt?             @map("primary_unit_id")
+  knownCrimeHeadId  BigInt?             @map("known_crime_head_id")
+  activeFromDate    DateTime?           @map("active_from_date") @db.Date
+  activeToDate      DateTime?           @map("active_to_date") @db.Date
+  threatLevel       String?             @map("threat_level") @db.VarChar(100)
+  confidenceScore   Decimal?            @map("confidence_score") @db.Decimal(6, 4)
+  notes             String?             @db.Text
+  primaryDistrict   District?           @relation(fields: [primaryDistrictId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  primaryUnit       Unit?               @relation(fields: [primaryUnitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  knownCrimeHead    CrimeHead?          @relation(fields: [knownCrimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  members           GangNetworkMember[]
+
+  @@index([primaryDistrictId])
+  @@map("gang_network")
+}
+
+model GangNetworkMember {
+  id                      BigInt                 @id @default(autoincrement()) @map("gang_network_member_id")
+  gangNetworkId           BigInt                 @map("gang_network_id")
+  accusedMasterId         BigInt?                @map("accused_master_id")
+  repeatOffenderProfileId BigInt?                @map("repeat_offender_profile_id")
+  roleInNetwork           String?                @map("role_in_network") @db.VarChar(150)
+  startDate               DateTime?              @map("start_date") @db.Date
+  endDate                 DateTime?              @map("end_date") @db.Date
+  confidenceScore         Decimal?               @map("confidence_score") @db.Decimal(6, 4)
+  sourceEvidenceId        BigInt?                @map("source_evidence_id")
+  network                 GangNetwork            @relation(fields: [gangNetworkId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accused                 Accused?               @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  repeatOffenderProfile   RepeatOffenderProfile? @relation(fields: [repeatOffenderProfileId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sourceEvidence          Evidence?              @relation(fields: [sourceEvidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([accusedMasterId])
+  @@index([repeatOffenderProfileId])
+  @@map("gang_network_member")
+}
+
+model ModusOperandi {
+  id                BigInt     @id @default(autoincrement()) @map("modus_operandi_id")
+  caseMasterId      BigInt     @map("case_master_id")
+  crimeHeadId       BigInt?    @map("crime_head_id")
+  patternType       String?    @map("pattern_type") @db.VarChar(150)
+  targetType        String?    @map("target_type") @db.VarChar(150)
+  entryMethod       String?    @map("entry_method") @db.VarChar(150)
+  toolsUsed         String?    @map("tools_used") @db.Text
+  deceptionPattern  String?    @map("deception_pattern") @db.Text
+  timePattern       String?    @map("time_pattern") @db.VarChar(150)
+  victimApproach    String?    @map("victim_approach") @db.Text
+  confidenceScore   Decimal?   @map("confidence_score") @db.Decimal(6, 4)
+  extractedFromText String?    @map("extracted_from_text") @db.Text
+  case              CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  crimeHead         CrimeHead? @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([caseMasterId])
+  @@index([patternType, targetType, timePattern])
+  @@map("modus_operandi")
+}
+
+model SocialRelationship {
+  id                BigInt      @id @default(autoincrement()) @map("social_relationship_id")
+  caseMasterId      BigInt?     @map("case_master_id")
+  personAType       String      @map("person_a_type") @db.VarChar(100)
+  personAOfficialId BigInt      @map("person_a_official_id")
+  personBType       String      @map("person_b_type") @db.VarChar(100)
+  personBOfficialId BigInt      @map("person_b_official_id")
+  relationshipType  String      @map("relationship_type") @db.VarChar(150)
+  confidenceScore   Decimal?    @map("confidence_score") @db.Decimal(6, 4)
+  sourceEvidenceId  BigInt?     @map("source_evidence_id")
+  dataSourceId      BigInt?     @map("data_source_id")
+  reviewStatus      String?     @default("pending") @map("review_status") @db.VarChar(100)
+  case              CaseMaster? @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sourceEvidence    Evidence?   @relation(fields: [sourceEvidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dataSource        DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([personAType, personAOfficialId])
+  @@index([personBType, personBOfficialId])
+  @@map("social_relationship")
+}
+
+model AddressHistory {
+  id                 BigInt    @id @default(autoincrement()) @map("address_history_id")
+  entityType         String    @map("entity_type") @db.VarChar(100)
+  entityOfficialId   BigInt    @map("entity_official_id")
+  addressText        String?   @map("address_text") @db.Text
+  districtId         BigInt?   @map("district_id")
+  stateId            BigInt?   @map("state_id")
+  latitude           Decimal?  @db.Decimal(12, 8)
+  longitude          Decimal?  @db.Decimal(12, 8)
+  validFromDate      DateTime? @map("valid_from_date") @db.Date
+  validToDate        DateTime? @map("valid_to_date") @db.Date
+  verificationStatus String?   @map("verification_status") @db.VarChar(100)
+  sourceEvidenceId   BigInt?   @map("source_evidence_id")
+  district           District? @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  state              State?    @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sourceEvidence     Evidence? @relation(fields: [sourceEvidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([entityType, entityOfficialId])
+  @@map("address_history")
+}
+
+model Organization {
+  id                         BigInt    @id @default(autoincrement()) @map("organization_id")
+  organizationName           String    @map("organization_name") @db.VarChar(255)
+  organizationType           String?   @map("organization_type") @db.VarChar(150)
+  registrationIdentifierHash String?   @map("registration_identifier_hash") @db.VarChar(256)
+  districtId                 BigInt?   @map("district_id")
+  stateId                    BigInt?   @map("state_id")
+  addressText                String?   @map("address_text") @db.Text
+  roleInCase                 String?   @map("role_in_case") @db.VarChar(150)
+  verificationStatus         String?   @map("verification_status") @db.VarChar(100)
+  district                   District? @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  state                      State?    @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("organization")
+}
+
+model Hotspot {
+  id                BigInt           @id @default(autoincrement()) @map("hotspot_id")
+  hotspotName       String?          @map("hotspot_name") @db.VarChar(255)
+  districtId        BigInt?          @map("district_id")
+  unitId            BigInt?          @map("unit_id")
+  crimeHeadId       BigInt?          @map("crime_head_id")
+  crimeSubHeadId    BigInt?          @map("crime_sub_head_id")
+  timeWindowStart   DateTime?        @map("time_window_start") @db.Timestamp(6)
+  timeWindowEnd     DateTime?        @map("time_window_end") @db.Timestamp(6)
+  boundaryReference String?          @map("boundary_reference") @db.Text
+  centerLatitude    Decimal?         @map("center_latitude") @db.Decimal(12, 8)
+  centerLongitude   Decimal?         @map("center_longitude") @db.Decimal(12, 8)
+  riskLevel         String?          @map("risk_level") @db.VarChar(100)
+  confidenceScore   Decimal?         @map("confidence_score") @db.Decimal(6, 4)
+  trendDirection    String?          @map("trend_direction") @db.VarChar(100)
+  generatedOn       DateTime         @default(now()) @map("generated_on") @db.Timestamp(6)
+  modelVersion      String?          @map("model_version") @db.VarChar(100)
+  district          District?        @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  unit              Unit?            @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  crimeHead         CrimeHead?       @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  crimeSubHead      CrimeSubHead?    @relation(fields: [crimeSubHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cases             HotspotCase[]
+  riskScores        RiskScore[]
+  recommendations   Recommendation[]
+  alerts            Alert[]
+
+  @@index([districtId, timeWindowStart, timeWindowEnd])
+  @@index([unitId, timeWindowStart, timeWindowEnd])
+  @@index([riskLevel, confidenceScore])
+  @@map("hotspot")
+}
+
+model HotspotCase {
+  id                BigInt     @id @default(autoincrement()) @map("hotspot_case_id")
+  hotspotId         BigInt     @map("hotspot_id")
+  caseMasterId      BigInt     @map("case_master_id")
+  contributionScore Decimal?   @map("contribution_score") @db.Decimal(6, 4)
+  matchReason       String?    @map("match_reason") @db.Text
+  hotspot           Hotspot    @relation(fields: [hotspotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case              CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([hotspotId, caseMasterId])
+  @@index([caseMasterId])
+  @@map("hotspot_case")
+}
+
+model RiskScore {
+  id                   BigInt           @id @default(autoincrement()) @map("risk_score_id")
+  scoreSubjectType     String           @map("score_subject_type") @db.VarChar(100)
+  caseMasterId         BigInt?          @map("case_master_id")
+  accusedMasterId      BigInt?          @map("accused_master_id")
+  victimMasterId       BigInt?          @map("victim_master_id")
+  unitId               BigInt?          @map("unit_id")
+  hotspotId            BigInt?          @map("hotspot_id")
+  scoreType            String           @map("score_type") @db.VarChar(150)
+  scoreValue           Decimal?         @map("score_value") @db.Decimal(10, 4)
+  riskLevel            String?          @map("risk_level") @db.VarChar(100)
+  explanationText      String?          @map("explanation_text") @db.Text
+  confidenceScore      Decimal?         @map("confidence_score") @db.Decimal(6, 4)
+  modelVersion         String?          @map("model_version") @db.VarChar(100)
+  generatedOn          DateTime         @default(now()) @map("generated_on") @db.Timestamp(6)
+  reviewStatus         String?          @default("pending") @map("review_status") @db.VarChar(100)
+  reviewedByEmployeeId BigInt?          @map("reviewed_by_employee_id")
+  case                 CaseMaster?      @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accused              Accused?         @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  victim               Victim?          @relation(fields: [victimMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  unit                 Unit?            @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  hotspot              Hotspot?         @relation(fields: [hotspotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviewedBy           Employee?        @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  recommendations      Recommendation[]
+  alerts               Alert[]
+
+  @@index([caseMasterId, scoreType, generatedOn])
+  @@index([accusedMasterId, scoreType, generatedOn])
+  @@index([hotspotId, scoreType, generatedOn])
+  @@map("risk_score")
+}
+
+model Recommendation {
+  id                   BigInt                       @id @default(autoincrement()) @map("recommendation_id")
+  caseMasterId         BigInt?                      @map("case_master_id")
+  hotspotId            BigInt?                      @map("hotspot_id")
+  riskScoreId          BigInt?                      @map("risk_score_id")
+  recommendationType   String                       @map("recommendation_type") @db.VarChar(150)
+  recommendationText   String                       @map("recommendation_text") @db.Text
+  rationaleText        String?                      @map("rationale_text") @db.Text
+  confidenceScore      Decimal?                     @map("confidence_score") @db.Decimal(6, 4)
+  priorityLevel        String?                      @map("priority_level") @db.VarChar(100)
+  modelVersion         String?                      @map("model_version") @db.VarChar(100)
+  generatedOn          DateTime                     @default(now()) @map("generated_on") @db.Timestamp(6)
+  status               String?                      @default("pending") @db.VarChar(100)
+  reviewedByEmployeeId BigInt?                      @map("reviewed_by_employee_id")
+  reviewNotes          String?                      @map("review_notes") @db.Text
+  case                 CaseMaster?                  @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  hotspot              Hotspot?                     @relation(fields: [hotspotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  riskScore            RiskScore?                   @relation(fields: [riskScoreId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviewedBy           Employee?                    @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  legalSections        RecommendationLegalSection[]
+  alerts               Alert[]
+  tasks                Task[]
+  chatMessages         ChatMessage[]
+  searchRequests       SearchRequest[]
+
+  @@index([caseMasterId, status, generatedOn])
+  @@index([hotspotId, status, generatedOn])
+  @@map("recommendation")
+}
+
+model RecommendationLegalSection {
+  id                   BigInt         @id @default(autoincrement()) @map("recommendation_legal_section_id")
+  recommendationId     BigInt         @map("recommendation_id")
+  actCode              String         @map("act_code") @db.VarChar(50)
+  sectionCode          String         @map("section_code") @db.VarChar(100)
+  recommendationAction String         @map("recommendation_action") @db.VarChar(100)
+  reasonText           String?        @map("reason_text") @db.Text
+  confidenceScore      Decimal?       @map("confidence_score") @db.Decimal(6, 4)
+  recommendation       Recommendation @relation(fields: [recommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  section              LegalSection   @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([recommendationId, actCode, sectionCode, recommendationAction])
+  @@index([actCode, sectionCode])
+  @@map("recommendation_legal_section")
+}
+
+model CaseSimilarity {
+  id                   BigInt     @id @default(autoincrement()) @map("case_similarity_id")
+  sourceCaseMasterId   BigInt     @map("source_case_master_id")
+  matchedCaseMasterId  BigInt     @map("matched_case_master_id")
+  similarityScore      Decimal    @map("similarity_score") @db.Decimal(10, 6)
+  similarityType       String?    @map("similarity_type") @db.VarChar(150)
+  reasonFeatures       String?    @map("reason_features") @db.Text
+  modelVersion         String?    @map("model_version") @db.VarChar(100)
+  generatedOn          DateTime   @default(now()) @map("generated_on") @db.Timestamp(6)
+  reviewStatus         String?    @default("pending") @map("review_status") @db.VarChar(100)
+  reviewedByEmployeeId BigInt?    @map("reviewed_by_employee_id")
+  sourceCase           CaseMaster @relation("SimilaritySourceCase", fields: [sourceCaseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  matchedCase          CaseMaster @relation("SimilarityMatchedCase", fields: [matchedCaseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviewedBy           Employee?  @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([sourceCaseMasterId, matchedCaseMasterId, similarityType])
+  @@index([sourceCaseMasterId, similarityScore(sort: Desc)])
+  @@index([matchedCaseMasterId, similarityScore(sort: Desc)])
+  @@map("case_similarity")
+}
+
+model FeatureVectorRef {
+  id                   BigInt      @id @default(autoincrement()) @map("feature_vector_id")
+  entityType           String      @map("entity_type") @db.VarChar(100)
+  entityOfficialId     BigInt?     @map("entity_official_id")
+  aiEntityId           BigInt?     @map("ai_entity_id")
+  vectorPurpose        String      @map("vector_purpose") @db.VarChar(150)
+  modelVersion         String?     @map("model_version") @db.VarChar(100)
+  generatedOn          DateTime    @default(now()) @map("generated_on") @db.Timestamp(6)
+  vectorStoreReference String      @map("vector_store_reference") @db.Text
+  featureSummary       String?     @map("feature_summary") @db.Text
+  dataSourceId         BigInt?     @map("data_source_id")
+  dataSource           DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([entityType, entityOfficialId, vectorPurpose])
+  @@map("feature_vector_ref")
+}
+
+model Alert {
+  id                   BigInt          @id @default(autoincrement()) @map("alert_id")
+  alertType            String          @map("alert_type") @db.VarChar(150)
+  caseMasterId         BigInt?         @map("case_master_id")
+  unitId               BigInt?         @map("unit_id")
+  hotspotId            BigInt?         @map("hotspot_id")
+  riskScoreId          BigInt?         @map("risk_score_id")
+  recommendationId     BigInt?         @map("recommendation_id")
+  severity             String?         @db.VarChar(100)
+  alertText            String          @map("alert_text") @db.Text
+  generatedOn          DateTime        @default(now()) @map("generated_on") @db.Timestamp(6)
+  status               String?         @default("open") @db.VarChar(100)
+  assignedToEmployeeId BigInt?         @map("assigned_to_employee_id")
+  case                 CaseMaster?     @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  unit                 Unit?           @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  hotspot              Hotspot?        @relation(fields: [hotspotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  riskScore            RiskScore?      @relation(fields: [riskScoreId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  recommendation       Recommendation? @relation(fields: [recommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assignedTo           Employee?       @relation(fields: [assignedToEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tasks                Task[]
+
+  @@index([status, severity, generatedOn])
+  @@index([assignedToEmployeeId, status])
+  @@map("alert")
+}
+
+model Task {
+  id                   BigInt          @id @default(autoincrement()) @map("task_id")
+  caseMasterId         BigInt?         @map("case_master_id")
+  recommendationId     BigInt?         @map("recommendation_id")
+  alertId              BigInt?         @map("alert_id")
+  assignedToEmployeeId BigInt?         @map("assigned_to_employee_id")
+  taskTitle            String          @map("task_title") @db.VarChar(255)
+  taskDescription      String?         @map("task_description") @db.Text
+  priorityLevel        String?         @map("priority_level") @db.VarChar(100)
+  dueDate              DateTime?       @map("due_date") @db.Date
+  status               String?         @default("open") @db.VarChar(100)
+  closureNotes         String?         @map("closure_notes") @db.Text
+  createdAt            DateTime        @default(now()) @map("created_at") @db.Timestamp(6)
+  case                 CaseMaster?     @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  recommendation       Recommendation? @relation(fields: [recommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  alert                Alert?          @relation(fields: [alertId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assignedTo           Employee?       @relation(fields: [assignedToEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([assignedToEmployeeId, status, dueDate])
+  @@index([caseMasterId, status])
+  @@map("task")
+}
+
+model ModelAuditLog {
+  id                    BigInt        @id @default(autoincrement()) @map("model_audit_log_id")
+  modelName             String        @map("model_name") @db.VarChar(255)
+  modelVersion          String?       @map("model_version") @db.VarChar(100)
+  runPurpose            String?       @map("run_purpose") @db.VarChar(150)
+  inputEntityType       String?       @map("input_entity_type") @db.VarChar(100)
+  inputEntityId         BigInt?       @map("input_entity_id")
+  outputEntityType      String?       @map("output_entity_type") @db.VarChar(100)
+  outputEntityId        BigInt?       @map("output_entity_id")
+  confidenceScore       Decimal?      @map("confidence_score") @db.Decimal(6, 4)
+  generatedOn           DateTime      @default(now()) @map("generated_on") @db.Timestamp(6)
+  triggeredByEmployeeId BigInt?       @map("triggered_by_employee_id")
+  reviewStatus          String?       @default("pending") @map("review_status") @db.VarChar(100)
+  reviewNotes           String?       @map("review_notes") @db.Text
+  triggeredBy           Employee?     @relation(fields: [triggeredByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  chatMessages          ChatMessage[]
+
+  @@index([outputEntityType, outputEntityId])
+  @@index([inputEntityType, inputEntityId])
+  @@map("model_audit_log")
+}
+
+model ChatSession {
+  id                     BigInt          @id @default(autoincrement()) @map("chat_session_id")
+  employeeId             BigInt?         @map("employee_id")
+  caseMasterId           BigInt?         @map("case_master_id")
+  sessionStartedOn       DateTime        @default(now()) @map("session_started_on") @db.Timestamp(6)
+  sessionEndedOn         DateTime?       @map("session_ended_on") @db.Timestamp(6)
+  sessionPurpose         String?         @map("session_purpose") @db.VarChar(150)
+  securityClassification String?         @map("security_classification") @db.VarChar(100)
+  modelVersion           String?         @map("model_version") @db.VarChar(100)
+  employee               Employee?       @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                   CaseMaster?     @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  messages               ChatMessage[]
+  searchRequests         SearchRequest[]
+
+  @@index([employeeId, sessionStartedOn])
+  @@index([caseMasterId, sessionStartedOn])
+  @@map("chat_session")
+}
+
+model ChatMessage {
+  id                     BigInt          @id @default(autoincrement()) @map("chat_message_id")
+  chatSessionId          BigInt          @map("chat_session_id")
+  messageSequence        Int             @map("message_sequence")
+  senderRole             String          @map("sender_role") @db.VarChar(50)
+  messageText            String          @map("message_text") @db.Text
+  createdOn              DateTime        @default(now()) @map("created_on") @db.Timestamp(6)
+  linkedRecommendationId BigInt?         @map("linked_recommendation_id")
+  linkedAuditLogId       BigInt?         @map("linked_audit_log_id")
+  session                ChatSession     @relation(fields: [chatSessionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  linkedRecommendation   Recommendation? @relation(fields: [linkedRecommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  linkedAuditLog         ModelAuditLog?  @relation(fields: [linkedAuditLogId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([chatSessionId, messageSequence])
+  @@index([chatSessionId, messageSequence])
+  @@map("chat_message")
+}
+
+model SearchRequest {
+  id                     BigInt          @id @default(autoincrement()) @map("search_request_id")
+  employeeId             BigInt?         @map("employee_id")
+  caseMasterId           BigInt?         @map("case_master_id")
+  searchText             String          @map("search_text") @db.Text
+  searchFiltersSummary   String?         @map("search_filters_summary") @db.Text
+  requestedOn            DateTime        @default(now()) @map("requested_on") @db.Timestamp(6)
+  resultSummary          String?         @map("result_summary") @db.Text
+  linkedChatSessionId    BigInt?         @map("linked_chat_session_id")
+  linkedRecommendationId BigInt?         @map("linked_recommendation_id")
+  employee               Employee?       @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                   CaseMaster?     @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  linkedChatSession      ChatSession?    @relation(fields: [linkedChatSessionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  linkedRecommendation   Recommendation? @relation(fields: [linkedRecommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([employeeId, requestedOn])
+  @@map("search_request")
+}
+
+model KgNode {
+  id               BigInt      @id @default(autoincrement()) @map("kg_node_id")
+  nodeLabel        String      @map("node_label") @db.VarChar(100)
+  sourceTable      String      @map("source_table") @db.VarChar(150)
+  sourceRecordId   String      @map("source_record_id") @db.VarChar(150)
+  displayName      String?     @map("display_name") @db.VarChar(500)
+  sensitivityLevel String?     @map("sensitivity_level") @db.VarChar(100)
+  qualityStatus    String?     @map("quality_status") @db.VarChar(100)
+  sourceConfidence Decimal?    @map("source_confidence") @db.Decimal(6, 4)
+  dataSourceId     BigInt?     @map("data_source_id")
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime    @default(now()) @map("updated_at") @db.Timestamp(6)
+  dataSource       DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  outgoingEdges    KgEdge[]    @relation("KgEdgeFrom")
+  incomingEdges    KgEdge[]    @relation("KgEdgeTo")
+
+  @@unique([sourceTable, sourceRecordId, nodeLabel])
+  @@index([nodeLabel])
+  @@index([sourceTable, sourceRecordId])
+  @@map("kg_node")
+}
+
+model KgEdge {
+  id                   BigInt      @id @default(autoincrement()) @map("kg_edge_id")
+  fromKgNodeId         BigInt      @map("from_kg_node_id")
+  toKgNodeId           BigInt      @map("to_kg_node_id")
+  relationshipType     String      @map("relationship_type") @db.VarChar(150)
+  sourceTable          String?     @map("source_table") @db.VarChar(150)
+  sourceRecordId       String?     @map("source_record_id") @db.VarChar(150)
+  confidenceScore      Decimal?    @map("confidence_score") @db.Decimal(6, 4)
+  edgeWeight           Decimal?    @default(1.0) @map("edge_weight") @db.Decimal(10, 4)
+  validFrom            DateTime?   @map("valid_from") @db.Timestamp(6)
+  validTo              DateTime?   @map("valid_to") @db.Timestamp(6)
+  evidenceId           BigInt?     @map("evidence_id")
+  dataSourceId         BigInt?     @map("data_source_id")
+  modelVersion         String?     @map("model_version") @db.VarChar(100)
+  reviewStatus         String?     @default("accepted") @map("review_status") @db.VarChar(100)
+  reviewedByEmployeeId BigInt?     @map("reviewed_by_employee_id")
+  explanation          String?     @db.Text
+  createdAt            DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
+  fromNode             KgNode      @relation("KgEdgeFrom", fields: [fromKgNodeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  toNode               KgNode      @relation("KgEdgeTo", fields: [toKgNodeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evidence             Evidence?   @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dataSource           DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviewedBy           Employee?   @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([fromKgNodeId, relationshipType])
+  @@index([toKgNodeId, relationshipType])
+  @@index([relationshipType])
+  @@index([confidenceScore])
+  @@map("kg_edge")
+}
