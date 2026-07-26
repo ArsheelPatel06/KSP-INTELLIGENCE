@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "targets": [
+      "auth_function"
+    ],
+    "source": "functions"
+  }
+}
