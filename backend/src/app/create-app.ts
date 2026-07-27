@@ -43,7 +43,10 @@ export function createApp(): Express {
   // Serve frontend static files in production
   if (env.NODE_ENV === 'production') {
     const fs = require('node:fs');
-    const frontendDist = path.join(process.cwd(), 'frontend', 'dist');
+    let frontendDist = path.join(process.cwd(), 'frontend', 'dist');
+    if (!fs.existsSync(frontendDist)) {
+      frontendDist = path.join(process.cwd(), '..', 'frontend', 'dist');
+    }
 
     console.log('Frontend path:', frontendDist);
     console.log('Exists:', fs.existsSync(frontendDist));
