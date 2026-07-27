@@ -17,6 +17,11 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  
   "dependencies": {
     "@langchain/core": "^1.2.3",
     "@langchain/langgraph": "^1.4.8",
@@ -67,3 +72,5 @@
     "node": ">=20.0.0"
   }
 }            
+
+

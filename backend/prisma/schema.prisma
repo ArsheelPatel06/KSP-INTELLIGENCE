@@ -178,8 +178,14 @@ model Employee {
   physicallyChallenged        Boolean?                    @map("physically_challenged")
   appointmentDate             DateTime?                   @map("appointment_date") @db.Date
   active                      Boolean                     @default(true)
+  passwordHash                String?                     @map("password_hash") @db.VarChar(255)
+  role                        String                      @default("INVESTIGATING_OFFICER") @db.VarChar(50)
+  tokenVersion                Int                         @default(0) @map("token_version")
+  lastLoginAt                 DateTime?                   @map("last_login_at") @db.Timestamptz(6)
   assignedAlerts              Alert[]
   arrestInvestigations        ArrestSurrender[]           @relation("ArrestInvestigatingOfficer")
+  authAuditLogs               AuthAuditLog[]
+  refreshTokens               RefreshToken[]
   diaryEntries                CaseDiaryEntry[]
   registeredCases             CaseMaster[]                @relation("CasePolicePerson")
   similarityReviews           CaseSimilarity[]
@@ -199,13 +205,6 @@ model Employee {
   riskScoreReviews            RiskScore[]
   searchRequests              SearchRequest[]
   assignedTasks               Task[]
-
-  passwordHash                String?                     @map("password_hash") @db.VarChar(255)
-  role                        String                      @default("INVESTIGATING_OFFICER") @db.VarChar(50)
-  tokenVersion                Int                         @default(0) @map("token_version")
-  lastLoginAt                 DateTime?                   @map("last_login_at") @db.Timestamptz
-  refreshTokens               RefreshToken[]
-  authAuditLogs               AuthAuditLog[]
 
   @@index([districtId], map: "idx_employee_district")
   @@index([rankId], map: "idx_employee_rank")
@@ -1768,12 +1767,11 @@ model RefreshToken {
   tokenHash         String    @unique @map("token_hash") @db.VarChar(255)
   employeeId        BigInt    @map("employee_id")
   familyId          String    @map("family_id") @db.Uuid
-  expiresAt         DateTime  @map("expires_at") @db.Timestamptz
-  revokedAt         DateTime? @map("revoked_at") @db.Timestamptz
+  expiresAt         DateTime  @map("expires_at") @db.Timestamptz(6)
+  revokedAt         DateTime? @map("revoked_at") @db.Timestamptz(6)
   replacedByTokenId String?   @map("replaced_by_token_id") @db.Uuid
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   createdByIp       String?   @map("created_by_ip") @db.VarChar(45)
-
   employee          Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@index([employeeId])
@@ -1782,15 +1780,14 @@ model RefreshToken {
 }
 
 model AuthAuditLog {
-  id          String    @id @default(uuid()) @db.Uuid
-  employeeId  BigInt?   @map("employee_id")
-  event       String    @db.VarChar(50)
-  ipAddress   String?   @map("ip_address") @db.VarChar(45)
-  userAgent   String?   @map("user_agent")
-  metadata    Json?     @db.JsonB
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
-
-  employee    Employee? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  id         String    @id @default(uuid()) @db.Uuid
+  employeeId BigInt?   @map("employee_id")
+  event      String    @db.VarChar(50)
+  ipAddress  String?   @map("ip_address") @db.VarChar(45)
+  userAgent  String?   @map("user_agent")
+  metadata   Json?
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  employee   Employee? @relation(fields: [employeeId], references: [id])
 
   @@index([employeeId])
   @@index([event])
