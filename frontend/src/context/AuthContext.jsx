@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
 
             if (!customTokenResp.ok) {
               console.warn("Catalyst auth function returned error status", customTokenResp.status);
-              return null;
+              throw new Error(`Catalyst API Error: ${customTokenResp.status}`);
             }
 
             const customToken = await customTokenResp.json();
@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
             };
           } catch (e) {
             console.warn("Could not fetch Catalyst custom token:", e);
-            return null;
+            throw e;
           }
         };
         
