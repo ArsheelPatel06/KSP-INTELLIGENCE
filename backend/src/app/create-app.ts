@@ -42,15 +42,24 @@ export function createApp(): Express {
 
   // Serve frontend static files in production
   if (env.NODE_ENV === 'production') {
-    const frontendDist = path.join(__dirname, '../../../frontend/dist');
-    app.use(express.static(frontendDist));
+    const fs = require('node:fs');
+    const frontendDist = path.join(process.cwd(), 'frontend', 'dist');
 
-    app.get('*', (req, res, next) => {
-      if (req.path.startsWith(env.API_PREFIX)) {
-        return next();
-      }
-      res.sendFile(path.join(frontendDist, 'index.html'));
-    });
+    console.log('Frontend path:', frontendDist);
+    console.log('Exists:', fs.existsSync(frontendDist));
+
+    if (fs.existsSync(frontendDist)) {
+      app.use(express.static(frontendDist));
+
+      app.get('*', (req, res, next) => {
+        if (req.path.startsWith(env.API_PREFIX)) {
+          return next();
+        }
+        res.sendFile(path.join(frontendDist, 'index.html'));
+      });
+    } else {
+      console.warn('Frontend build not found:', frontendDist);
+    }
   }
 
   app.use(notFoundMiddleware);
