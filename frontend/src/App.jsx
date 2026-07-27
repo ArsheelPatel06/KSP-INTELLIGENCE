@@ -9,6 +9,9 @@ import { AppLayout } from './layouts/AppLayout';
 
 // Pages
 import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { AiAssistantPage } from './pages/AiAssistantPage';
 import { SearchCasesPage } from './pages/SearchCasesPage';
@@ -27,8 +30,11 @@ export function App() {
       <AppProvider>
         <BrowserRouter>
           <Routes>
-          {/* Public Login Route */}
+          {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Main Tactical Layout Wrapper */}
           <Route element={<RouteGuard />}>

@@ -18,8 +18,66 @@ import {
   verifyRefreshToken,
 } from '../utils/token';
 
+import crypto from 'crypto';
+import { hashPassword } from '../utils/password';
+import type { CatalystService } from './catalyst.service';
+
 export class AuthService {
-  constructor(private readonly repository: AuthRepository) {}
+  constructor(
+    private readonly repository: AuthRepository,
+    private readonly catalystService?: CatalystService
+  ) {}
+
+  async signup(input: any): Promise<void> {
+    const existingKgid = await this.repository.findUserByIdentifier(input.kgid);
+    if (existingKgid) {
+      throw new AppError('KGID already in use', { statusCode: 400 });
+    }
+    const existingEmail = await this.repository.findUserByEmail(input.email);
+    if (existingEmail) {
+      throw new AppError('Email already in use', { statusCode: 400 });
+    }
+
+    const passwordHash = await hashPassword(input.password);
+    await this.repository.createUser({
+      kgid: input.kgid,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      email: input.email,
+      passwordHash,
+      role: input.role,
+      active: true,
+      tokenVersion: 0,
+    });
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.repository.findUserByEmail(email);
+    if (!user) return; // Do not reveal if user exists
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
+    await this.repository.saveResetToken(user.id, resetTokenHash, expiresAt);
+
+    if (this.catalystService) {
+      const resetLink = `${env.CLIENT_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
+      await this.catalystService.sendPasswordResetEmail(email, resetLink);
+    }
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await this.repository.findUserByResetToken(resetTokenHash);
+    
+    if (!user) {
+      throw new AppError('Invalid or expired reset token', { statusCode: 400 });
+    }
+
+    const passwordHash = await hashPassword(newPassword);
+    await this.repository.updatePassword(user.id, passwordHash);
+  }
 
   async login(input: LoginRequestDto, metadata: AuthRequestMetadata): Promise<LoginResult> {
     const identifier = input.username.trim();

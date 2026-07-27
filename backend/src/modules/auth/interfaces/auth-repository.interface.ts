@@ -29,6 +29,8 @@ export interface CreateAuditLogInput {
 export interface AuthRepository {
   findUserByIdentifier(identifier: string): Promise<AuthUser | null>;
   findUserById(employeeId: bigint): Promise<AuthUser | null>;
+  findUserByEmail(email: string): Promise<AuthUser | null>;
+  findUserByResetToken(token: string): Promise<AuthUser | null>;
   updateLastLogin(employeeId: bigint): Promise<void>;
   findRefreshTokenByHash(tokenHash: string): Promise<StoredRefreshToken | null>;
   createRefreshToken(input: CreateRefreshTokenInput): Promise<void>;
@@ -36,5 +38,8 @@ export interface AuthRepository {
   revokeTokenFamily(familyId: string): Promise<void>;
   createAuditLog(input: CreateAuditLogInput): Promise<void>;
   roleExists(role: string): boolean;
+  createUser(data: any): Promise<AuthUser>;
+  saveResetToken(employeeId: bigint, token: string, expiresAt: Date): Promise<void>;
+  updatePassword(employeeId: bigint, passwordHash: string): Promise<void>;
 }
 

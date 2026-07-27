@@ -37,6 +37,31 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('ksp_access_token', data.accessToken);
       localStorage.setItem('ksp_refresh_token', data.refreshToken);
       setCurrentUser(data.user);
+      
+      // Initialize Zoho Catalyst Session via Custom JWT Token
+      if (window.catalyst && window.catalyst.auth) {
+        const getCustomTokenCallback = async () => {
+          try {
+            const customToken = await authService.getCatalystToken();
+            return {
+              client_id: customToken.client_id,
+              scopes: customToken.scopes,
+              jwt_token: customToken.jwt_token
+            };
+          } catch (e) {
+            console.warn("Could not fetch Catalyst custom token:", e);
+            throw e;
+          }
+        };
+        
+        try {
+          await window.catalyst.auth.signinWithJwt(getCustomTokenCallback);
+          console.log("Catalyst Custom Auth Session Established");
+        } catch (catalystErr) {
+          console.error("Catalyst authentication failed:", catalystErr);
+        }
+      }
+
       setError(null);
       return true;
     } catch (err) {

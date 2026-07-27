@@ -6,8 +6,38 @@ import type { LoginRequestDto, RefreshTokenRequestDto } from '../dto/auth.dto';
 import type { AuthService } from '../services/auth.service';
 import { setRefreshCookie } from '../utils/cookie';
 
+import type { CatalystService } from '../services/catalyst.service';
+
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly catalystService: CatalystService
+  ) {}
+
+  signup = async (req: Request, res: Response): Promise<Response> => {
+    await this.authService.signup(req.body);
+    return ok(res, { message: 'Account created successfully' }, 201);
+  };
+
+  forgotPassword = async (req: Request, res: Response): Promise<Response> => {
+    const { email } = req.body;
+    await this.authService.forgotPassword(email);
+    return ok(res, { message: 'If an account exists, a reset link has been sent.' });
+  };
+
+  resetPassword = async (req: Request, res: Response): Promise<Response> => {
+    const { token, password } = req.body;
+    await this.authService.resetPassword(token, password);
+    return ok(res, { message: 'Password has been reset successfully' });
+  };
+
+  catalystToken = async (req: Request, res: Response): Promise<Response> => {
+    // Generate custom JWT using Catalyst SDK
+    // @ts-ignore
+    const user = req.user; // from authenticateMiddleware
+    const tokenResponse = await this.catalystService.generateCustomToken(user);
+    return ok(res, tokenResponse);
+  };
 
   login = async (req: Request, res: Response): Promise<Response> => {
     const input = req.body as LoginRequestDto;

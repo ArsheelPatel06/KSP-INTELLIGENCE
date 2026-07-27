@@ -124,6 +124,58 @@ export class PrismaAuthRepository implements AuthRepository {
     return (ROLE_VALUES as readonly string[]).includes(role);
   }
 
+  async findUserByEmail(email: string): Promise<AuthUser | null> {
+    const emp = await this.client.employee.findUnique({
+      where: { email },
+      select: employeeSelect,
+    });
+    if (!emp) return null;
+    return this.mapToAuthUser(emp);
+  }
+
+  async findUserByResetToken(token: string): Promise<AuthUser | null> {
+    const emp = await this.client.employee.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpiresAt: {
+          gt: new Date()
+        }
+      },
+      select: employeeSelect,
+    });
+    if (!emp) return null;
+    return this.mapToAuthUser(emp);
+  }
+
+  async createUser(data: any): Promise<AuthUser> {
+    const emp = await this.client.employee.create({
+      data,
+      select: employeeSelect,
+    });
+    return this.mapToAuthUser(emp);
+  }
+
+  async saveResetToken(employeeId: bigint, token: string, expiresAt: Date): Promise<void> {
+    await this.client.employee.update({
+      where: { id: employeeId },
+      data: {
+        resetToken: token,
+        resetTokenExpiresAt: expiresAt,
+      }
+    });
+  }
+
+  async updatePassword(employeeId: bigint, passwordHash: string): Promise<void> {
+    await this.client.employee.update({
+      where: { id: employeeId },
+      data: {
+        passwordHash,
+        resetToken: null,
+        resetTokenExpiresAt: null,
+      }
+    });
+  }
+
   private mapToAuthUser(emp: any): AuthUser {
     return {
       id: emp.id,
