@@ -31,6 +31,29 @@ export const AppProvider = ({ children }) => {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
 
+  // Listen for Catalyst Push Notifications
+  useEffect(() => {
+    const handleCatalystNotification = (e) => {
+      const msg = e.detail;
+      const newNotif = {
+        id: Date.now().toString(),
+        type: 'alert', // default to alert, could map based on msg content
+        title: msg.title || 'New Push Notification',
+        message: msg.message || 'You have a new message from Catalyst',
+        time: 'Just now',
+        read: false,
+        priority: 'high',
+        icon: 'Bell' // fallback icon
+      };
+      setNotifications(prev => [newNotif, ...prev]);
+    };
+
+    window.addEventListener('catalyst-notification', handleCatalystNotification);
+    return () => {
+      window.removeEventListener('catalyst-notification', handleCatalystNotification);
+    };
+  }, []);
+
   const toggleDarkMode = () => setIsDarkMode(prev => !prev);
 
   // Mark single notification as read

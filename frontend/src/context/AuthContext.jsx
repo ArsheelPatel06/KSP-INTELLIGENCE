@@ -57,6 +57,20 @@ export const AuthProvider = ({ children }) => {
         try {
           await window.catalyst.auth.signinWithJwt(getCustomTokenCallback);
           console.log("Catalyst Custom Auth Session Established");
+          
+          // Enable Push Notifications
+          if (window.catalyst.notification) {
+            window.catalyst.notification.enableNotification().then((resp) => {
+              console.log("Catalyst notifications enabled:", resp);
+              window.catalyst.notification.messageHandler = (msg) => {
+                console.log("Received Catalyst Notification:", msg);
+                // Dispatch a custom event so AppContext can pick it up
+                window.dispatchEvent(new CustomEvent('catalyst-notification', { detail: msg }));
+              };
+            }).catch(err => {
+              console.error("Failed to enable Catalyst notifications:", err);
+            });
+          }
         } catch (catalystErr) {
           console.error("Catalyst authentication failed:", catalystErr);
         }
