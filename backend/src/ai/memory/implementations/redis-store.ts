@@ -13,6 +13,7 @@ import type {
   AiSessionMemory,
 } from '../memory.types';
 import { logger } from '../../../core/logger/logger';
+import { env } from '../../../config/env';
 
 export class RedisMemoryStore
   implements
@@ -24,8 +25,7 @@ export class RedisMemoryStore
   private redis: Redis;
 
   constructor() {
-    const uri = process.env.REDIS_URI || 'redis://localhost:6379';
-    this.redis = new Redis(uri);
+    this.redis = new Redis(env.REDIS_URL);
     this.redis.on('error', (err) => logger.error({ err }, 'Redis Memory Store Error'));
   }
 
