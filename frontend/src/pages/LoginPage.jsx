@@ -7,10 +7,10 @@ export const LoginPage = () => {
   const { login, error } = useAuth();
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState('KSP-12345');
+  const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('Password123!');
   const [loading, setLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState('Investigator');
+  const [selectedRole, setSelectedRole] = useState('Admin');
 
   const roles = ['Investigator', 'Analyst', 'Supervisor', 'Admin'];
 
@@ -34,6 +34,15 @@ export const LoginPage = () => {
           <div style={{ textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 600, color: '#93C5FD', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Government of Karnataka</div>
           <h1 className="ux4g-text-2xl ux4g-font-bold ux4g-text-white" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#FFF' }}>KSP Intelligence OS</h1>
           <p className="ux4g-text-sm ux4g-text-neutral-300 ux4g-mt-xs" style={{ fontSize: '0.875rem', color: '#BFDBFE', marginTop: '0.25rem' }}>Secure Authorized Access</p>
+        </div>
+
+        {/* Demo Credentials Notice */}
+        <div style={{ padding: '1rem 2rem 0 2rem' }}>
+          <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '0.5rem', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: '#1E40AF', textAlign: 'center' }}>Hackathon Judges Login</p>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: '#1E3A8A', textAlign: 'center' }}>Username: <strong>admin</strong></p>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: '#1E3A8A', textAlign: 'center' }}>Password: <strong>Password123!</strong></p>
+          </div>
         </div>
 
         {/* Form */}
