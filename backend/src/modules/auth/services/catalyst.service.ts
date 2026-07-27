@@ -5,6 +5,7 @@ import * as catalyst from 'zcatalyst-sdk-node';
 let app: catalyst.CatalystApp | null = null;
 try {
   app = catalyst.initialize({
+    type: catalyst.type.applogic,
     project_id: process.env.ZOHO_PROJECT_ID,
     client_id: process.env.ZOHO_CLIENT_ID,
     client_secret: process.env.ZOHO_CLIENT_SECRET,
