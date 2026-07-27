@@ -16,7 +16,7 @@ const envSchema = z.object({
   AUTH_COOKIE_SECURE: z.enum(['true', 'false']).default('false'),
   AUTH_COOKIE_SAME_SITE: z.enum(['strict', 'lax', 'none']).default('strict'),
   AUTH_COOKIE_DOMAIN: z.string().optional(),
-  CORS_ORIGIN: z.string().default('http://localhost:3000,http://localhost:5173,https://ksp-intelligence.onslate.com'),
+  CORS_ORIGIN: z.string().default('http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:5173,https://ksp-intelligence.onslate.com'),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900000),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
   LOG_LEVEL: z.string().default('info'),
