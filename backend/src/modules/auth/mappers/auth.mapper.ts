@@ -3,11 +3,10 @@ import type { AuthenticatedUser, AuthUser } from '../types/auth.types';
 
 export function toAuthenticatedUser(user: AuthUser): AuthenticatedUser {
   return {
-    id: user.id,
-    username: user.username,
-    email: user.email,
+    id: user.id.toString(),
+    kgid: user.kgid,
+    firstName: user.firstName,
     role: user.role,
-    employeeId: user.employeeId?.toString() ?? null,
     permissions: permissionsForRole(user.role),
     lastLoginAt: user.lastLoginAt?.toISOString() ?? null,
   };

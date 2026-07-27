@@ -1,28 +1,15 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Settings, User, Bell, Shield, Save, CheckCircle2 } from 'lucide-react';
-import { Badge } from '../components/common/Badge';
-
-const sCard = {
-  padding: '1.25rem',
-  borderRadius: '0.75rem',
-  backgroundColor: 'var(--t-bg-card)',
-  border: '1px solid var(--t-border)',
-};
-
-const sTitle = {
-  fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase',
-  letterSpacing: '0.07em', color: 'var(--t-text-secondary)',
-  display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '1rem'
-};
+import { Btn } from '../components/common/ButtonSystem';
 
 export const SettingsPage = () => {
   const { currentUser, setCurrentUser } = useApp();
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  const [name, setName] = useState(currentUser.name);
-  const [badge, setBadge] = useState(currentUser.badge);
-  const [district, setDistrict] = useState(currentUser.district);
+  const [name, setName] = useState(currentUser.name || 'Vikram Singh');
+  const [badge, setBadge] = useState(currentUser.badge || 'IPS-KA-2019-482');
+  const [district, setDistrict] = useState(currentUser.district || 'Bengaluru Urban');
   const [email, setEmail] = useState('officer.vikram@ksp.gov.in');
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [smsAlerts, setSmsAlerts] = useState(true);
@@ -36,32 +23,35 @@ export const SettingsPage = () => {
   };
 
   return (
-    <div style={{ maxWidth: '52rem', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+    <div className="max-w-4xl mx-auto flex flex-col gap-5 pb-8 animate-fade-in font-sans">
 
       {/* Header */}
-      <div style={{ ...sCard, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-200 rounded-[18px] p-6 shadow-sm">
         <div>
-          <h1 style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--t-text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Settings size={20} style={{ color: '#3B82F6' }} />
+          <h1 className="text-[22px] font-extrabold text-slate-900 flex items-center gap-2">
+            <Settings size={24} className="text-blue-600" />
             Platform Settings &amp; Personnel Preferences
           </h1>
-          <p style={{ fontSize: '0.75rem', color: 'var(--t-text-secondary)', marginTop: '0.25rem' }}>
+          <p className="text-[14px] text-slate-500 mt-1 font-medium">
             Configure officer credentials, notification channels, &amp; security parameters.
           </p>
         </div>
         {savedSuccess && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.375rem 0.875rem', backgroundColor: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', color: '#10B981', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 600 }}>
-            <CheckCircle2 size={14} /> Settings Saved!
+          <div className="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-[10px] text-[13px] font-bold shadow-sm">
+            <CheckCircle2 size={16} /> Settings Saved!
           </div>
         )}
       </div>
 
-      <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      <form onSubmit={handleSave} className="flex flex-col gap-5">
 
         {/* Officer Profile */}
-        <div style={sCard}>
-          <div style={sTitle}><User size={15} style={{ color: '#3B82F6' }} /> Officer Profile &amp; SmartCard Metadata</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className="bg-white border border-gray-200 rounded-[18px] p-6 shadow-sm">
+          <div className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-widest text-slate-500 mb-5">
+            <User size={16} className="text-blue-600" /> 
+            Officer Profile &amp; SmartCard Metadata
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {[
               { label: 'Full Officer Name', value: name, setter: setName, type: 'text' },
               { label: 'IPS / KPS Badge Number', value: badge, setter: setBadge, type: 'text' },
@@ -69,12 +59,12 @@ export const SettingsPage = () => {
               { label: 'Official Gov Email', value: email, setter: setEmail, type: 'email' },
             ].map(f => (
               <div key={f.label}>
-                <label className="t-label">{f.label}</label>
+                <label className="block text-[12px] font-extrabold uppercase tracking-widest text-slate-400 mb-1.5">{f.label}</label>
                 <input
                   type={f.type}
                   value={f.value}
                   onChange={e => f.setter(e.target.value)}
-                  className="t-input"
+                  className="w-full h-11 px-4 rounded-[12px] border border-gray-200 bg-slate-50 text-[14px] font-semibold text-slate-800 focus:bg-white focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)] outline-none transition-all"
                 />
               </div>
             ))}
@@ -82,41 +72,56 @@ export const SettingsPage = () => {
         </div>
 
         {/* Notification Channels */}
-        <div style={sCard}>
-          <div style={sTitle}><Bell size={15} style={{ color: '#3B82F6' }} /> Alert Channels &amp; Thresholds</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+        <div className="bg-white border border-gray-200 rounded-[18px] p-6 shadow-sm">
+          <div className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-widest text-slate-500 mb-5">
+            <Bell size={16} className="text-blue-600" /> 
+            Alert Channels &amp; Thresholds
+          </div>
+          <div className="flex flex-col gap-3">
             {[
               { label: 'Critical Crime Spike Push Alerts', desc: 'Instant audio/popup alerts when automated spike detection triggers.', val: criticalPush, setter: setCriticalPush },
               { label: 'Official SMS Dispatch Notifications', desc: 'Receive encrypted SMS alerts for FIR assignments.', val: smsAlerts, setter: setSmsAlerts },
               { label: 'Daily Intelligence Email Summary', desc: 'Automated 06:00 AM briefing sent to official email.', val: emailAlerts, setter: setEmailAlerts },
             ].map(t => (
-              <label key={t.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', backgroundColor: 'var(--t-bg-card-alt)', border: '1px solid var(--t-border)', borderRadius: '0.5rem', cursor: 'pointer' }}>
+              <label key={t.label} className="flex items-center justify-between p-4 bg-slate-50 border border-gray-100 rounded-[14px] cursor-pointer hover:border-blue-200 transition-colors">
                 <div>
-                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--t-text-primary)' }}>{t.label}</div>
-                  <div style={{ fontSize: '0.6875rem', color: 'var(--t-text-muted)', marginTop: '0.125rem' }}>{t.desc}</div>
+                  <div className="text-[14px] font-extrabold text-slate-800">{t.label}</div>
+                  <div className="text-[12px] font-medium text-slate-500 mt-0.5">{t.desc}</div>
                 </div>
-                <input type="checkbox" checked={t.val} onChange={e => t.setter(e.target.checked)} style={{ width: '1rem', height: '1rem', accentColor: '#3B82F6', cursor: 'pointer' }} />
+                <input 
+                  type="checkbox" 
+                  checked={t.val} 
+                  onChange={e => t.setter(e.target.checked)} 
+                  className="w-5 h-5 rounded-[6px] border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
+                />
               </label>
             ))}
           </div>
         </div>
 
         {/* Security */}
-        <div style={sCard}>
-          <div style={sTitle}><Shield size={15} style={{ color: '#3B82F6' }} /> Hardware SmartCard &amp; 2FA Status</div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', backgroundColor: 'var(--t-bg-card-alt)', border: '1px solid var(--t-border)', borderRadius: '0.5rem' }}>
+        <div className="bg-white border border-gray-200 rounded-[18px] p-6 shadow-sm">
+          <div className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-widest text-slate-500 mb-5">
+            <Shield size={16} className="text-blue-600" /> 
+            Hardware SmartCard &amp; 2FA Status
+          </div>
+          <div className="flex items-center justify-between p-4 bg-slate-50 border border-gray-100 rounded-[14px]">
             <div>
-              <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--t-text-primary)' }}>Hardware Token: YubiKey-5-Police-HSM</div>
-              <div style={{ fontSize: '0.6875rem', color: 'var(--t-text-muted)', marginTop: '0.125rem' }}>Cryptographic key ID: 0x94F2A... (Valid till 2028)</div>
+              <div className="text-[14px] font-extrabold text-slate-800">Hardware Token: YubiKey-5-Police-HSM</div>
+              <div className="text-[12px] font-medium text-slate-500 mt-0.5">Cryptographic key ID: 0x94F2A... (Valid till 2028)</div>
             </div>
-            <Badge variant="success" size="md">ENFORCED</Badge>
+            <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-extrabold uppercase tracking-widest">
+              Enforced
+            </span>
           </div>
         </div>
 
         {/* Save */}
-        <button type="submit" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.75rem', backgroundColor: '#1E3A8A', color: '#FFF', border: 'none', borderRadius: '0.75rem', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer', width: 'fit-content' }}>
-          <Save size={16} /> Save Preferences
-        </button>
+        <div className="flex justify-start">
+          <Btn type="submit" variant="primary" size="lg" icon={Save}>
+            Save Preferences
+          </Btn>
+        </div>
       </form>
     </div>
   );

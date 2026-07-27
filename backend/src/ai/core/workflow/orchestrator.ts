@@ -1,21 +1,21 @@
 import { StateGraph, MemorySaver, START, END } from '@langchain/langgraph';
 import { AiGraphState } from './state';
-import { securityShieldNode } from './nodes/security-shield.node';
-import { intentDetectionNode } from './nodes/intent-detection.node';
-import { entityExtractionNode } from './nodes/entity-extraction.node';
-import { supervisorNode } from './nodes/supervisor.node';
+import { securityShieldNode } from './nodes/security-shield';
+import { intentDetectionNode } from './nodes/intent-detection';
+import { entityExtractionNode } from './nodes/entity-extraction';
+import { supervisorNode } from './nodes/supervisor';
 import { 
   investigationAgentNode, 
   legalAgentNode, 
   graphAgentNode, 
   analyticsAgentNode, 
   recommendationAgentNode 
-} from './nodes/agent-execution.node';
-import { evidenceAggregatorNode } from './nodes/evidence-aggregator.node';
-import { conflictResolutionNode } from './nodes/conflict-resolution.node';
-import { confidenceScoringNode } from './nodes/confidence-scoring.node';
-import { generatorNode } from './nodes/generator.node';
-import { reportAgentNode } from './nodes/report.node';
+} from './nodes/agent-execution';
+import { evidenceAggregatorNode } from './nodes/evidence-aggregator';
+import { conflictResolutionNode } from './nodes/conflict-resolution';
+import { confidenceScoringNode } from './nodes/confidence-scoring';
+import { generatorNode } from './nodes/generator';
+import { reportAgentNode } from './nodes/report';
 
 /**
  * Conditional routing function after Intent/Entity extraction to Supervisor.

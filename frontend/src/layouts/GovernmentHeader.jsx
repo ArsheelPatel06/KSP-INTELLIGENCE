@@ -7,8 +7,6 @@ export function GovernmentHeader() {
   const { isDarkMode, toggleDarkMode, sidebarCollapsed, setSidebarCollapsed, notifications, currentUser, markNotificationRead } = useApp();
   const navigate = useNavigate();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   
@@ -29,11 +27,8 @@ export function GovernmentHeader() {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const handleSearchSubmit = (e) => {
-    if (e.key === 'Enter') {
-      setShowSearchDropdown(false);
-      navigate(`/cases`); // You can pass query params later
-    }
+  const handleSearchClick = () => {
+    window.dispatchEvent(new CustomEvent('open-command-palette'));
   };
 
   return (
@@ -85,12 +80,9 @@ export function GovernmentHeader() {
           <div style={{ position: 'relative' }}>
             <Search size={17} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--t-text-muted)' }} />
             <input
-              type="text"
-              placeholder="Search FIRs, Persons, Vehicles, Evidence or Ask AI… (Ctrl+K)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onClick={() => setShowSearchDropdown(true)}
-              onKeyDown={handleSearchSubmit}
+              type="button"
+              value="Search FIRs, Persons, Vehicles, Evidence or Ask AI… (Ctrl+K)"
+              onClick={handleSearchClick}
               style={{
                 width: '100%', boxSizing: 'border-box',
                 padding: '0.5rem 1rem 0.5rem 2.5rem',
@@ -98,47 +90,16 @@ export function GovernmentHeader() {
                 border: '1px solid var(--t-border)',
                 borderRadius: '0.375rem',
                 fontSize: '0.8125rem',
-                color: 'var(--t-text-primary)',
+                color: 'var(--t-text-muted)',
                 outline: 'none',
+                textAlign: 'left',
+                cursor: 'pointer',
                 transition: 'border-color 0.15s ease'
               }}
-              onFocus={e => {
-                e.target.style.borderColor = '#3B82F6';
-                setShowSearchDropdown(true);
-              }}
-              onBlur={e => e.target.style.borderColor = 'var(--t-border)'}
+              onMouseOver={e => e.target.style.borderColor = '#3B82F6'}
+              onMouseOut={e => e.target.style.borderColor = 'var(--t-border)'}
             />
           </div>
-          
-          {/* Search Dropdown */}
-          {showSearchDropdown && (
-            <div style={{
-              position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '0.5rem',
-              backgroundColor: 'var(--t-bg-card)', border: '1px solid var(--t-border)',
-              borderRadius: '0.375rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-              zIndex: 50, overflow: 'hidden'
-            }}>
-              <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--t-border)', fontSize: '0.75rem', fontWeight: 600, color: 'var(--t-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Relative Options
-              </div>
-              <div style={{ padding: '0.5rem 0' }}>
-                <div onClick={() => { navigate('/cases'); setShowSearchDropdown(false); }} style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.875rem', color: 'var(--t-text-primary)' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'var(--t-bg-card-alt)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                  <FileText size={16} color="var(--t-text-secondary)" /> Search FIR Records
-                </div>
-                <div onClick={() => { navigate('/cases'); setShowSearchDropdown(false); }} style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.875rem', color: 'var(--t-text-primary)' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'var(--t-bg-card-alt)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                  <User size={16} color="var(--t-text-secondary)" /> Search Criminal Database
-                </div>
-              </div>
-              <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--t-border)', fontSize: '0.75rem', fontWeight: 600, color: 'var(--t-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Recent Searches
-              </div>
-              <div style={{ padding: '0.5rem 0' }}>
-                <div onClick={() => { setSearchQuery('Narcotics Hubli'); navigate('/cases'); setShowSearchDropdown(false); }} style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.875rem', color: 'var(--t-text-primary)' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'var(--t-bg-card-alt)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                  <Clock size={16} color="var(--t-text-secondary)" /> "Narcotics Hubli"
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Right: Emblem + Bells + Profile */}

@@ -3,6 +3,7 @@
     "targets": [
       "auth_function"
     ],
+    "ignore": [],
     "source": "functions"
   }
 }

@@ -18,6 +18,13 @@ export const AppProvider = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [aiLanguage, setAiLanguage] = useState('en'); // 'en' or 'kn'
   const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  // Global Copilot Chat History
+  const [copilotMessages, setCopilotMessages] = useState([
+    { id: 1, sender: 'bot', text: 'Good afternoon, DCP V. Rathore. I have prepared your daily briefing. There is a cluster of 7 Cyber Fraud FIRs in Indiranagar that requires your attention.' },
+    { id: 2, sender: 'bot', text: 'Would you like me to open the full investigation workspace for this cluster?', action: 'open_workspace' }
+  ]);
+  const [chatSessionId, setChatSessionId] = useState(null);
 
   // Sync theme to <html data-theme> so CSS variables & global overrides fire
   useEffect(() => {
@@ -81,7 +88,11 @@ export const AppProvider = ({ children }) => {
     addFirNote,
     updateFirStatus,
     isDarkMode,
-    toggleDarkMode
+    toggleDarkMode,
+    copilotMessages,
+    setCopilotMessages,
+    chatSessionId,
+    setChatSessionId
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -4,7 +4,6 @@ import {
   PieChart, Pie, Cell, Tooltip, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList,
   LineChart, Line, ComposedChart, Area,
-  RadialBarChart, RadialBar
 } from 'recharts';
 import { Download, BarChart3, TrendingUp, RefreshCw } from 'lucide-react';
 import {
@@ -15,14 +14,15 @@ import {
   aiForecastData
 } from '../mockData/mockAnalytics';
 import { useApp } from '../context/AppContext';
+import { Btn, BtnIcon } from '../components/common/ButtonSystem';
 
-// ─── Government Color Palette ───────────────────────────────────────────────
-const GOV_TEAL = '#1A7F8E';
-const GOV_BLUE = '#1565C0';
-const GOV_STEEL = '#2E7D9A';
-const GOV_GREEN = '#2E7D32';
-const GOV_RED = '#C62828';
-const GOV_AMBER = '#E65100';
+// ─── Color Palette ────────────────────────────────────────────────────────
+const GOV_TEAL = '#0891b2';
+const GOV_BLUE = '#2563eb';
+const GOV_STEEL = '#475569';
+const GOV_GREEN = '#16a34a';
+const GOV_RED = '#dc2626';
+const GOV_AMBER = '#ea580c';
 
 // ─── Half-Circle Gauge (SVG) ─────────────────────────────────────────────────
 function HalfGauge({ value, max, color, label, sublabel }) {
@@ -36,19 +36,16 @@ function HalfGauge({ value, max, color, label, sublabel }) {
   const bgX2 = cx + r * Math.cos(end), bgY2 = cy + r * Math.sin(end);
 
   return (
-    <div style={{ textAlign: 'center' }}>
-      <svg width={140} height={80} viewBox="0 0 140 80">
-        {/* Background track */}
-        <path d={`M ${x1} ${y1} A ${r} ${r} 0 1 1 ${bgX2} ${bgY2}`} fill="none" stroke="#E0E0E0" strokeWidth={10} strokeLinecap="round" />
-        {/* Value arc */}
+    <div className="text-center">
+      <svg width={140} height={90} viewBox="0 0 140 90">
+        <path d={`M ${x1} ${y1} A ${r} ${r} 0 1 1 ${bgX2} ${bgY2}`} fill="none" stroke="#f1f5f9" strokeWidth={10} strokeLinecap="round" />
         {pct > 0 && (
           <path d={`M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`} fill="none" stroke={color} strokeWidth={10} strokeLinecap="round" />
         )}
-        {/* Center text */}
-        <text x={cx} y={cy - 4} textAnchor="middle" fontSize={14} fontWeight={700} fill="#212121">{value.toLocaleString()}</text>
-        <text x={cx} y={cy + 12} textAnchor="middle" fontSize={9} fill={color}>{sublabel}</text>
+        <text x={cx} y={cy - 4} textAnchor="middle" fontSize={14} fontWeight={800} fill="#1e293b">{value.toLocaleString()}</text>
+        <text x={cx} y={cy + 14} textAnchor="middle" fontSize={10} fill={color} fontWeight={600}>{sublabel}</text>
       </svg>
-      <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#424242', marginTop: '-0.5rem', lineHeight: 1.4 }}>{label}</div>
+      <div className="text-[12px] font-bold text-slate-600 mt-1 leading-tight">{label}</div>
     </div>
   );
 }
@@ -61,7 +58,7 @@ function renderCustomLabel({ cx, cy, midAngle, innerRadius, outerRadius, name, p
   const y = cy + r * Math.sin(-midAngle * RADIAN);
   if (percent < 0.05) return null;
   return (
-    <text x={x} y={y} fill="#424242" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize={9}>
+    <text x={x} y={y} fill="#475569" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize={10} fontWeight={600}>
       {`${(percent * 100).toFixed(1)}%`}
     </text>
   );
@@ -71,11 +68,11 @@ function renderCustomLabel({ cx, cy, midAngle, innerRadius, outerRadius, name, p
 function GovTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #BDBDBD', borderRadius: '4px', padding: '0.5rem 0.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.12)', fontSize: '0.75rem' }}>
-      {label && <div style={{ fontWeight: 700, color: '#212121', marginBottom: '0.25rem', borderBottom: '1px solid #E0E0E0', paddingBottom: '0.25rem' }}>{label}</div>}
+    <div className="bg-white border border-gray-200 rounded-[12px] p-3 shadow-lg text-[12px]">
+      {label && <div className="font-bold text-slate-800 mb-2 border-b border-gray-100 pb-2">{label}</div>}
       {payload.map(p => (
-        <div key={p.name} style={{ color: p.color || '#424242', display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
-          <span>{p.name}:</span><strong>{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}</strong>
+        <div key={p.name} className="flex justify-between gap-4 font-medium" style={{ color: p.color || '#475569' }}>
+          <span>{p.name}:</span><strong className="font-extrabold text-slate-900">{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}</strong>
         </div>
       ))}
     </div>
@@ -87,33 +84,19 @@ export const CrimeAnalyticsPage = () => {
   const { isDarkMode } = useApp();
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Government style: always light background on analytics page (like NeSDA/NJDG)
-  const bg = '#F5F5F5';
-  const card = '#FFFFFF';
-  const border = '#E0E0E0';
-  const headerBg = '#1A3A5C';
-
-  const cardStyle = {
-    backgroundColor: card,
-    border: `1px solid ${border}`,
-    borderRadius: '4px',
-    overflow: 'hidden',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
-  };
-
   const cardHeader = (title) => (
-    <div style={{ backgroundColor: '#F9F9F9', borderBottom: `1px solid ${border}`, padding: '0.5rem 0.875rem', fontSize: '0.8125rem', fontWeight: 700, color: '#1A3A5C' }}>
+    <div className="bg-slate-50 border-b border-gray-100 px-4 py-3 text-[12px] font-extrabold text-slate-700 uppercase tracking-widest rounded-t-[16px]">
       {title}
     </div>
   );
 
   // Top KPI summary data
   const kpiSummary = [
-    { label: 'Total FIRs', value: '1,000', sub: 'Karnataka State' },
-    { label: 'Cases Solved', value: '837', sub: '83.7% resolution rate' },
-    { label: 'Active Investigations', value: '163', sub: 'As of today' },
-    { label: 'High Risk Cases', value: '27', sub: '2.7% of total' },
-    { label: 'Total Persons', value: '2,841', sub: 'Suspects + accused' },
+    { label: 'Total FIRs', value: '1,000', sub: 'Karnataka State', color: 'text-slate-700' },
+    { label: 'Cases Solved', value: '837', sub: '83.7% resolution rate', color: 'text-blue-600' },
+    { label: 'Active Investigations', value: '163', sub: 'As of today', color: 'text-amber-600' },
+    { label: 'High Risk Cases', value: '27', sub: '2.7% of total', color: 'text-red-600' },
+    { label: 'Total Persons', value: '2,841', sub: 'Suspects + accused', color: 'text-indigo-600' },
   ];
 
   // District horizontal bar data
@@ -125,12 +108,12 @@ export const CrimeAnalyticsPage = () => {
 
   // Category donut
   const total = crimeCategoryDistribution.reduce((s, d) => s + d.value, 0);
-  const categoryColors = ['#1565C0', '#1A7F8E', '#C62828', '#6A1B9A', '#E65100', '#546E7A'];
+  const categoryColors = ['#2563eb', '#0891b2', '#dc2626', '#9333ea', '#ea580c', '#475569'];
 
-  // Monthly trend with 3 lines
+  // Monthly trend
   const trendData = monthlyCrimeTrends.map(d => ({ ...d, rate: Math.round((d.solved / d.firs) * 100) }));
 
-  // Institute vs Disposal style data
+  // Institute vs Disposal data
   const ivdData = [
     { period: '2021', instituted: 890, disposed: 754 },
     { period: '2022', instituted: 920, disposed: 801 },
@@ -140,65 +123,70 @@ export const CrimeAnalyticsPage = () => {
     { period: '2026', instituted: 1000, disposed: 837 },
   ];
 
-  // Resolution rate gauge data per category
+  // Resolution rate gauges
   const resolutionGauges = [
-    { label: 'Cyber Crimes', sub: '79.2% resolved', value: 301, max: 380, color: '#1565C0' },
-    { label: 'Property Crimes', sub: '85.8% resolved', value: 206, max: 240, color: GOV_TEAL },
-    { label: 'Violent Crimes', sub: '75.0% resolved', value: 120, max: 160, color: GOV_RED },
+    { label: 'Cyber Crimes', sub: '79.2% resolved', value: 301, max: 380, color: '#2563eb' },
+    { label: 'Property Crimes', sub: '85.8% resolved', value: 206, max: 240, color: '#0891b2' },
+    { label: 'Violent Crimes', sub: '75.0% resolved', value: 120, max: 160, color: '#dc2626' },
   ];
 
   // Syndicate risk table
   const syndicateTable = repeatOffenderStats;
 
   return (
-    <div style={{ backgroundColor: bg, minHeight: '100%', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.875rem', fontFamily: "'Arial', 'Helvetica', sans-serif" }}>
+    <div className="flex flex-col gap-4 pb-8 animate-fade-in">
 
       {/* ── Page Header ─────────────────────────────────────────────── */}
-      <div style={{ backgroundColor: headerBg, borderRadius: '4px', padding: '0.875rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-200 rounded-[18px] p-6 shadow-sm">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-            <BarChart3 size={18} style={{ color: '#90CAF9' }} />
-            <span style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '1rem' }}>State Crime Analytics Dashboard</span>
-          </div>
-          <div style={{ fontSize: '0.6875rem', color: '#90CAF9', marginTop: '0.25rem' }}>Karnataka State Police · Integrated Crime Intelligence Platform</div>
+          <h1 className="text-[22px] font-extrabold text-slate-900 flex items-center gap-2">
+            <BarChart3 size={24} className="text-blue-600" />
+            <span>State Crime Analytics Dashboard</span>
+          </h1>
+          <p className="text-[14px] text-slate-500 mt-1 font-medium">
+            Karnataka State Police · Integrated Crime Intelligence Platform
+          </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '0.6875rem', color: '#B3D1F0' }}>Last Refreshed: {new Date().toLocaleString('en-IN')}</span>
-          <button style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.375rem 0.75rem', backgroundColor: '#FFFFFF', color: '#1A3A5C', border: 'none', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}>
-            <Download size={13} /> Export
-          </button>
-          <RefreshCw size={16} style={{ color: '#90CAF9', cursor: 'pointer' }} />
+        <div className="flex items-center gap-3">
+          <span className="text-[12px] text-slate-400 font-medium mr-2">Last Refreshed: {new Date().toLocaleString('en-IN')}</span>
+          <Btn variant="secondary" size="md" icon={Download}>Export Report</Btn>
+          <BtnIcon variant="ghost" icon={RefreshCw} title="Refresh Data" />
         </div>
       </div>
 
       {/* ── Row 1: KPI Summary Boxes ─────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.625rem' }}>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {kpiSummary.map(k => (
-          <div key={k.label} style={{ ...cardStyle, textAlign: 'center', padding: '0.875rem 0.5rem' }}>
-            <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#616161', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{k.label}</div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#1A3A5C', lineHeight: 1.1, margin: '0.25rem 0' }}>{k.value}</div>
-            <div style={{ fontSize: '0.625rem', color: '#9E9E9E' }}>{k.sub}</div>
+          <div key={k.label} className="bg-white border border-gray-200 rounded-[16px] shadow-sm p-4 text-center">
+            <div className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">{k.label}</div>
+            <div className={`text-[26px] font-extrabold leading-none my-2 ${k.color}`}>{k.value}</div>
+            <div className="text-[11px] font-medium text-slate-500">{k.sub}</div>
           </div>
         ))}
       </div>
 
       {/* ── Row 2: Resolution Gauges + Category Donut + Category Table ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px 1fr', gap: '0.875rem' }}>
-
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px_1.6fr] xl:grid-cols-[1fr_250px_1.5fr] gap-4">
+        
         {/* Resolution Rate Gauges */}
-        <div style={cardStyle}>
+        <div className="bg-white border border-gray-200 rounded-[16px] shadow-sm flex flex-col h-full">
           {cardHeader('Resolution Rate by Crime Category')}
-          <div style={{ padding: '1rem', display: 'flex', justifyContent: 'space-around' }}>
-            {resolutionGauges.map(g => (
-              <HalfGauge key={g.label} value={g.value} max={g.max} color={g.color} label={g.label} sublabel={g.sub} />
-            ))}
+          <div className="flex-1 flex flex-col items-center justify-center p-4">
+            <div className="w-full flex justify-around">
+              {resolutionGauges.map(g => (
+                <HalfGauge key={g.label} value={g.value} max={g.max} color={g.color} label={g.label} sublabel={g.sub} />
+              ))}
+            </div>
+            <div className="mt-6 text-[11px] text-slate-400 font-medium text-center bg-slate-50 py-1.5 px-4 rounded-full border border-gray-100">
+              * Rates reflect cases closed or charge-sheeted within 90 days.
+            </div>
           </div>
         </div>
 
         {/* Donut — Crime Category Visibility */}
-        <div style={cardStyle}>
+        <div className="bg-white border border-gray-200 rounded-[16px] shadow-sm">
           {cardHeader('Crime Category Share')}
-          <div style={{ padding: '0.5rem 0' }}>
+          <div className="p-3">
             <ResponsiveContainer width="100%" height={160}>
               <PieChart>
                 <Pie data={crimeCategoryDistribution} dataKey="value" cx="50%" cy="50%" innerRadius={38} outerRadius={62} labelLine={false} label={renderCustomLabel}>
@@ -209,14 +197,14 @@ export const CrimeAnalyticsPage = () => {
                 <Tooltip content={<GovTooltip />} />
               </PieChart>
             </ResponsiveContainer>
-            <div style={{ padding: '0 0.75rem 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <div className="flex flex-col gap-1 mt-1 px-2">
               {crimeCategoryDistribution.map((c, i) => (
-                <div key={c.name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.625rem', color: '#424242', borderBottom: '1px dotted #EEEEEE', paddingBottom: '0.125rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                    <span style={{ width: '8px', height: '8px', backgroundColor: categoryColors[i], display: 'inline-block', borderRadius: '1px', flexShrink: 0 }} />
-                    {c.name.length > 20 ? c.name.slice(0, 20) + '…' : c.name}
+                <div key={c.name} className="flex justify-between text-[11px] text-slate-600 border-b border-gray-100 border-dashed pb-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-[2px]" style={{ backgroundColor: categoryColors[i] }} />
+                    <span className="font-medium">{c.name.length > 20 ? c.name.slice(0, 20) + '…' : c.name}</span>
                   </div>
-                  <strong>{((c.value / total) * 100).toFixed(1)}%</strong>
+                  <strong className="text-slate-800">{((c.value / total) * 100).toFixed(1)}%</strong>
                 </div>
               ))}
             </div>
@@ -224,26 +212,32 @@ export const CrimeAnalyticsPage = () => {
         </div>
 
         {/* FIR Status Summary Table */}
-        <div style={cardStyle}>
+        <div className="bg-white border border-gray-200 rounded-[16px] shadow-sm flex flex-col">
           {cardHeader('District-wise FIR Summary')}
-          <div style={{ overflow: 'auto', maxHeight: '270px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.6875rem' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#F5F5F5', position: 'sticky', top: 0 }}>
+          <div className="overflow-x-auto overflow-y-auto max-h-[270px]">
+            <table className="w-full text-left text-[12px] border-collapse">
+              <thead className="bg-slate-50 sticky top-0 border-b border-gray-200 shadow-sm z-10">
+                <tr>
                   {['District', 'Total', 'Solved', 'Active', 'Rate%'].map(h => (
-                    <th key={h} style={{ padding: '0.5rem 0.625rem', textAlign: h === 'District' ? 'left' : 'right', fontWeight: 700, color: '#424242', borderBottom: `2px solid ${GOV_TEAL}`, whiteSpace: 'nowrap' }}>{h}</th>
+                    <th key={h} className={`px-2 lg:px-3 py-2 font-extrabold text-slate-600 uppercase tracking-widest text-[10px] whitespace-nowrap ${h !== 'District' ? 'text-right' : ''}`}>
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
-              <tbody>
-                {districtCrimeDistribution.map((d, i) => (
-                  <tr key={d.district} style={{ backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#FAFAFA' }}>
-                    <td style={{ padding: '0.4rem 0.625rem', color: '#212121', fontWeight: 500 }}>{d.district}</td>
-                    <td style={{ padding: '0.4rem 0.625rem', textAlign: 'right', fontWeight: 700, color: GOV_BLUE }}>{d.total}</td>
-                    <td style={{ padding: '0.4rem 0.625rem', textAlign: 'right', color: GOV_GREEN, fontWeight: 600 }}>{d.solved}</td>
-                    <td style={{ padding: '0.4rem 0.625rem', textAlign: 'right', color: '#E65100' }}>{d.active}</td>
-                    <td style={{ padding: '0.4rem 0.625rem', textAlign: 'right' }}>
-                      <span style={{ backgroundColor: d.rate >= 80 ? '#E8F5E9' : d.rate >= 75 ? '#FFF8E1' : '#FFEBEE', color: d.rate >= 80 ? GOV_GREEN : d.rate >= 75 ? '#E65100' : GOV_RED, padding: '0.0625rem 0.375rem', borderRadius: '2px', fontWeight: 700 }}>
+              <tbody className="divide-y divide-gray-100 bg-white">
+                {districtCrimeDistribution.map((d) => (
+                  <tr key={d.district} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-2 lg:px-3 py-2 font-bold text-slate-800 whitespace-nowrap">{d.district}</td>
+                    <td className="px-2 lg:px-3 py-2 text-right font-extrabold text-blue-600">{d.total}</td>
+                    <td className="px-2 lg:px-3 py-2 text-right font-extrabold text-emerald-600">{d.solved}</td>
+                    <td className="px-2 lg:px-3 py-2 text-right font-extrabold text-amber-600">{d.active}</td>
+                    <td className="px-2 lg:px-3 py-2 text-right">
+                      <span className={`px-1.5 py-0.5 rounded-[4px] font-bold whitespace-nowrap ${
+                        d.rate >= 80 ? 'bg-emerald-50 text-emerald-700' :
+                        d.rate >= 75 ? 'bg-amber-50 text-amber-700' :
+                        'bg-red-50 text-red-700'
+                      }`}>
                         {d.rate}%
                       </span>
                     </td>
@@ -256,47 +250,43 @@ export const CrimeAnalyticsPage = () => {
       </div>
 
       {/* ── Row 3: Monthly Trend + Institution vs Disposal ───────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-        {/* Monthly Crime Trend (line chart — NJDG style) */}
-        <div style={cardStyle}>
+        {/* Monthly Crime Trend */}
+        <div className="bg-white border border-gray-200 rounded-[16px] shadow-sm">
           {cardHeader('Monthly FIR Trend — Registered vs Solved')}
-          <div style={{ padding: '0.75rem' }}>
-            <ResponsiveContainer width="100%" height={200}>
+          <div className="p-4">
+            <ResponsiveContainer width="100%" height={220}>
               <ComposedChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EEEEEE" />
-                <XAxis dataKey="month" tick={{ fontSize: 9, fill: '#616161' }} />
-                <YAxis tick={{ fontSize: 9, fill: '#616161' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<GovTooltip />} />
-                <Legend iconSize={10} wrapperStyle={{ fontSize: '0.625rem', paddingTop: '0.25rem' }} />
-                <Bar dataKey="firs" name="FIRs Registered" fill={GOV_BLUE} radius={[2, 2, 0, 0]} fillOpacity={0.85}>
-                  <LabelList dataKey="firs" position="top" style={{ fontSize: 8, fill: GOV_BLUE, fontWeight: 700 }} />
+                <Legend iconSize={10} wrapperStyle={{ fontSize: '11px', fontWeight: 600, paddingTop: '10px' }} />
+                <Bar dataKey="firs" name="FIRs Registered" fill={GOV_BLUE} radius={[4, 4, 0, 0]} barSize={30}>
+                  <LabelList dataKey="firs" position="top" style={{ fontSize: 10, fill: GOV_BLUE, fontWeight: 700 }} />
                 </Bar>
-                <Line type="monotone" dataKey="solved" name="Cases Solved" stroke={GOV_TEAL} strokeWidth={2.5} dot={{ r: 3, fill: GOV_TEAL }} activeDot={{ r: 5 }}>
-                  <LabelList dataKey="solved" position="top" style={{ fontSize: 7, fill: GOV_TEAL, fontWeight: 600 }} />
+                <Line type="monotone" dataKey="solved" name="Cases Solved" stroke={GOV_TEAL} strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6 }}>
+                  <LabelList dataKey="solved" position="top" style={{ fontSize: 10, fill: GOV_TEAL, fontWeight: 700 }} />
                 </Line>
               </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Institution vs Disposal (NJDG style) */}
-        <div style={cardStyle}>
+        {/* Institution vs Disposal */}
+        <div className="bg-white border border-gray-200 rounded-[16px] shadow-sm">
           {cardHeader('Institution vs. Disposal — Year on Year')}
-          <div style={{ padding: '0.75rem' }}>
-            <ResponsiveContainer width="100%" height={200}>
+          <div className="p-4">
+            <ResponsiveContainer width="100%" height={220}>
               <ComposedChart data={ivdData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EEEEEE" />
-                <XAxis dataKey="period" tick={{ fontSize: 9, fill: '#616161' }} />
-                <YAxis tick={{ fontSize: 9, fill: '#616161' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="period" tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<GovTooltip />} />
-                <Legend iconSize={10} wrapperStyle={{ fontSize: '0.625rem', paddingTop: '0.25rem' }} />
-                <Area type="monotone" dataKey="instituted" name="Instituted" fill="#BBDEFB" stroke={GOV_BLUE} strokeWidth={2} fillOpacity={0.5} dot={{ r: 3, fill: GOV_BLUE }}>
-                  <LabelList dataKey="instituted" position="top" style={{ fontSize: 8, fill: GOV_BLUE, fontWeight: 700 }} />
-                </Area>
-                <Line type="monotone" dataKey="disposed" name="Disposed" stroke={GOV_RED} strokeWidth={2.5} strokeDasharray="5 3" dot={{ r: 3, fill: GOV_RED }}>
-                  <LabelList dataKey="disposed" position="top" style={{ fontSize: 8, fill: GOV_RED, fontWeight: 700 }} />
-                </Line>
+                <Legend iconSize={10} wrapperStyle={{ fontSize: '11px', fontWeight: 600, paddingTop: '10px' }} />
+                <Area type="monotone" dataKey="instituted" name="Instituted" fill="#eff6ff" stroke={GOV_BLUE} strokeWidth={2} fillOpacity={1} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} />
+                <Line type="monotone" dataKey="disposed" name="Disposed" stroke={GOV_RED} strokeWidth={3} strokeDasharray="5 5" dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -304,23 +294,23 @@ export const CrimeAnalyticsPage = () => {
       </div>
 
       {/* ── Row 4: Top Districts Bar + AI Forecast ───────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-        {/* Top Districts — Horizontal Bar (NeGD style) */}
-        <div style={cardStyle}>
+        {/* Top Districts */}
+        <div className="bg-white border border-gray-200 rounded-[16px] shadow-sm">
           {cardHeader('Top Districts by Total FIRs')}
-          <div style={{ padding: '0.75rem' }}>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart layout="vertical" data={districtBar} margin={{ top: 0, right: 50, left: 10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EEEEEE" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 9, fill: '#616161' }} />
-                <YAxis dataKey="name" type="category" tick={{ fontSize: 9, fill: '#424242' }} width={80} />
+          <div className="p-4">
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart layout="vertical" data={districtBar} margin={{ top: 0, right: 30, left: 20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#334155', fontWeight: 600 }} axisLine={false} tickLine={false} width={90} />
                 <Tooltip content={<GovTooltip />} />
-                <Bar dataKey="total" name="Total FIRs" fill={GOV_STEEL} radius={[0, 2, 2, 0]}>
-                  <LabelList dataKey="total" position="right" style={{ fontSize: 9, fill: '#424242', fontWeight: 700 }} />
+                <Bar dataKey="total" name="Total FIRs" fill={GOV_STEEL} radius={[0, 4, 4, 0]} barSize={12}>
+                  <LabelList dataKey="total" position="right" style={{ fontSize: 10, fill: GOV_STEEL, fontWeight: 700 }} />
                 </Bar>
-                <Bar dataKey="solved" name="Solved" fill={GOV_TEAL} radius={[0, 2, 2, 0]}>
-                  <LabelList dataKey="solved" position="right" style={{ fontSize: 9, fill: '#424242', fontWeight: 700 }} />
+                <Bar dataKey="solved" name="Solved" fill={GOV_TEAL} radius={[0, 4, 4, 0]} barSize={12}>
+                  <LabelList dataKey="solved" position="right" style={{ fontSize: 10, fill: GOV_TEAL, fontWeight: 700 }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -328,21 +318,21 @@ export const CrimeAnalyticsPage = () => {
         </div>
 
         {/* AI Forecast Chart */}
-        <div style={cardStyle}>
+        <div className="bg-white border border-gray-200 rounded-[16px] shadow-sm">
           {cardHeader('AI Predictive Forecast — FIR Volume (3-Month Projection)')}
-          <div style={{ padding: '0.75rem' }}>
-            <ResponsiveContainer width="100%" height={220}>
+          <div className="p-4">
+            <ResponsiveContainer width="100%" height={240}>
               <ComposedChart data={aiForecastData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EEEEEE" />
-                <XAxis dataKey="month" tick={{ fontSize: 8, fill: '#616161' }} angle={-15} textAnchor="end" height={35} />
-                <YAxis tick={{ fontSize: 9, fill: '#616161' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<GovTooltip />} />
-                <Legend iconSize={10} wrapperStyle={{ fontSize: '0.625rem' }} />
-                <Bar dataKey="actual" name="Actual FIRs" fill={GOV_BLUE} radius={[2, 2, 0, 0]} fillOpacity={0.9}>
-                  <LabelList dataKey="actual" position="top" style={{ fontSize: 8, fill: GOV_BLUE, fontWeight: 700 }} formatter={(v) => v ?? ''} />
+                <Legend iconSize={10} wrapperStyle={{ fontSize: '11px', fontWeight: 600, paddingTop: '10px' }} />
+                <Bar dataKey="actual" name="Actual FIRs" fill={GOV_BLUE} radius={[4, 4, 0, 0]} barSize={30}>
+                  <LabelList dataKey="actual" position="top" style={{ fontSize: 10, fill: GOV_BLUE, fontWeight: 700 }} formatter={(v) => v ?? ''} />
                 </Bar>
-                <Line type="monotone" dataKey="predicted" name="AI Prediction" stroke={GOV_AMBER} strokeWidth={2.5} strokeDasharray="6 3" dot={{ r: 4, fill: GOV_AMBER, stroke: '#FFF', strokeWidth: 2 }}>
-                  <LabelList dataKey="predicted" position="top" style={{ fontSize: 8, fill: GOV_AMBER, fontWeight: 700 }} />
+                <Line type="monotone" dataKey="predicted" name="AI Prediction" stroke={GOV_AMBER} strokeWidth={3} strokeDasharray="6 6" dot={{ r: 4, strokeWidth: 2, fill: '#fff' }}>
+                  <LabelList dataKey="predicted" position="top" style={{ fontSize: 10, fill: GOV_AMBER, fontWeight: 700 }} />
                 </Line>
               </ComposedChart>
             </ResponsiveContainer>
@@ -351,34 +341,49 @@ export const CrimeAnalyticsPage = () => {
       </div>
 
       {/* ── Row 5: Syndicate Risk Table ──────────────────────────────── */}
-      <div style={cardStyle}>
+      <div className="bg-white border border-gray-200 rounded-[16px] shadow-sm overflow-hidden">
         {cardHeader('Organized Crime Syndicate Risk Index — Active Networks')}
-        <div style={{ padding: '0.5rem' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#1A3A5C' }}>
-                {['#', 'Syndicate / Ring Name', 'Active Members', 'Linked FIRs', 'Risk Score', 'Risk Level'].map(h => (
-                  <th key={h} style={{ padding: '0.5rem 0.75rem', textAlign: h === '#' || h === 'Syndicate / Ring Name' ? 'left' : 'center', fontWeight: 700, color: '#FFFFFF', fontSize: '0.6875rem', letterSpacing: '0.03em' }}>{h}</th>
-                ))}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-[13px]">
+            <thead className="bg-slate-50 border-b border-gray-200 text-[11px] uppercase tracking-widest text-slate-500 font-extrabold">
+              <tr>
+                <th className="px-6 py-4">#</th>
+                <th className="px-6 py-4">Syndicate / Ring Name</th>
+                <th className="px-6 py-4 text-center">Active Members</th>
+                <th className="px-6 py-4 text-center">Linked FIRs</th>
+                <th className="px-6 py-4 text-center">Risk Score</th>
+                <th className="px-6 py-4 text-center">Risk Level</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-100 bg-white">
               {syndicateTable.map((s, i) => (
-                <tr key={s.gang} style={{ backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F5F9FF', borderBottom: `1px solid ${border}` }}>
-                  <td style={{ padding: '0.5rem 0.75rem', color: '#9E9E9E', fontWeight: 600, fontSize: '0.625rem' }}>{i + 1}</td>
-                  <td style={{ padding: '0.5rem 0.75rem', fontWeight: 700, color: '#212121' }}>{s.gang}</td>
-                  <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 600, color: GOV_BLUE }}>{s.activeMembers}</td>
-                  <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700, color: '#1A3A5C' }}>{s.linkedFirs}</td>
-                  <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                      <div style={{ flex: 1, maxWidth: '80px', height: '6px', backgroundColor: '#E0E0E0', borderRadius: '9999px', overflow: 'hidden' }}>
-                        <div style={{ width: `${s.riskScore}%`, height: '100%', backgroundColor: s.riskScore >= 90 ? GOV_RED : s.riskScore >= 80 ? GOV_AMBER : '#F9A825', borderRadius: '9999px' }} />
+                <tr key={s.gang} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-6 py-4 font-bold text-slate-400">{i + 1}</td>
+                  <td className="px-6 py-4 font-extrabold text-slate-800">{s.gang}</td>
+                  <td className="px-6 py-4 text-center font-bold text-blue-600">{s.activeMembers}</td>
+                  <td className="px-6 py-4 text-center font-bold text-slate-700">{s.linkedFirs}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="flex-1 max-w-[100px] h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ 
+                            width: `${s.riskScore}%`,
+                            backgroundColor: s.riskScore >= 90 ? GOV_RED : s.riskScore >= 80 ? GOV_AMBER : '#eab308' 
+                          }}
+                        />
                       </div>
-                      <strong style={{ color: s.riskScore >= 90 ? GOV_RED : s.riskScore >= 80 ? GOV_AMBER : '#F9A825', fontSize: '0.75rem' }}>{s.riskScore}</strong>
+                      <strong className={`text-[13px] ${s.riskScore >= 90 ? 'text-red-600' : s.riskScore >= 80 ? 'text-amber-600' : 'text-yellow-600'}`}>
+                        {s.riskScore}
+                      </strong>
                     </div>
                   </td>
-                  <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
-                    <span style={{ padding: '0.125rem 0.5rem', borderRadius: '2px', fontWeight: 700, fontSize: '0.625rem', backgroundColor: s.riskScore >= 90 ? '#FFEBEE' : s.riskScore >= 80 ? '#FFF8E1' : '#F3F4F6', color: s.riskScore >= 90 ? GOV_RED : s.riskScore >= 80 ? GOV_AMBER : '#616161' }}>
+                  <td className="px-6 py-4 text-center">
+                    <span className={`px-3 py-1 text-[11px] font-extrabold rounded-full ${
+                      s.riskScore >= 90 ? 'bg-red-50 text-red-700 border border-red-200' : 
+                      s.riskScore >= 80 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 
+                      'bg-slate-50 text-slate-600 border border-slate-200'
+                    }`}>
                       {s.riskScore >= 90 ? '🔴 CRITICAL' : s.riskScore >= 80 ? '🟠 HIGH' : '🟡 MEDIUM'}
                     </span>
                   </td>
@@ -387,29 +392,6 @@ export const CrimeAnalyticsPage = () => {
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* ── Row 6: Offense Type Breakdown — Small summary stats ─────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.625rem' }}>
-        {[
-          { label: 'Instituted This Month', items: [{ k: 'Cyber', v: 48 }, { k: 'Property', v: 29 }, { k: 'Violent', v: 18 }, { k: 'Total', v: 95 }] },
-          { label: 'Disposed This Month', items: [{ k: 'Cyber', v: 41 }, { k: 'Property', v: 24 }, { k: 'Violent', v: 14 }, { k: 'Total', v: 79 }] },
-          { label: 'Disposal Rate (Current Year)', items: [{ k: 'Cyber', v: '79.2%' }, { k: 'Property', v: '85.8%' }, { k: 'Violent', v: '75.0%' }, { k: 'Overall', v: '83.7%' }] },
-        ].map(section => (
-          <div key={section.label} style={cardStyle}>
-            <div style={{ backgroundColor: GOV_TEAL, padding: '0.375rem 0.875rem' }}>
-              <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#FFFFFF' }}>{section.label}</div>
-            </div>
-            <div style={{ padding: '0.5rem 0' }}>
-              {section.items.map((item, i) => (
-                <div key={item.k} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.375rem 0.875rem', borderBottom: i < section.items.length - 1 ? `1px solid ${border}` : 'none', backgroundColor: item.k === 'Total' || item.k === 'Overall' ? '#F0F4FF' : '#FFF' }}>
-                  <span style={{ fontSize: '0.75rem', color: '#424242', fontWeight: item.k === 'Total' || item.k === 'Overall' ? 700 : 400 }}>{item.k}</span>
-                  <strong style={{ fontSize: '0.875rem', color: item.k === 'Total' || item.k === 'Overall' ? GOV_BLUE : '#212121' }}>{item.v}</strong>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
       </div>
 
     </div>

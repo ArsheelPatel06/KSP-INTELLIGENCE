@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { CrimeMapComponent } from '../components/map/CrimeMapComponent';
-import { Badge } from '../components/common/Badge';
+import { MapPin } from 'lucide-react';
 
 export const CrimeMapPage = () => {
   const { firs } = useApp();
@@ -18,32 +18,35 @@ export const CrimeMapPage = () => {
   });
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="flex flex-col gap-5 pb-8 animate-fade-in font-sans h-full">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0A0A0A] border border-[#27272A] rounded-xl p-5 shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-200 rounded-[18px] p-6 shadow-sm shrink-0">
         <div>
-          <h1 className="text-xl font-extrabold text-white">Geospatial Crime Hotspots & GIS Map</h1>
-          <p className="text-xs text-zinc-400 mt-1">
+          <h1 className="text-[22px] font-extrabold text-slate-900 flex items-center gap-2">
+            <MapPin size={24} className="text-blue-600" />
+            Geospatial Crime Hotspots &amp; GIS Map
+          </h1>
+          <p className="text-[14px] text-slate-500 mt-1 font-medium">
             Real-time geospatial plotting, heatmaps, and police station boundaries across Karnataka state.
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Badge variant="cyan" size="md">
+        <div className="flex items-center gap-2">
+          <span className="px-3 py-1.5 rounded-[8px] bg-blue-50 border border-blue-200 text-blue-700 text-[12px] font-extrabold uppercase tracking-widest">
             {filteredFirs.length} Incidents Plotted
-          </Badge>
+          </span>
         </div>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-xl p-4 shadow-xl grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="bg-white border border-gray-200 rounded-[18px] p-6 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-5 shrink-0">
         <div>
-          <label className="block text-[11px] font-extrabold uppercase tracking-wider text-zinc-400 mb-1">
+          <label className="block text-[12px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">
             Filter District
           </label>
           <select
             value={selectedDistrict}
             onChange={(e) => setSelectedDistrict(e.target.value)}
-            className="w-full bg-[#000000] border border-[#27272A] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-semibold"
+            className="w-full h-11 px-4 rounded-[12px] border border-gray-200 bg-slate-50 text-[14px] font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white transition-all appearance-none cursor-pointer"
           >
             <option value="All">All Karnataka Districts (10)</option>
             <option value="Bengaluru Urban">Bengaluru Urban</option>
@@ -55,13 +58,13 @@ export const CrimeMapPage = () => {
         </div>
 
         <div>
-          <label className="block text-[11px] font-extrabold uppercase tracking-wider text-zinc-400 mb-1">
+          <label className="block text-[12px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">
             Offense Type
           </label>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full bg-[#000000] border border-[#27272A] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-semibold"
+            className="w-full h-11 px-4 rounded-[12px] border border-gray-200 bg-slate-50 text-[14px] font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white transition-all appearance-none cursor-pointer"
           >
             <option value="All">All Offense Categories</option>
             <option value="Cyber Financial Fraud">Cyber Financial Fraud</option>
@@ -72,13 +75,13 @@ export const CrimeMapPage = () => {
         </div>
 
         <div>
-          <label className="block text-[11px] font-extrabold uppercase tracking-wider text-zinc-400 mb-1">
+          <label className="block text-[12px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">
             Severity Level
           </label>
           <select
             value={selectedPriority}
             onChange={(e) => setSelectedPriority(e.target.value)}
-            className="w-full bg-[#000000] border border-[#27272A] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-semibold"
+            className="w-full h-11 px-4 rounded-[12px] border border-gray-200 bg-slate-50 text-[14px] font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white transition-all appearance-none cursor-pointer"
           >
             <option value="All">All Severities</option>
             <option value="Critical">Critical</option>
@@ -89,7 +92,9 @@ export const CrimeMapPage = () => {
       </div>
 
       {/* Main Map Component */}
-      <CrimeMapComponent firs={filteredFirs} selectedDistrict={selectedDistrict} />
+      <div className="flex-1 bg-white border border-gray-200 rounded-[18px] shadow-sm overflow-hidden min-h-[500px]">
+        <CrimeMapComponent firs={filteredFirs} selectedDistrict={selectedDistrict} />
+      </div>
     </div>
   );
 };

@@ -1,0 +1,136 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOBAL CARD UTILITY CLASS
+   ═══════════════════════════════════════════════════════════════════════════ */
+.t-card {
+  background-color: var(--t-bg-card);
+  border: 1px solid var(--t-border);
+  border-radius: 0.5rem;
+  color: var(--t-text-primary);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.t-card-alt {
+  background-color: var(--t-bg-card-alt);
+  border: 1px solid var(--t-border);
+  border-radius: 0.5rem;
+}
+
+.t-input {
+  background-color: var(--t-bg-input);
+  border: 1px solid var(--t-border);
+  color: var(--t-text-primary);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+  width: 100%;
+}
+.t-input:focus { border-color: var(--t-accent); }
+
+.t-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--t-text-secondary);
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR — theme-aware
+   ═══════════════════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--t-scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--t-scrollbar-thumb); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--t-accent); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEAFLET MAP — theme aware
+   ═══════════════════════════════════════════════════════════════════════════ */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: var(--t-bg-card) !important;
+  border-radius: 0.75rem;
+}
+
+html[data-theme="dark"] .leaflet-container  { background: #000000 !important; }
+html[data-theme="dark"] .leaflet-tile-pane  { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(1.1); }
+
+.leaflet-popup-content-wrapper {
+  background: var(--t-bg-card) !important;
+  color: var(--t-text-primary) !important;
+  border: 1px solid var(--t-border) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
+}
+.leaflet-popup-tip { background: var(--t-bg-card) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REACT FLOW — theme aware
+   ═══════════════════════════════════════════════════════════════════════════ */
+.react-flow__node   { border-radius: 0.5rem; }
+.react-flow__background { background-color: var(--t-bg-page) !important; }
+
+html[data-theme="light"] .react-flow__edge-path { stroke: #94A3B8; }
+html[data-theme="dark"]  .react-flow__edge-path { stroke: #334155; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DATA TABLE — global theme & Modern Data Grids
+   ═══════════════════════════════════════════════════════════════════════════ */
+.t-table {
+  background-color: var(--t-bg-card);
+  color: var(--t-text-primary);
+  border-color: var(--t-border);
+  width: 100%;
+  border-collapse: collapse;
+}
+.t-table th {
+  background-color: var(--t-bg-card-alt);
+  color: var(--t-text-secondary);
+  border-bottom: 2px solid var(--t-border);
+  padding: 0.625rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
+}
+.t-table th:hover {
+  background-color: var(--t-bg-hover);
+}
+.t-table td {
+  border-bottom: 1px solid var(--t-border);
+  padding: 0.625rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--t-text-primary);
+  transition: background-color 0.15s ease;
+}
+.t-table tr {
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+}
+.t-table tr:hover td { 
+  background-color: var(--t-bg-hover); 
+}
+.t-table tr.selected td {
+  background-color: var(--t-accent-soft);
+}
+.t-table-resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  background-color: transparent;
+  transition: background-color 0.15s;
+}
+.t-table-resizer:hover, .t-table-resizer.isResizing {
+  background-color: var(--t-accent);
+}

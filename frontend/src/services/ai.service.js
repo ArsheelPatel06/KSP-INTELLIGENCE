@@ -14,7 +14,7 @@ export const aiService = {
       if (threadId) payload.threadId = threadId;
       if (caseMasterId) payload.caseMasterId = caseMasterId;
 
-      const response = await api.post('/ai/query', payload);
+      const response = await api.post('/copilot/query', payload);
       
       // Backend returns: { status: 'success', threadId, data: { payload: { ... } } }
       return response.data;
@@ -25,12 +25,12 @@ export const aiService = {
   },
 
   /**
-   * Check the health of the local AI provider (Ollama)
+   * Check the health of the local AI provider (Sentinel)
    * @returns {Promise<boolean>}
    */
   checkHealth: async () => {
     try {
-      const response = await api.get('/ai/health');
+      const response = await api.get('/copilot/health');
       return response.data?.status === 'ok';
     } catch (error) {
       return false;

@@ -72,7 +72,7 @@ export const mockUsers = [
 export const mockSystemHealth = {
   apiLatency: "24 ms",
   uptime: "99.98%",
-  aiModelStatus: "Operational (Llama-3-70B-Crime-FineTuned)",
+  aiModelStatus: "Operational (Sentinel-AI-70B-Crime-FineTuned)",
   vectorDbDocs: "1,000 FIR Records / 14,200 Entities",
   serverLoad: "32% CPU / 4.2 GB RAM",
   activeSessions: 42,

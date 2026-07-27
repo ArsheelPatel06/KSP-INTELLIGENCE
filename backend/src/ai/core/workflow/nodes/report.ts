@@ -1,7 +1,7 @@
 import type { typeofAiGraphState } from '../state';
 import { aiLogger } from '../../../shared/ai-logger';
 import { OllamaProvider } from '../../../providers/ollama-provider';
-import { promptManager } from '../../prompts/prompt-manager';
+import { promptManager } from '../../../prompts/prompt-manager';
 
 export async function reportAgentNode(state: typeofAiGraphState): Promise<Partial<typeofAiGraphState>> {
   aiLogger.info('Executing Report Agent to generate PDF-ready Markdown', state.context);

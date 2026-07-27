@@ -4,7 +4,7 @@ import { OllamaProvider } from '../../../providers/ollama-provider';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
-import { promptManager } from '../../prompts/prompt-manager';
+import { promptManager } from '../../../prompts/prompt-manager';
 
 const ConfidenceSchema = z.object({
   score: z.number().min(0).max(100).describe('Overall confidence score of the generated response from 0 to 100'),
@@ -16,7 +16,7 @@ export async function confidenceScoringNode(state: typeof AiGraphState.State): P
     return { overallConfidence: 0 };
   }
 
-  const llm = new OllamaProvider('llama3.1');
+  const llm = new OllamaProvider();
   const evidenceText = state.evidence.map(e => `Agent: ${e.sourceAgent}\nFacts: ${e.facts.join(', ')}\nCitations: ${e.citations.length}`).join('\n\n');
   const conflictsText = state.resolvedConflicts?.join('\n') || 'None';
 
@@ -26,12 +26,14 @@ export async function confidenceScoringNode(state: typeof AiGraphState.State): P
       conflictsText: conflictsText
     });
 
-    const response = await llm.generateStructured(
+    const response = await llm.generateStructuredJson(
       [
-        new SystemMessage(systemPromptStr),
-        new HumanMessage(`Evidence:\n${evidenceText}\n\nResolved Conflicts:\n${conflictsText}`)
+        { role: 'system', content: systemPromptStr },
+        { role: 'user', content: `Evidence:\n${evidenceText}\n\nResolved Conflicts:\n${conflictsText}` }
       ],
-      zodToJsonSchema(ConfidenceSchema)
+      zodToJsonSchema(ConfidenceSchema) as Record<string, unknown>,
+      { model: 'llama3.1' },
+      state.context
     );
 
     const parsed = ConfidenceSchema.parse(response.data);

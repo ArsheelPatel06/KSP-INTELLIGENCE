@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Bell, ShieldAlert, CheckCircle2, ExternalLink } from 'lucide-react';
-import { Badge } from '../components/common/Badge';
+import { Btn } from '../components/common/ButtonSystem';
 
 export const NotificationsPage = () => {
   const { notifications, markNotificationRead, markAllNotificationsRead } = useApp();
@@ -16,45 +16,40 @@ export const NotificationsPage = () => {
   });
 
   const severityColor = (sev) => ({
-    Critical: { bg: 'rgba(239,68,68,0.12)', color: '#EF4444', border: 'rgba(239,68,68,0.3)' },
-    High:     { bg: 'rgba(245,158,11,0.12)', color: '#F59E0B', border: 'rgba(245,158,11,0.3)' },
-    Medium:   { bg: 'rgba(59,130,246,0.12)', color: '#3B82F6', border: 'rgba(59,130,246,0.3)' },
-  }[sev] || { bg: 'rgba(100,116,139,0.1)', color: '#64748B', border: 'rgba(100,116,139,0.2)' });
+    Critical: { bg: 'bg-red-50', color: 'text-red-600', border: 'border-red-200' },
+    High:     { bg: 'bg-orange-50', color: 'text-orange-600', border: 'border-orange-200' },
+    Medium:   { bg: 'bg-blue-50', color: 'text-blue-600', border: 'border-blue-200' },
+  }[sev] || { bg: 'bg-slate-50', color: 'text-slate-500', border: 'border-slate-200' });
 
   return (
-    <div style={{ maxWidth: '56rem', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+    <div className="max-w-4xl mx-auto flex flex-col gap-5 pb-8 animate-fade-in font-sans">
       {/* Header */}
-      <div className="t-card" style={{ padding: '1.25rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', borderRadius: '0.75rem' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-200 rounded-[18px] p-6 shadow-sm">
         <div>
-          <h1 style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--t-text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Bell size={20} style={{ color: '#3B82F6' }} />
+          <h1 className="text-[22px] font-extrabold text-slate-900 flex items-center gap-2">
+            <Bell size={24} className="text-blue-600" />
             Alerts &amp; Real-time Intelligence Feed
           </h1>
-          <p style={{ fontSize: '0.75rem', color: 'var(--t-text-secondary)', marginTop: '0.25rem' }}>
+          <p className="text-[14px] text-slate-500 mt-1 font-medium">
             Automated notifications for high priority matches, crime spikes, and AI link analysis.
           </p>
         </div>
-        <button
-          onClick={markAllNotificationsRead}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', backgroundColor: 'rgba(59,130,246,0.1)', color: '#3B82F6', border: '1px solid rgba(59,130,246,0.3)', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
-        >
-          <CheckCircle2 size={14} /> Mark All as Read
-        </button>
+        <Btn variant="secondary" size="sm" icon={CheckCircle2} onClick={markAllNotificationsRead}>
+          Mark All as Read
+        </Btn>
       </div>
 
       {/* Filter Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--t-border)', paddingBottom: '0.75rem', flexWrap: 'wrap' }}>
+      <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-4">
         {['All', 'Unread', 'Critical', 'High', 'Medium'].map((sev) => (
           <button
             key={sev}
             onClick={() => setFilterSeverity(sev)}
-            style={{
-              padding: '0.375rem 0.875rem', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', border: '1px solid',
-              backgroundColor: filterSeverity === sev ? '#1E3A8A' : 'var(--t-bg-card-alt)',
-              color: filterSeverity === sev ? '#FFFFFF' : 'var(--t-text-secondary)',
-              borderColor: filterSeverity === sev ? '#1E3A8A' : 'var(--t-border)',
-              transition: 'all 0.15s'
-            }}
+            className={`px-4 py-2 rounded-[10px] text-[13px] font-bold transition-all border ${
+              filterSeverity === sev 
+                ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
+                : 'bg-white text-slate-600 border-gray-200 hover:border-blue-300 hover:text-blue-700'
+            }`}
           >
             {sev} Alerts
           </button>
@@ -62,7 +57,7 @@ export const NotificationsPage = () => {
       </div>
 
       {/* Notifications List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div className="flex flex-col gap-3">
         {filteredNotifications.length > 0 ? (
           filteredNotifications.map((notif) => {
             const sc = severityColor(notif.severity);
@@ -70,36 +65,38 @@ export const NotificationsPage = () => {
               <div
                 key={notif.id}
                 onClick={() => { markNotificationRead(notif.id); if (notif.link) navigate(notif.link); }}
-                style={{
-                  display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem',
-                  padding: '1rem', borderRadius: '0.75rem', cursor: 'pointer',
-                  backgroundColor: notif.read ? 'var(--t-bg-card-alt)' : 'var(--t-bg-card)',
-                  border: `1px solid ${notif.read ? 'var(--t-border)' : 'rgba(59,130,246,0.35)'}`,
-                  boxShadow: notif.read ? 'none' : '0 0 0 1px rgba(59,130,246,0.1)',
-                  transition: 'all 0.15s', opacity: notif.read ? 0.75 : 1
-                }}
+                className={`flex items-start justify-between gap-4 p-5 rounded-[16px] cursor-pointer transition-all ${
+                  notif.read 
+                    ? 'bg-slate-50/50 border border-transparent hover:bg-slate-50' 
+                    : 'bg-white border border-blue-200 shadow-[0_0_0_1px_rgba(59,130,246,0.1)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:-translate-y-[1px]'
+                }`}
+                style={{ opacity: notif.read ? 0.75 : 1 }}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.875rem' }}>
-                  <div style={{ padding: '0.625rem', borderRadius: '0.5rem', backgroundColor: sc.bg, color: sc.color, border: `1px solid ${sc.border}`, flexShrink: 0 }}>
-                    <ShieldAlert size={18} />
+                <div className="flex items-start gap-4">
+                  <div className={`p-3 rounded-[12px] border flex-shrink-0 ${sc.bg} ${sc.color} ${sc.border}`}>
+                    <ShieldAlert size={20} />
                   </div>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--t-text-primary)' }}>{notif.title}</span>
-                      <Badge variant={notif.severity === 'Critical' ? 'danger' : notif.severity === 'High' ? 'warning' : 'primary'}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="font-extrabold text-[15px] text-slate-900">{notif.title}</span>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-widest uppercase border ${
+                        notif.severity === 'Critical' ? 'bg-red-50 text-red-700 border-red-200' :
+                        notif.severity === 'High' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                        'bg-blue-50 text-blue-700 border-blue-200'
+                      }`}>
                         {notif.category}
-                      </Badge>
+                      </span>
                     </div>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--t-text-secondary)', lineHeight: 1.6 }}>{notif.message}</p>
-                    <span style={{ fontSize: '0.625rem', color: 'var(--t-text-muted)', marginTop: '0.5rem', display: 'block', fontFamily: 'monospace' }}>{notif.timestamp}</span>
+                    <p className="text-[13px] text-slate-600 font-medium leading-relaxed max-w-2xl">{notif.message}</p>
+                    <span className="text-[11px] text-slate-400 font-bold mt-2 block font-mono">{notif.timestamp}</span>
                   </div>
                 </div>
-                <ExternalLink size={16} style={{ color: '#3B82F6', flexShrink: 0 }} />
+                <ExternalLink size={18} className="text-slate-300 flex-shrink-0 mt-1" />
               </div>
             );
           })
         ) : (
-          <div className="t-card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--t-text-muted)', fontSize: '0.875rem', borderRadius: '0.75rem' }}>
+          <div className="bg-white border border-gray-200 text-center p-12 text-slate-500 font-bold text-[14px] rounded-[18px]">
             No matching notifications found.
           </div>
         )}

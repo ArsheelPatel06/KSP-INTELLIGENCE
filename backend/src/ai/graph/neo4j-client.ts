@@ -1,5 +1,5 @@
 import neo4j, { Driver, Session, SessionMode } from 'neo4j-driver';
-import { logger } from '../../../core/logger/logger';
+import { logger } from '../../core/logger/logger';
 
 export class Neo4jClient {
   private static instance: Neo4jClient;

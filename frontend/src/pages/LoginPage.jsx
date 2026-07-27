@@ -7,8 +7,8 @@ export const LoginPage = () => {
   const { login, error } = useAuth();
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState('officer.vikram');
-  const [password, setPassword] = useState('••••••••••••');
+  const [username, setUsername] = useState('KSP-12345');
+  const [password, setPassword] = useState('Password123!');
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState('Investigator');
 
@@ -63,8 +63,10 @@ export const LoginPage = () => {
               <User size={18} className="ux4g-absolute ux4g-left-3 ux4g-top-1/2 -ux4g-translate-y-1/2 ux4g-text-neutral-400" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#A1A1AA' }} />
               <input 
                 type="text" 
+                id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
                 required
                 className="ux4g-w-full ux4g-p-s ux4g-pl-10 ux4g-border ux4g-border-neutral-300 ux4g-rounded ux4g-text-neutral-900 focus:ux4g-ring-2 focus:ux4g-ring-primary-500" 
                 style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', border: '1px solid #D4D4D8', borderRadius: '0.25rem', color: '#18181B', backgroundColor: '#FFF' }}
@@ -78,8 +80,10 @@ export const LoginPage = () => {
               <Key size={18} className="ux4g-absolute ux4g-left-3 ux4g-top-1/2 -ux4g-translate-y-1/2 ux4g-text-neutral-400" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#A1A1AA' }} />
               <input 
                 type="password" 
+                id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
                 required
                 className="ux4g-w-full ux4g-p-s ux4g-pl-10 ux4g-border ux4g-border-neutral-300 ux4g-rounded ux4g-text-neutral-900 focus:ux4g-ring-2 focus:ux4g-ring-primary-500" 
                 style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', border: '1px solid #D4D4D8', borderRadius: '0.25rem', color: '#18181B', backgroundColor: '#FFF' }}

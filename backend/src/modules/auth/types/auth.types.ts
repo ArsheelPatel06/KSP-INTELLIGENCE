@@ -2,20 +2,19 @@ import type { Permission } from '../../../core/auth/permissions';
 import type { Role } from '../../../core/auth/roles';
 
 export interface AuthUser {
-  id: string;
-  username: string;
-  email: string | null;
-  passwordHash: string;
-  role: Role;
-  employeeId: bigint | null;
-  isActive: boolean;
+  id: bigint;
+  kgid: string | null;
+  firstName: string | null;
+  passwordHash: string | null;
+  role: string;
   tokenVersion: number;
   lastLoginAt: Date | null;
+  isActive: boolean;
 }
 
 export interface StoredRefreshToken {
   id: string;
-  userId: string;
+  employeeId: bigint;
   tokenHash: string;
   familyId: string;
   expiresAt: Date;
@@ -30,10 +29,9 @@ export interface AuthRequestMetadata {
 
 export interface AuthenticatedUser {
   id: string;
-  username: string;
-  email: string | null;
-  role: Role;
-  employeeId: string | null;
+  kgid: string | null;
+  firstName: string | null;
+  role: string;
   permissions: Permission[];
   lastLoginAt: string | null;
 }

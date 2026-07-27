@@ -16,6 +16,7 @@ export const errorMiddleware: ErrorRequestHandler = (error, _req, res, _next) =>
     ]);
   }
 
+  console.error('[Unhandled Error]', error);
   logger.error({ error }, 'Unhandled application error');
 
   return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, [

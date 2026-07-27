@@ -2,29 +2,9 @@ import { api } from './api';
 
 export const authService = {
   login: async (credentials) => {
-    // For now, if backend isn't ready we mock the response, but route it through API for later
     try {
-      // const response = await api.post('/auth/login', credentials);
-      // return response.data;
-      
-      // MOCK BACKEND RESPONSE
-      console.log('Mocking backend auth for:', credentials.username);
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            accessToken: 'mock_jwt_token',
-            refreshToken: 'mock_refresh_token',
-            user: {
-              id: 'USR-101',
-              name: 'DCP Vikram Rathore, IPS',
-              role: credentials.role || 'Investigator',
-              badge: 'IPS-KA-2016-89',
-              district: 'State HQ Bengaluru',
-              permissions: ['view_cases', 'edit_cases', 'run_ai']
-            }
-          });
-        }, 1000);
-      });
+      const response = await api.post('/auth/login', { ...credentials, deliveryMode: 'body' });
+      return response.data.data;
     } catch (error) {
       throw error;
     }
@@ -32,7 +12,7 @@ export const authService = {
 
   logout: async () => {
     try {
-      // await api.post('/auth/logout');
+      await api.post('/auth/logout');
       localStorage.removeItem('ksp_access_token');
       localStorage.removeItem('ksp_refresh_token');
       window.location.href = '/login';
@@ -43,20 +23,8 @@ export const authService = {
 
   getCurrentUser: async () => {
     try {
-      // return await api.get('/auth/me');
-      
-      // MOCK
-      return new Promise((resolve) => {
-        resolve({
-          data: {
-            id: 'USR-101',
-            name: 'DCP Vikram Rathore, IPS',
-            role: 'Investigator',
-            badge: 'IPS-KA-2016-89',
-            district: 'State HQ Bengaluru'
-          }
-        });
-      });
+      const response = await api.get('/auth/me');
+      return response.data.data;
     } catch (error) {
       throw error;
     }

@@ -1,9 +1,9 @@
-import type { AuthAuditEvent, Role } from '@prisma/client';
+import type { Role } from '@prisma/client';
 import type { AuthUser, StoredRefreshToken } from '../types/auth.types';
 
 export interface CreateRefreshTokenInput {
   id: string;
-  userId: string;
+  employeeId: bigint;
   tokenHash: string;
   familyId: string;
   expiresAt: Date;
@@ -17,8 +17,8 @@ export interface RotateRefreshTokenInput {
 }
 
 export interface CreateAuditLogInput {
-  userId?: string;
-  event: AuthAuditEvent;
+  employeeId?: bigint;
+  event: string;
   success: boolean;
   ipAddress?: string;
   userAgent?: string;
@@ -28,12 +28,13 @@ export interface CreateAuditLogInput {
 
 export interface AuthRepository {
   findUserByIdentifier(identifier: string): Promise<AuthUser | null>;
-  findUserById(userId: string): Promise<AuthUser | null>;
-  updateLastLogin(userId: string): Promise<void>;
+  findUserById(employeeId: bigint): Promise<AuthUser | null>;
+  updateLastLogin(employeeId: bigint): Promise<void>;
   findRefreshTokenByHash(tokenHash: string): Promise<StoredRefreshToken | null>;
   createRefreshToken(input: CreateRefreshTokenInput): Promise<void>;
   rotateRefreshToken(input: RotateRefreshTokenInput): Promise<void>;
   revokeTokenFamily(familyId: string): Promise<void>;
   createAuditLog(input: CreateAuditLogInput): Promise<void>;
-  roleExists(role: Role): boolean;
+  roleExists(role: string): boolean;
 }
+

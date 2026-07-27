@@ -4,7 +4,7 @@ import { OllamaProvider } from '../../../providers/ollama-provider';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
-import { promptManager } from '../../prompts/prompt-manager';
+import { promptManager } from '../../../prompts/prompt-manager';
 
 const ConflictSchema = z.object({
   conflicts: z.array(z.string()).describe('List of conflicting facts found between agents, if any'),
@@ -16,7 +16,7 @@ export async function conflictResolutionNode(state: typeof AiGraphState.State): 
     return { resolvedConflicts: [] };
   }
 
-  const llm = new OllamaProvider('llama3.1');
+  const llm = new OllamaProvider();
   const evidenceText = state.evidence.map(e => `Agent: ${e.sourceAgent}\nFacts: ${e.facts.join(', ')}`).join('\n\n');
 
   try {
@@ -24,12 +24,14 @@ export async function conflictResolutionNode(state: typeof AiGraphState.State): 
       evidenceText: evidenceText
     });
 
-    const response = await llm.generateStructured(
+    const response = await llm.generateStructuredJson(
       [
-        new SystemMessage(systemPromptStr),
-        new HumanMessage(`Evidence:\n${evidenceText}`)
+        { role: 'system', content: systemPromptStr },
+        { role: 'user', content: `Evidence:\n${evidenceText}` }
       ],
-      zodToJsonSchema(ConflictSchema)
+      zodToJsonSchema(ConflictSchema) as Record<string, unknown>,
+      { model: 'llama3.1' },
+      state.context
     );
 
     const parsed = ConflictSchema.parse(response.data);

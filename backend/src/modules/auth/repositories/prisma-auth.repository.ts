@@ -1,4 +1,4 @@
-import { AuthAuditEvent, Prisma, PrismaClient, Role } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { prisma } from '../../../core/database/prisma';
 import type {
   AuthRepository,
@@ -7,55 +7,70 @@ import type {
   RotateRefreshTokenInput,
 } from '../interfaces/auth-repository.interface';
 import type { AuthUser, StoredRefreshToken } from '../types/auth.types';
+import { ROLE_VALUES } from '../../../core/auth/roles';
 
-const userSelect = {
+const employeeSelect = {
   id: true,
-  username: true,
-  email: true,
+  kgid: true,
+  firstName: true,
   passwordHash: true,
   role: true,
-  employeeId: true,
-  isActive: true,
+  active: true,
   tokenVersion: true,
   lastLoginAt: true,
-} satisfies Prisma.UserSelect;
+} satisfies Prisma.EmployeeSelect;
 
 export class PrismaAuthRepository implements AuthRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
 
   async findUserByIdentifier(identifier: string): Promise<AuthUser | null> {
-    return this.client.user.findFirst({
-      where: {
-        OR: [{ username: identifier }, { email: identifier.toLowerCase() }],
-      },
-      select: userSelect,
+    const emp = await this.client.employee.findFirst({
+      where: { kgid: identifier },
+      select: employeeSelect,
+    });
+    if (!emp) return null;
+    return this.mapToAuthUser(emp);
+  }
+
+  async findUserById(employeeId: bigint): Promise<AuthUser | null> {
+    const emp = await this.client.employee.findUnique({
+      where: { id: employeeId },
+      select: employeeSelect,
+    });
+    if (!emp) return null;
+    return this.mapToAuthUser(emp);
+  }
+
+  async updateLastLogin(employeeId: bigint): Promise<void> {
+    await this.client.employee.update({
+      where: { id: employeeId },
+      data: { lastLoginAt: new Date() },
     });
   }
 
-  async findUserById(userId: string): Promise<AuthUser | null> {
-    return this.client.user.findUnique({ where: { id: userId }, select: userSelect });
-  }
-
-  async updateLastLogin(userId: string): Promise<void> {
-    await this.client.user.update({ where: { id: userId }, data: { lastLoginAt: new Date() } });
-  }
-
   async findRefreshTokenByHash(tokenHash: string): Promise<StoredRefreshToken | null> {
-    return this.client.refreshToken.findUnique({
+    const token = await this.client.refreshToken.findUnique({
       where: { tokenHash },
       select: {
         id: true,
-        userId: true,
+        employeeId: true,
         tokenHash: true,
         familyId: true,
         expiresAt: true,
         revokedAt: true,
       },
     });
+    return token;
   }
 
   async createRefreshToken(input: CreateRefreshTokenInput): Promise<void> {
-    await this.client.refreshToken.create({ data: input });
+    const { ipAddress, userAgent, ...rest } = input;
+    await this.client.refreshToken.create({ 
+      data: {
+        ...rest,
+        createdByIp: ipAddress,
+      } 
+    });
   }
 
   async rotateRefreshToken(input: RotateRefreshTokenInput): Promise<void> {
@@ -68,7 +83,13 @@ export class PrismaAuthRepository implements AuthRepository {
         throw new Error('Refresh token is no longer active');
       }
 
-      await transaction.refreshToken.create({ data: input.nextToken });
+      const { ipAddress, userAgent, ...nextTokenRest } = input.nextToken;
+      await transaction.refreshToken.create({ 
+        data: {
+          ...nextTokenRest,
+          createdByIp: ipAddress,
+        }
+      });
       await transaction.refreshToken.update({
         where: { id: input.currentTokenId },
         data: {
@@ -87,12 +108,32 @@ export class PrismaAuthRepository implements AuthRepository {
   }
 
   async createAuditLog(input: CreateAuditLogInput): Promise<void> {
-    await this.client.authAuditLog.create({ data: input });
+    const { employeeId, event, ipAddress, userAgent, ...metadata } = input;
+    await this.client.authAuditLog.create({
+      data: {
+        employeeId,
+        event,
+        ipAddress,
+        userAgent,
+        metadata: metadata as unknown as Prisma.InputJsonValue,
+      },
+    });
   }
 
-  roleExists(role: Role): boolean {
-    return Object.values(Role).includes(role);
+  roleExists(role: string): boolean {
+    return (ROLE_VALUES as readonly string[]).includes(role);
+  }
+
+  private mapToAuthUser(emp: any): AuthUser {
+    return {
+      id: emp.id,
+      kgid: emp.kgid,
+      firstName: emp.firstName,
+      passwordHash: emp.passwordHash,
+      role: emp.role,
+      tokenVersion: emp.tokenVersion,
+      lastLoginAt: emp.lastLoginAt,
+      isActive: emp.active,
+    };
   }
 }
-
-export { AuthAuditEvent };

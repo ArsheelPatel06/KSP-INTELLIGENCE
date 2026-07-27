@@ -7,117 +7,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  SUPER_ADMIN
-  DGP
-  IG
-  SP
-  DSP
-  INSPECTOR
-  SI
-  CONSTABLE
-  CRIME_ANALYST
-  POLICY_MAKER
-}
-
-enum AuthAuditEvent {
-  LOGIN_SUCCESS
-  LOGIN_FAILURE
-  TOKEN_REFRESH
-  TOKEN_REFRESH_FAILURE
-  TOKEN_REUSE_DETECTED
-  LOGOUT
-  ACCESS_DENIED
-}
-
-model User {
-  id            String         @id @default(cuid())
-  username      String         @unique @db.VarChar(100)
-  email         String?        @unique @db.VarChar(255)
-  passwordHash  String         @map("password_hash") @db.VarChar(255)
-  role          Role
-  employeeId    BigInt?        @map("employee_id")
-  isActive      Boolean        @default(true) @map("is_active")
-  tokenVersion  Int            @default(0) @map("token_version")
-  lastLoginAt   DateTime?      @map("last_login_at")
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-  refreshTokens RefreshToken[]
-  auditLogs     AuthAuditLog[]
-
-  @@index([role, isActive])
-  @@map("auth_user")
-}
-
-model RefreshToken {
-  id                String    @id
-  userId            String    @map("user_id")
-  tokenHash         String    @unique @map("token_hash") @db.VarChar(64)
-  familyId          String    @map("family_id") @db.VarChar(50)
-  expiresAt         DateTime  @map("expires_at")
-  revokedAt         DateTime? @map("revoked_at")
-  replacedByTokenId String?   @map("replaced_by_token_id") @db.VarChar(50)
-  ipAddress         String?   @map("ip_address") @db.VarChar(64)
-  userAgent         String?   @map("user_agent") @db.VarChar(500)
-  createdAt         DateTime  @default(now()) @map("created_at")
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, revokedAt, expiresAt])
-  @@index([familyId])
-  @@map("auth_refresh_token")
-}
-
-model AuthAuditLog {
-  id        String         @id @default(cuid())
-  userId    String?        @map("user_id")
-  event     AuthAuditEvent
-  success   Boolean
-  ipAddress String?        @map("ip_address") @db.VarChar(64)
-  userAgent String?        @map("user_agent") @db.VarChar(500)
-  requestId String?        @map("request_id") @db.VarChar(100)
-  details   String?        @db.Text
-  createdAt DateTime       @default(now()) @map("created_at")
-  user      User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  @@index([userId, createdAt])
-  @@index([event, createdAt])
-  @@map("auth_audit_log")
-}
-
 model DataSource {
   id                  BigInt                       @id @default(autoincrement()) @map("data_source_id")
   sourceName          String                       @map("source_name") @db.VarChar(255)
   sourceType          String                       @map("source_type") @db.VarChar(50)
-  sourcePath          String?                      @map("source_path") @db.Text
+  sourcePath          String?                      @map("source_path")
   sourceBatch         String?                      @map("source_batch") @db.VarChar(50)
   reportingMonth      Int?                         @map("reporting_month")
   reportingYear       Int?                         @map("reporting_year")
   extractedOn         DateTime?                    @map("extracted_on") @db.Timestamp(6)
   rowCount            BigInt?                      @map("row_count")
   pageCount           Int?                         @map("page_count")
-  checksum            String?                      @unique @db.VarChar(128)
-  qualitySummary      String?                      @map("quality_summary") @db.Text
+  checksum            String?                      @unique(map: "uq_data_source_checksum") @db.VarChar(128)
+  qualitySummary      String?                      @map("quality_summary")
   isDuplicate         Boolean                      @default(false) @map("is_duplicate")
-  notes               String?                      @db.Text
+  notes               String?
   createdAt           DateTime                     @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt           DateTime                     @default(now()) @map("updated_at") @db.Timestamp(6)
   cases               CaseMaster[]
   crimeReviewReports  CrimeReviewReport[]
   crimeStatistics     CrimeStatistic[]
-  victimStatistics    VictimDemographicStatistic[]
   cyberStatistics     CyberSuspectStatistic[]
+  dataQualityIssues   DataQualityIssue[]
+  documentAttachments DocumentAttachment[]
+  evidence            Evidence[]
+  featureVectors      FeatureVectorRef[]
+  ipcReferences       IpcSectionReference[]
+  knowledgeGraphEdges KgEdge[]
+  knowledgeGraphNodes KgNode[]
+  legalDocuments      LegalDocumentSource[]
+  ragDocuments        RagDocument[]
   roadStatistics      RoadAccidentStatistic[]
   serviceMetrics      ServicePerformanceMetric[]
-  legalDocuments      LegalDocumentSource[]
-  ipcReferences       IpcSectionReference[]
-  ragDocuments        RagDocument[]
-  dataQualityIssues   DataQualityIssue[]
-  evidence            Evidence[]
-  documentAttachments DocumentAttachment[]
   socialRelationships SocialRelationship[]
-  featureVectors      FeatureVectorRef[]
-  knowledgeGraphNodes KgNode[]
-  knowledgeGraphEdges KgEdge[]
+  victimStatistics    VictimDemographicStatistic[]
 
   @@map("data_source")
 }
@@ -126,10 +49,10 @@ model GenderMaster {
   id           BigInt        @id @default(autoincrement()) @map("gender_id")
   name         String        @unique @map("gender_name") @db.VarChar(100)
   active       Boolean       @default(true)
-  employees    Employee[]
-  complainants Complainant[]
-  victims      Victim[]
   accused      Accused[]
+  complainants Complainant[]
+  employees    Employee[]
+  victims      Victim[]
   witnesses    Witness[]
 
   @@map("gender_master")
@@ -137,18 +60,18 @@ model GenderMaster {
 
 model State {
   id               BigInt                       @id @default(autoincrement()) @map("state_id")
-  name             String                       @unique @map("state_name") @db.VarChar(150)
+  name             String                       @unique(map: "uq_state_name") @map("state_name") @db.VarChar(150)
   nationalityId    BigInt?                      @map("nationality_id")
   active           Boolean                      @default(true)
-  districts        District[]
-  units            Unit[]
-  courts           Court[]
-  arrests          ArrestSurrender[]
-  victimStatistics VictimDemographicStatistic[]
-  cyberStatistics  CyberSuspectStatistic[]
-  jails            Jail[]
   addresses        AddressHistory[]
+  arrests          ArrestSurrender[]
+  courts           Court[]
+  cyberStatistics  CyberSuspectStatistic[]
+  districts        District[]
+  jails            Jail[]
   organizations    Organization[]
+  units            Unit[]
+  victimStatistics VictimDemographicStatistic[]
 
   @@map("state")
 }
@@ -158,29 +81,29 @@ model District {
   name                   String                     @map("district_name") @db.VarChar(150)
   stateId                BigInt                     @map("state_id")
   active                 Boolean                    @default(true)
-  state                  State                      @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  units                  Unit[]
-  employees              Employee[]
-  courts                 Court[]
+  addresses              AddressHistory[]
   arrests                ArrestSurrender[]
+  courts                 Court[]
   crimeStatistics        CrimeStatistic[]
+  state                  State                      @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_district_state")
+  employees              Employee[]
+  gangNetworks           GangNetwork[]
+  hotspots               Hotspot[]
+  jails                  Jail[]
+  organizations          Organization[]
+  repeatOffenderProfiles RepeatOffenderProfile[]
   roadStatistics         RoadAccidentStatistic[]
   serviceMetrics         ServicePerformanceMetric[]
-  jails                  Jail[]
-  repeatOffenderProfiles RepeatOffenderProfile[]
-  gangNetworks           GangNetwork[]
-  addresses              AddressHistory[]
-  organizations          Organization[]
-  hotspots               Hotspot[]
+  units                  Unit[]
 
-  @@unique([name, stateId])
-  @@index([stateId])
+  @@unique([name, stateId], map: "uq_district_state")
+  @@index([stateId], map: "idx_district_state")
   @@map("district")
 }
 
 model UnitType {
   id             BigInt  @id @default(autoincrement()) @map("unit_type_id")
-  name           String  @unique @map("unit_type_name") @db.VarChar(150)
+  name           String  @unique(map: "uq_unit_type_name") @map("unit_type_name") @db.VarChar(150)
   cityDistState  String? @map("city_dist_state") @db.VarChar(100)
   hierarchyLevel Int?    @map("hierarchy_level")
   active         Boolean @default(true)
@@ -199,25 +122,25 @@ model Unit {
   districtId      BigInt?                    @map("district_id")
   active          Boolean                    @default(true)
   sourceUnitCode  String?                    @map("source_unit_code") @db.VarChar(100)
-  unitType        UnitType?                  @relation(fields: [unitTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  parent          Unit?                      @relation("UnitHierarchy", fields: [parentUnitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children        Unit[]                     @relation("UnitHierarchy")
-  state           State?                     @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  district        District?                  @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  employees       Employee[]
-  cases           CaseMaster[]
+  alerts          Alert[]
   arrests         ArrestSurrender[]
+  cases           CaseMaster[]
   crimeStatistics CrimeStatistic[]
-  roadStatistics  RoadAccidentStatistic[]
-  serviceMetrics  ServicePerformanceMetric[]
+  employees       Employee[]
   gangNetworks    GangNetwork[]
   hotspots        Hotspot[]
   riskScores      RiskScore[]
-  alerts          Alert[]
+  roadStatistics  RoadAccidentStatistic[]
+  serviceMetrics  ServicePerformanceMetric[]
+  district        District?                  @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_unit_district")
+  parent          Unit?                      @relation("UnitHierarchy", fields: [parentUnitId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_unit_parent")
+  children        Unit[]                     @relation("UnitHierarchy")
+  state           State?                     @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_unit_state")
+  unitType        UnitType?                  @relation(fields: [unitTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_unit_unit_type")
 
-  @@unique([name, districtId])
-  @@index([districtId])
-  @@index([parentUnitId])
+  @@unique([name, districtId], map: "uq_unit_name_district")
+  @@index([districtId], map: "idx_unit_district")
+  @@index([parentUnitId], map: "idx_unit_parent")
   @@map("unit")
 }
 
@@ -247,7 +170,7 @@ model Employee {
   unitId                      BigInt?                     @map("unit_id")
   rankId                      BigInt?                     @map("rank_id")
   designationId               BigInt?                     @map("designation_id")
-  kgid                        String?                     @unique @db.VarChar(100)
+  kgid                        String?                     @unique(map: "uq_employee_kgid") @db.VarChar(100)
   firstName                   String?                     @map("first_name") @db.VarChar(255)
   employeeDob                 DateTime?                   @map("employee_dob") @db.Date
   genderId                    BigInt?                     @map("gender_id")
@@ -255,31 +178,38 @@ model Employee {
   physicallyChallenged        Boolean?                    @map("physically_challenged")
   appointmentDate             DateTime?                   @map("appointment_date") @db.Date
   active                      Boolean                     @default(true)
-  district                    District?                   @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  unit                        Unit?                       @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rank                        Rank?                       @relation(fields: [rankId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  designation                 Designation?                @relation(fields: [designationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  gender                      GenderMaster?               @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  registeredCases             CaseMaster[]                @relation("CasePolicePerson")
+  assignedAlerts              Alert[]
   arrestInvestigations        ArrestSurrender[]           @relation("ArrestInvestigatingOfficer")
-  chargesheets                ChargesheetDetails[]
-  collectedEvidence           Evidence[]
   diaryEntries                CaseDiaryEntry[]
+  registeredCases             CaseMaster[]                @relation("CasePolicePerson")
+  similarityReviews           CaseSimilarity[]
+  chargesheets                ChargesheetDetails[]
+  chatSessions                ChatSession[]
+  designation                 Designation?                @relation(fields: [designationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_designation")
+  district                    District?                   @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_district")
+  gender                      GenderMaster?               @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_gender")
+  rank                        Rank?                       @relation(fields: [rankId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_rank")
+  unit                        Unit?                       @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_unit")
+  collectedEvidence           Evidence[]
+  reviewedKnowledgeGraphEdges KgEdge[]
+  modelRuns                   ModelAuditLog[]
+  ragRetrievals               RagRetrievalLog[]
+  recommendationReviews       Recommendation[]
   offenderLinkReviews         RepeatOffenderAccusedLink[]
   riskScoreReviews            RiskScore[]
-  recommendationReviews       Recommendation[]
-  similarityReviews           CaseSimilarity[]
-  assignedAlerts              Alert[]
-  assignedTasks               Task[]
-  ragRetrievals               RagRetrievalLog[]
-  modelRuns                   ModelAuditLog[]
-  chatSessions                ChatSession[]
   searchRequests              SearchRequest[]
-  reviewedKnowledgeGraphEdges KgEdge[]
+  assignedTasks               Task[]
 
-  @@index([unitId])
-  @@index([districtId])
-  @@index([rankId])
+  passwordHash                String?                     @map("password_hash") @db.VarChar(255)
+  role                        String                      @default("INVESTIGATING_OFFICER") @db.VarChar(50)
+  tokenVersion                Int                         @default(0) @map("token_version")
+  lastLoginAt                 DateTime?                   @map("last_login_at") @db.Timestamptz
+  refreshTokens               RefreshToken[]
+  authAuditLogs               AuthAuditLog[]
+
+  @@index([districtId], map: "idx_employee_district")
+  @@index([rankId], map: "idx_employee_rank")
+  @@index([unitId], map: "idx_employee_unit")
   @@map("employee")
 }
 
@@ -289,14 +219,14 @@ model Court {
   districtId      BigInt?           @map("district_id")
   stateId         BigInt?           @map("state_id")
   active          Boolean           @default(true)
-  district        District?         @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  state           State?            @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  cases           CaseMaster[]
   arrests         ArrestSurrender[]
+  cases           CaseMaster[]
+  district        District?         @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_court_district")
+  state           State?            @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_court_state")
   proceedings     CourtProceeding[]
   custodyStatuses CustodyStatus[]
 
-  @@unique([name, districtId])
+  @@unique([name, districtId], map: "uq_court_name_district")
   @@map("court")
 }
 
@@ -356,26 +286,27 @@ model Caste {
 
 model Act {
   code           String                @id @map("act_code") @db.VarChar(50)
-  description    String                @map("act_description") @db.Text
+  description    String                @map("act_description")
   shortName      String?               @map("short_name") @db.VarChar(150)
   active         Boolean               @default(true)
-  sections       LegalSection[]
   legalDocuments LegalDocumentSource[]
+  sections       LegalSection[]
 
   @@map("act")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model LegalSection {
   actCode                String                       @map("act_code") @db.VarChar(50)
   sectionCode            String                       @map("section_code") @db.VarChar(100)
-  description            String?                      @map("section_description") @db.Text
+  description            String?                      @map("section_description")
   active                 Boolean                      @default(true)
-  act                    Act                          @relation(fields: [actCode], references: [code], onDelete: NoAction, onUpdate: NoAction)
-  crimeHeadMappings      CrimeHeadActSection[]
   caseAssociations       ActSectionAssociation[]
+  crimeHeadMappings      CrimeHeadActSection[]
   ipcReferences          IpcSectionReference[]
   keywordMappings        LegalSectionKeyword[]
   recommendationMappings RecommendationLegalSection[]
+  act                    Act                          @relation(fields: [actCode], references: [code], onDelete: NoAction, onUpdate: NoAction, map: "fk_section_act")
 
   @@id([actCode, sectionCode])
   @@map("section")
@@ -383,16 +314,16 @@ model LegalSection {
 
 model CrimeHead {
   id              BigInt                @id @default(autoincrement()) @map("crime_head_id")
-  groupName       String                @unique @map("crime_group_name") @db.VarChar(255)
+  groupName       String                @unique(map: "uq_crime_head_name") @map("crime_group_name") @db.VarChar(255)
   active          Boolean               @default(true)
-  subHeads        CrimeSubHead[]
-  sectionMappings CrimeHeadActSection[]
   majorCases      CaseMaster[]          @relation("CaseMajorCrimeHead")
-  reportSections  ReportSection[]
+  sectionMappings CrimeHeadActSection[]
   crimeStatistics CrimeStatistic[]
+  subHeads        CrimeSubHead[]
   gangNetworks    GangNetwork[]
-  modusOperandi   ModusOperandi[]
   hotspots        Hotspot[]
+  modusOperandi   ModusOperandi[]
+  reportSections  ReportSection[]
 
   @@map("crime_head")
 }
@@ -403,12 +334,12 @@ model CrimeSubHead {
   name            String           @map("crime_head_name") @db.VarChar(255)
   sequenceId      Int?             @map("seq_id")
   active          Boolean          @default(true)
-  crimeHead       CrimeHead        @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   minorCases      CaseMaster[]     @relation("CaseMinorCrimeHead")
   crimeStatistics CrimeStatistic[]
+  crimeHead       CrimeHead        @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_crime_sub_head_parent")
   hotspots        Hotspot[]
 
-  @@unique([crimeHeadId, name])
+  @@unique([crimeHeadId, name], map: "uq_crime_sub_head")
   @@map("crime_sub_head")
 }
 
@@ -416,17 +347,18 @@ model CrimeHeadActSection {
   crimeHeadId BigInt       @map("crime_head_id")
   actCode     String       @map("act_code") @db.VarChar(50)
   sectionCode String       @map("section_code") @db.VarChar(100)
-  crimeHead   CrimeHead    @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  section     LegalSection @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction)
+  crimeHead   CrimeHead    @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_chas_crime_head")
+  section     LegalSection @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction, map: "fk_chas_section")
 
   @@id([crimeHeadId, actCode, sectionCode])
   @@map("crime_head_act_section")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model CaseMaster {
   id                    BigInt                      @id @default(autoincrement()) @map("case_master_id")
-  crimeNo               String?                     @unique @map("crime_no") @db.VarChar(100)
-  caseNo                String?                     @unique @map("case_no") @db.VarChar(100)
+  crimeNo               String?                     @unique(map: "uq_case_crime_no") @map("crime_no") @db.VarChar(100)
+  caseNo                String?                     @unique(map: "uq_case_case_no") @map("case_no") @db.VarChar(100)
   crimeRegisteredDate   DateTime?                   @map("crime_registered_date") @db.Timestamp(6)
   policePersonId        BigInt?                     @map("police_person_id")
   policeStationId       BigInt?                     @map("police_station_id")
@@ -441,65 +373,65 @@ model CaseMaster {
   infoReceivedPsDate    DateTime?                   @map("info_received_ps_date") @db.Timestamp(6)
   latitude              Decimal?                    @db.Decimal(10, 7)
   longitude             Decimal?                    @db.Decimal(10, 7)
-  briefFacts            String?                     @map("brief_facts") @db.Text
+  briefFacts            String?                     @map("brief_facts")
   dataSourceId          BigInt?                     @map("data_source_id")
   sourceRowNumber       BigInt?                     @map("source_row_number")
   sourceCaseKey         String?                     @map("source_case_key") @db.VarChar(255)
   createdAt             DateTime                    @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt             DateTime                    @default(now()) @map("updated_at") @db.Timestamp(6)
-  policePerson          Employee?                   @relation("CasePolicePerson", fields: [policePersonId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  policeStation         Unit?                       @relation(fields: [policeStationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  category              CaseCategory?               @relation(fields: [caseCategoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  gravity               GravityOffence?             @relation(fields: [gravityOffenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  majorCrimeHead        CrimeHead?                  @relation("CaseMajorCrimeHead", fields: [crimeMajorHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  minorCrimeHead        CrimeSubHead?               @relation("CaseMinorCrimeHead", fields: [crimeMinorHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  status                CaseStatus?                 @relation(fields: [caseStatusId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  court                 Court?                      @relation(fields: [courtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  dataSource            DataSource?                 @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  complainants          Complainant[]
-  victims               Victim[]
   accused               Accused[]
-  arrests               ArrestSurrender[]
   actSections           ActSectionAssociation[]
-  chargesheets          ChargesheetDetails[]
-  occurrence            InvestigationOccurrence?
-  ragDocuments          RagDocument[]
-  ragRetrievals         RagRetrievalLog[]
-  featureSnapshots      CaseFeatureSnapshot[]
-  geoLocations          GeoLocation[]
-  evidence              Evidence[]
-  propertyAssets        PropertyAsset[]
-  vehicles              Vehicle[]
-  digitalIdentifiers    PhoneDigitalIdentifier[]
-  financialAccounts     FinancialAccount[]
-  financialTransactions FinancialTransaction[]
-  weapons               Weapon[]
-  documents             DocumentAttachment[]
-  forensicReports       ForensicReport[]
-  witnesses             Witness[]
+  alerts                Alert[]
+  arrests               ArrestSurrender[]
   diaryEntries          CaseDiaryEntry[]
+  featureSnapshots      CaseFeatureSnapshot[]
+  category              CaseCategory?               @relation(fields: [caseCategoryId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_category")
+  court                 Court?                      @relation(fields: [courtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_court")
+  dataSource            DataSource?                 @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_data_source")
+  policePerson          Employee?                   @relation("CasePolicePerson", fields: [policePersonId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_employee")
+  gravity               GravityOffence?             @relation(fields: [gravityOffenceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_gravity")
+  majorCrimeHead        CrimeHead?                  @relation("CaseMajorCrimeHead", fields: [crimeMajorHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_major_head")
+  minorCrimeHead        CrimeSubHead?               @relation("CaseMinorCrimeHead", fields: [crimeMinorHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_minor_head")
+  policeStation         Unit?                       @relation(fields: [policeStationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_station")
+  status                CaseStatus?                 @relation(fields: [caseStatusId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_status")
+  matchedSimilarities   CaseSimilarity[]            @relation("SimilarityMatchedCase")
+  sourceSimilarities    CaseSimilarity[]            @relation("SimilaritySourceCase")
+  chargesheets          ChargesheetDetails[]
+  chatSessions          ChatSession[]
+  complainants          Complainant[]
   courtProceedings      CourtProceeding[]
   custodyStatuses       CustodyStatus[]
-  offenderLinks         RepeatOffenderAccusedLink[]
-  modusOperandi         ModusOperandi[]
-  socialRelationships   SocialRelationship[]
+  documents             DocumentAttachment[]
+  evidence              Evidence[]
+  financialAccounts     FinancialAccount[]
+  financialTransactions FinancialTransaction[]
+  forensicReports       ForensicReport[]
+  geoLocations          GeoLocation[]
   hotspotLinks          HotspotCase[]
-  riskScores            RiskScore[]
+  occurrence            InvestigationOccurrence?
+  modusOperandi         ModusOperandi[]
+  digitalIdentifiers    PhoneDigitalIdentifier[]
+  propertyAssets        PropertyAsset[]
+  ragDocuments          RagDocument[]
+  ragRetrievals         RagRetrievalLog[]
   recommendations       Recommendation[]
-  sourceSimilarities    CaseSimilarity[]            @relation("SimilaritySourceCase")
-  matchedSimilarities   CaseSimilarity[]            @relation("SimilarityMatchedCase")
-  alerts                Alert[]
-  tasks                 Task[]
-  chatSessions          ChatSession[]
+  offenderLinks         RepeatOffenderAccusedLink[]
+  riskScores            RiskScore[]
   searchRequests        SearchRequest[]
+  socialRelationships   SocialRelationship[]
+  tasks                 Task[]
+  vehicles              Vehicle[]
+  victims               Victim[]
+  weapons               Weapon[]
+  witnesses             Witness[]
 
-  @@index([crimeRegisteredDate])
-  @@index([policeStationId, crimeRegisteredDate])
-  @@index([caseStatusId])
-  @@index([crimeMajorHeadId, crimeMinorHeadId])
-  @@index([courtId])
-  @@index([sourceCaseKey])
-  @@index([latitude, longitude])
+  @@index([courtId], map: "idx_case_court")
+  @@index([crimeMajorHeadId, crimeMinorHeadId], map: "idx_case_crime_heads")
+  @@index([latitude, longitude], map: "idx_case_geo")
+  @@index([crimeRegisteredDate], map: "idx_case_registered_date")
+  @@index([sourceCaseKey], map: "idx_case_source_key")
+  @@index([policeStationId, crimeRegisteredDate], map: "idx_case_station_date")
+  @@index([caseStatusId], map: "idx_case_status")
   @@map("case_master")
 }
 
@@ -512,14 +444,14 @@ model Complainant {
   religionId          BigInt?                  @map("religion_id")
   casteId             BigInt?                  @map("caste_id")
   genderId            BigInt?                  @map("gender_id")
-  case                CaseMaster               @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  occupation          Occupation?              @relation(fields: [occupationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  religion            Religion?                @relation(fields: [religionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  caste               Caste?                   @relation(fields: [casteId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  gender              GenderMaster?            @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                CaseMaster               @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_complainant_case")
+  caste               Caste?                   @relation(fields: [casteId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_complainant_caste")
+  gender              GenderMaster?            @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_complainant_gender")
+  occupation          Occupation?              @relation(fields: [occupationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_complainant_occupation")
+  religion            Religion?                @relation(fields: [religionId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_complainant_religion")
   digitalIdentifiers  PhoneDigitalIdentifier[]
 
-  @@index([caseMasterId])
+  @@index([caseMasterId], map: "idx_complainant_case")
   @@map("complainant_details")
 }
 
@@ -530,16 +462,16 @@ model Victim {
   ageYear            Int?                     @map("age_year")
   genderId           BigInt?                  @map("gender_id")
   victimPolice       Boolean?                 @map("victim_police")
-  case               CaseMaster               @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  gender             GenderMaster?            @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  propertyAssets     PropertyAsset[]
-  vehicles           Vehicle[]
-  digitalIdentifiers PhoneDigitalIdentifier[]
   financialAccounts  FinancialAccount[]
-  weapons            Weapon[]
+  digitalIdentifiers PhoneDigitalIdentifier[]
+  propertyAssets     PropertyAsset[]
   riskScores         RiskScore[]
+  vehicles           Vehicle[]
+  case               CaseMaster               @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_victim_case")
+  gender             GenderMaster?            @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_victim_gender")
+  weapons            Weapon[]
 
-  @@index([caseMasterId])
+  @@index([caseMasterId], map: "idx_victim_case")
   @@map("victim")
 }
 
@@ -550,20 +482,20 @@ model Accused {
   ageYear            Int?                        @map("age_year")
   genderId           BigInt?                     @map("gender_id")
   personId           String?                     @map("person_id") @db.VarChar(50)
-  case               CaseMaster                  @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  gender             GenderMaster?               @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case               CaseMaster                  @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_accused_case")
+  gender             GenderMaster?               @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_accused_gender")
   primaryArrests     ArrestSurrender[]           @relation("ArrestPrimaryAccused")
-  arrestLinks        ArrestSurrenderAccused[]
-  vehicles           Vehicle[]
-  digitalIdentifiers PhoneDigitalIdentifier[]
-  financialAccounts  FinancialAccount[]
-  weapons            Weapon[]
   custodyStatuses    CustodyStatus[]
-  offenderLinks      RepeatOffenderAccusedLink[]
+  financialAccounts  FinancialAccount[]
   gangMemberships    GangNetworkMember[]
+  arrestLinks        ArrestSurrenderAccused[]
+  digitalIdentifiers PhoneDigitalIdentifier[]
+  offenderLinks      RepeatOffenderAccusedLink[]
   riskScores         RiskScore[]
+  vehicles           Vehicle[]
+  weapons            Weapon[]
 
-  @@index([caseMasterId])
+  @@index([caseMasterId], map: "idx_accused_case")
   @@map("accused")
 }
 
@@ -580,26 +512,26 @@ model ArrestSurrender {
   accusedMasterId           BigInt?                  @map("accused_master_id")
   isAccused                 Boolean?                 @map("is_accused")
   isComplainantAccused      Boolean?                 @map("is_complainant_accused")
-  case                      CaseMaster               @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  state                     State?                   @relation(fields: [arrestSurrenderStateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  district                  District?                @relation(fields: [arrestSurrenderDistrictId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  policeStation             Unit?                    @relation(fields: [policeStationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  investigatingOfficer      Employee?                @relation("ArrestInvestigatingOfficer", fields: [ioId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  court                     Court?                   @relation(fields: [courtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  primaryAccused            Accused?                 @relation("ArrestPrimaryAccused", fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  primaryAccused            Accused?                 @relation("ArrestPrimaryAccused", fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_arrest_accused")
+  case                      CaseMaster               @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_arrest_case")
+  court                     Court?                   @relation(fields: [courtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_arrest_court")
+  district                  District?                @relation(fields: [arrestSurrenderDistrictId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_arrest_district")
+  investigatingOfficer      Employee?                @relation("ArrestInvestigatingOfficer", fields: [ioId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_arrest_io")
+  state                     State?                   @relation(fields: [arrestSurrenderStateId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_arrest_state")
+  policeStation             Unit?                    @relation(fields: [policeStationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_arrest_station")
   accusedLinks              ArrestSurrenderAccused[]
 
-  @@index([caseMasterId])
-  @@index([accusedMasterId])
-  @@index([arrestSurrenderDate])
+  @@index([accusedMasterId], map: "idx_arrest_accused")
+  @@index([caseMasterId], map: "idx_arrest_case")
+  @@index([arrestSurrenderDate], map: "idx_arrest_date")
   @@map("arrest_surrender")
 }
 
 model ArrestSurrenderAccused {
   arrestSurrenderId BigInt          @map("arrest_surrender_id")
   accusedMasterId   BigInt          @map("accused_master_id")
-  arrest            ArrestSurrender @relation(fields: [arrestSurrenderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  accused           Accused         @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accused           Accused         @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_asa_accused")
+  arrest            ArrestSurrender @relation(fields: [arrestSurrenderId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_asa_arrest")
 
   @@id([arrestSurrenderId, accusedMasterId])
   @@map("inv_arrest_surrender_accused")
@@ -611,12 +543,12 @@ model ActSectionAssociation {
   sectionCode    String       @map("section_code") @db.VarChar(100)
   actOrderId     Int          @default(1) @map("act_order_id")
   sectionOrderId Int          @default(1) @map("section_order_id")
-  case           CaseMaster   @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  section        LegalSection @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction)
+  case           CaseMaster   @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_asa_case")
+  section        LegalSection @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction, map: "fk_asa_section")
 
   @@id([caseMasterId, actCode, sectionCode, actOrderId, sectionOrderId])
-  @@index([caseMasterId])
-  @@index([actCode, sectionCode])
+  @@index([caseMasterId], map: "idx_act_section_case")
+  @@index([actCode, sectionCode], map: "idx_act_section_section")
   @@map("act_section_association")
 }
 
@@ -626,10 +558,10 @@ model ChargesheetDetails {
   date           DateTime?  @map("cs_date") @db.Date
   type           String?    @map("cs_type") @db.VarChar(100)
   policePersonId BigInt?    @map("police_person_id")
-  case           CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  policePerson   Employee?  @relation(fields: [policePersonId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case           CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_chargesheet_case")
+  policePerson   Employee?  @relation(fields: [policePersonId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_chargesheet_employee")
 
-  @@index([caseMasterId])
+  @@index([caseMasterId], map: "idx_chargesheet_case")
   @@map("chargesheet_details")
 }
 
@@ -637,9 +569,9 @@ model InvestigationOccurrence {
   caseMasterId        BigInt     @id @map("case_master_id")
   occurrenceFrom      DateTime?  @map("occurrence_from") @db.Timestamp(6)
   occurrenceTo        DateTime?  @map("occurrence_to") @db.Timestamp(6)
-  occurrencePlaceText String?    @map("occurrence_place_text") @db.Text
-  occurrenceNotes     String?    @map("occurrence_notes") @db.Text
-  case                CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  occurrencePlaceText String?    @map("occurrence_place_text")
+  occurrenceNotes     String?    @map("occurrence_notes")
+  case                CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_occurrence_case")
 
   @@map("inv_occurrence_time")
 }
@@ -653,11 +585,11 @@ model CrimeReviewReport {
   publishedBy            String?         @map("published_by") @db.VarChar(255)
   classificationAsOfDate DateTime?       @map("classification_as_of_date") @db.Date
   isProvisional          Boolean         @default(false) @map("is_provisional")
-  summaryText            String?         @map("summary_text") @db.Text
-  dataSource             DataSource      @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  summaryText            String?         @map("summary_text")
+  dataSource             DataSource      @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_crime_review_source")
   sections               ReportSection[]
 
-  @@index([reportYear, reportMonth])
+  @@index([reportYear, reportMonth], map: "idx_crime_review_period")
   @@map("crime_review_report")
 }
 
@@ -667,14 +599,14 @@ model ReportSection {
   sectionNumber            String?           @map("section_number") @db.VarChar(50)
   sectionTitle             String?           @map("section_title") @db.VarChar(500)
   relatedCrimeHeadId       BigInt?           @map("related_crime_head_id")
-  narrativeText            String?           @map("narrative_text") @db.Text
-  currentPeriodObservation String?           @map("current_period_observation") @db.Text
-  previousPeriodComparison String?           @map("previous_period_comparison") @db.Text
-  previousYearComparison   String?           @map("previous_year_comparison") @db.Text
-  report                   CrimeReviewReport @relation(fields: [crimeReviewReportId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  relatedCrimeHead         CrimeHead?        @relation(fields: [relatedCrimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  narrativeText            String?           @map("narrative_text")
+  currentPeriodObservation String?           @map("current_period_observation")
+  previousPeriodComparison String?           @map("previous_period_comparison")
+  previousYearComparison   String?           @map("previous_year_comparison")
+  relatedCrimeHead         CrimeHead?        @relation(fields: [relatedCrimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_report_section_crime_head")
+  report                   CrimeReviewReport @relation(fields: [crimeReviewReportId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_report_section_report")
 
-  @@index([relatedCrimeHeadId])
+  @@index([relatedCrimeHeadId], map: "idx_report_section_head")
   @@map("report_section")
 }
 
@@ -694,18 +626,18 @@ model CrimeStatistic {
   yearToDateCount                Decimal?      @map("year_to_date_count") @db.Decimal(18, 2)
   previousMonthCount             Decimal?      @map("previous_month_count") @db.Decimal(18, 2)
   correspondingPreviousYearCount Decimal?      @map("corresponding_previous_year_count") @db.Decimal(18, 2)
-  measureNotes                   String?       @map("measure_notes") @db.Text
+  measureNotes                   String?       @map("measure_notes")
   isProvisional                  Boolean       @default(false) @map("is_provisional")
-  dataSource                     DataSource    @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  district                       District?     @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  unit                           Unit?         @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  crimeHead                      CrimeHead?    @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  crimeSubHead                   CrimeSubHead? @relation(fields: [crimeSubHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  district                       District?     @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_crime_stat_district")
+  crimeHead                      CrimeHead?    @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_crime_stat_head")
+  dataSource                     DataSource    @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_crime_stat_source")
+  crimeSubHead                   CrimeSubHead? @relation(fields: [crimeSubHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_crime_stat_sub_head")
+  unit                           Unit?         @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_crime_stat_unit")
 
-  @@index([reportYear, reportMonth])
-  @@index([districtId, reportYear, reportMonth])
-  @@index([unitId, reportYear, reportMonth])
-  @@index([crimeHeadId, reportYear, reportMonth])
+  @@index([districtId, reportYear, reportMonth], map: "idx_crime_stat_district_period")
+  @@index([crimeHeadId, reportYear, reportMonth], map: "idx_crime_stat_head_period")
+  @@index([reportYear, reportMonth], map: "idx_crime_stat_period")
+  @@index([unitId, reportYear, reportMonth], map: "idx_crime_stat_unit_period")
   @@map("crime_statistic")
 }
 
@@ -724,10 +656,10 @@ model VictimDemographicStatistic {
   maleCount      Decimal?   @map("male_count") @db.Decimal(18, 2)
   femaleCount    Decimal?   @map("female_count") @db.Decimal(18, 2)
   grandTotal     Decimal?   @map("grand_total") @db.Decimal(18, 2)
-  dataSource     DataSource @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  state          State?     @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dataSource     DataSource @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_victim_demo_source")
+  state          State?     @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_victim_demo_state")
 
-  @@index([statisticYear, stateId])
+  @@index([statisticYear, stateId], map: "idx_victim_demo_year_state")
   @@map("victim_demographic_statistic")
 }
 
@@ -741,10 +673,10 @@ model CyberSuspectStatistic {
   suspectCategory String?    @map("suspect_category") @db.VarChar(255)
   suspectCount    Decimal?   @map("suspect_count") @db.Decimal(18, 2)
   totalCount      Decimal?   @map("total_count") @db.Decimal(18, 2)
-  dataSource      DataSource @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  state           State?     @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dataSource      DataSource @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cyber_stat_source")
+  state           State?     @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cyber_stat_state")
 
-  @@index([statisticYear, stateId])
+  @@index([statisticYear, stateId], map: "idx_cyber_stat_year_state")
   @@map("cyber_suspect_statistic")
 }
 
@@ -763,11 +695,11 @@ model RoadAccidentStatistic {
   injuredCount  Decimal?   @map("injured_count") @db.Decimal(18, 2)
   totalCount    Decimal?   @map("total_count") @db.Decimal(18, 2)
   qualityStatus String?    @map("quality_status") @db.VarChar(100)
-  dataSource    DataSource @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  district      District?  @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  unit          Unit?      @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  district      District?  @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_road_stat_district")
+  dataSource    DataSource @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_road_stat_source")
+  unit          Unit?      @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_road_stat_unit")
 
-  @@index([statisticYear, districtId])
+  @@index([statisticYear, districtId], map: "idx_road_stat_year_district")
   @@map("road_accident_statistic")
 }
 
@@ -786,12 +718,12 @@ model ServicePerformanceMetric {
   pendingCount  Decimal?   @map("pending_count") @db.Decimal(18, 2)
   disposedCount Decimal?   @map("disposed_count") @db.Decimal(18, 2)
   receivedCount Decimal?   @map("received_count") @db.Decimal(18, 2)
-  remarks       String?    @db.Text
-  dataSource    DataSource @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  district      District?  @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  unit          Unit?      @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  remarks       String?
+  district      District?  @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_service_metric_district")
+  dataSource    DataSource @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_service_metric_source")
+  unit          Unit?      @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_service_metric_unit")
 
-  @@index([reportYear, reportMonth, metricDomain])
+  @@index([reportYear, reportMonth, metricDomain], map: "idx_service_metric_period_domain")
   @@map("service_performance_metric")
 }
 
@@ -804,30 +736,31 @@ model LegalDocumentSource {
   jurisdictionPlace    String?       @map("jurisdiction_place") @db.VarChar(255)
   publishedDateText    String?       @map("published_date_text") @db.VarChar(100)
   commencementDateText String?       @map("commencement_date_text") @db.VarChar(100)
-  sourceUrl            String?       @map("source_url") @db.Text
+  sourceUrl            String?       @map("source_url")
   parseQualityStatus   String?       @map("parse_quality_status") @db.VarChar(100)
-  dataSource           DataSource?   @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  act                  Act?          @relation(fields: [actCode], references: [code], onDelete: NoAction, onUpdate: NoAction)
+  act                  Act?          @relation(fields: [actCode], references: [code], onDelete: NoAction, onUpdate: NoAction, map: "fk_legal_doc_act")
+  dataSource           DataSource?   @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_legal_doc_data_source")
   ragDocuments         RagDocument[]
 
-  @@index([actCode])
+  @@index([actCode], map: "idx_legal_doc_act")
   @@map("legal_document_source")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model IpcSectionReference {
   id                 BigInt        @id @default(autoincrement()) @map("ipc_section_reference_id")
   dataSourceId       BigInt?       @map("data_source_id")
   actCode            String?       @map("act_code") @db.VarChar(50)
   sectionCode        String?       @map("section_code") @db.VarChar(100)
   rawSectionLabel    String?       @map("raw_section_label") @db.VarChar(200)
-  descriptionText    String?       @map("description_text") @db.Text
-  offenseText        String?       @map("offense_text") @db.Text
-  punishmentText     String?       @map("punishment_text") @db.Text
+  descriptionText    String?       @map("description_text")
+  offenseText        String?       @map("offense_text")
+  punishmentText     String?       @map("punishment_text")
   parseQualityStatus String?       @map("parse_quality_status") @db.VarChar(100)
-  dataSource         DataSource?   @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  section            LegalSection? @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction)
+  section            LegalSection? @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction, map: "fk_ipc_ref_section")
+  dataSource         DataSource?   @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ipc_ref_source")
 
-  @@index([actCode, sectionCode])
+  @@index([actCode, sectionCode], map: "idx_ipc_ref_section")
   @@map("ipc_section_reference")
 }
 
@@ -838,8 +771,8 @@ model LegalKeyword {
   active          Boolean               @default(true)
   sectionMappings LegalSectionKeyword[]
 
-  @@unique([text, type])
-  @@index([text])
+  @@unique([text, type], map: "uq_legal_keyword")
+  @@index([text], map: "idx_legal_keyword_text")
   @@map("legal_keyword")
 }
 
@@ -849,11 +782,11 @@ model LegalSectionKeyword {
   sectionCode     String       @map("section_code") @db.VarChar(100)
   legalKeywordId  BigInt       @map("legal_keyword_id")
   relevanceWeight Decimal?     @default(1.0) @map("relevance_weight") @db.Decimal(8, 4)
-  notes           String?      @db.Text
-  section         LegalSection @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction)
-  keyword         LegalKeyword @relation(fields: [legalKeywordId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  notes           String?
+  keyword         LegalKeyword @relation(fields: [legalKeywordId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lsk_keyword")
+  section         LegalSection @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction, map: "fk_lsk_section")
 
-  @@unique([actCode, sectionCode, legalKeywordId])
+  @@unique([actCode, sectionCode, legalKeywordId], map: "uq_lsk")
   @@map("legal_section_keyword")
 }
 
@@ -861,7 +794,7 @@ model RagCorpus {
   id          BigInt        @id @default(autoincrement()) @map("rag_corpus_id")
   name        String        @unique @map("corpus_name") @db.VarChar(255)
   type        String        @map("corpus_type") @db.VarChar(100)
-  description String?       @db.Text
+  description String?
   accessLevel String?       @map("access_level") @db.VarChar(100)
   active      Boolean       @default(true)
   createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamp(6)
@@ -879,41 +812,42 @@ model RagDocument {
   documentTitle         String               @map("document_title") @db.VarChar(500)
   documentType          String?              @map("document_type") @db.VarChar(100)
   documentDate          DateTime?            @map("document_date") @db.Date
-  sourceUri             String?              @map("source_uri") @db.Text
+  sourceUri             String?              @map("source_uri")
   sourceHash            String?              @map("source_hash") @db.VarChar(128)
   extractionStatus      String?              @map("extraction_status") @db.VarChar(100)
   sensitivityLevel      String?              @map("sensitivity_level") @db.VarChar(100)
-  summaryText           String?              @map("summary_text") @db.Text
+  summaryText           String?              @map("summary_text")
   createdAt             DateTime             @default(now()) @map("created_at") @db.Timestamp(6)
-  corpus                RagCorpus            @relation(fields: [ragCorpusId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  dataSource            DataSource?          @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  legalDocumentSource   LegalDocumentSource? @relation(fields: [legalDocumentSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  case                  CaseMaster?          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   chunks                RagChunk[]
+  case                  CaseMaster?          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rag_doc_case")
+  corpus                RagCorpus            @relation(fields: [ragCorpusId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rag_doc_corpus")
+  legalDocumentSource   LegalDocumentSource? @relation(fields: [legalDocumentSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rag_doc_legal")
+  dataSource            DataSource?          @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rag_doc_source")
 
-  @@index([ragCorpusId])
-  @@index([caseMasterId])
+  @@index([caseMasterId], map: "idx_rag_doc_case")
+  @@index([ragCorpusId], map: "idx_rag_doc_corpus")
   @@map("rag_document")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model RagChunk {
   id               BigInt               @id @default(autoincrement()) @map("rag_chunk_id")
   ragDocumentId    BigInt               @map("rag_document_id")
   chunkSequence    Int                  @map("chunk_sequence")
   chunkTitle       String?              @map("chunk_title") @db.VarChar(500)
-  chunkText        String               @map("chunk_text") @db.Text
+  chunkText        String               @map("chunk_text")
   tokenCount       Int?                 @map("token_count")
   languageCode     String?              @default("en") @map("language_code") @db.VarChar(20)
   pageNumber       Int?                 @map("page_number")
   sectionReference String?              @map("section_reference") @db.VarChar(255)
   qualityStatus    String?              @map("quality_status") @db.VarChar(100)
   createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamp(6)
-  document         RagDocument          @relation(fields: [ragDocumentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  document         RagDocument          @relation(fields: [ragDocumentId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rag_chunk_doc")
   embeddings       RagEmbeddingRef[]
   retrievalResults RagRetrievalResult[]
 
-  @@unique([ragDocumentId, chunkSequence])
-  @@index([ragDocumentId, chunkSequence])
+  @@unique([ragDocumentId, chunkSequence], map: "uq_rag_chunk_sequence")
+  @@index([ragDocumentId, chunkSequence], map: "idx_rag_chunk_doc_sequence")
   @@map("rag_chunk")
 }
 
@@ -923,14 +857,14 @@ model RagEmbeddingRef {
   embeddingModel        String   @map("embedding_model") @db.VarChar(255)
   embeddingModelVersion String?  @map("embedding_model_version") @db.VarChar(100)
   vectorStoreName       String?  @map("vector_store_name") @db.VarChar(255)
-  vectorStoreReference  String   @map("vector_store_reference") @db.Text
+  vectorStoreReference  String   @map("vector_store_reference")
   vectorDimension       Int?     @map("vector_dimension")
   generatedOn           DateTime @default(now()) @map("generated_on") @db.Timestamp(6)
   active                Boolean  @default(true)
-  chunk                 RagChunk @relation(fields: [ragChunkId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  chunk                 RagChunk @relation(fields: [ragChunkId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_embedding_chunk")
 
-  @@unique([ragChunkId, embeddingModel, embeddingModelVersion])
-  @@index([ragChunkId])
+  @@unique([ragChunkId, embeddingModel, embeddingModelVersion], map: "uq_embedding_ref")
+  @@index([ragChunkId], map: "idx_embedding_chunk")
   @@map("rag_embedding_ref")
 }
 
@@ -938,16 +872,16 @@ model RagRetrievalLog {
   id            BigInt               @id @default(autoincrement()) @map("rag_retrieval_log_id")
   employeeId    BigInt?              @map("employee_id")
   caseMasterId  BigInt?              @map("case_master_id")
-  queryText     String               @map("query_text") @db.Text
+  queryText     String               @map("query_text")
   intentLabel   String?              @map("intent_label") @db.VarChar(150)
   retrievedOn   DateTime             @default(now()) @map("retrieved_on") @db.Timestamp(6)
   modelVersion  String?              @map("model_version") @db.VarChar(100)
-  resultSummary String?              @map("result_summary") @db.Text
-  employee      Employee?            @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  case          CaseMaster?          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  resultSummary String?              @map("result_summary")
+  case          CaseMaster?          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rag_log_case")
+  employee      Employee?            @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rag_log_employee")
   results       RagRetrievalResult[]
 
-  @@index([caseMasterId, retrievedOn])
+  @@index([caseMasterId, retrievedOn], map: "idx_rag_log_case_time")
   @@map("rag_retrieval_log")
 }
 
@@ -957,12 +891,12 @@ model RagRetrievalResult {
   ragChunkId        BigInt          @map("rag_chunk_id")
   rankOrder         Int             @map("rank_order")
   similarityScore   Decimal?        @map("similarity_score") @db.Decimal(10, 6)
-  reasonText        String?         @map("reason_text") @db.Text
-  retrievalLog      RagRetrievalLog @relation(fields: [ragRetrievalLogId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  chunk             RagChunk        @relation(fields: [ragChunkId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reasonText        String?         @map("reason_text")
+  chunk             RagChunk        @relation(fields: [ragChunkId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rag_result_chunk")
+  retrievalLog      RagRetrievalLog @relation(fields: [ragRetrievalLogId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rag_result_log")
 
-  @@unique([ragRetrievalLogId, rankOrder])
-  @@index([ragRetrievalLogId, rankOrder])
+  @@unique([ragRetrievalLogId, rankOrder], map: "uq_rag_result_rank")
+  @@index([ragRetrievalLogId, rankOrder], map: "idx_rag_result_log_rank")
   @@map("rag_retrieval_result")
 }
 
@@ -976,10 +910,10 @@ model DataQualityIssue {
   fieldName          String?     @map("field_name") @db.VarChar(150)
   issueType          String      @map("issue_type") @db.VarChar(150)
   severity           String?     @db.VarChar(50)
-  issueDescription   String?     @map("issue_description") @db.Text
+  issueDescription   String?     @map("issue_description")
   detectedOn         DateTime    @default(now()) @map("detected_on") @db.Timestamp(6)
   resolutionStatus   String?     @default("open") @map("resolution_status") @db.VarChar(100)
-  dataSource         DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dataSource         DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dqi_source")
 
   @@map("data_quality_issue")
 }
@@ -997,11 +931,11 @@ model CaseFeatureSnapshot {
   arrestTotalDerived        Int?       @map("arrest_total_derived")
   chargesheetedTotalDerived Int?       @map("chargesheeted_total_derived")
   convictionTotalDerived    Int?       @map("conviction_total_derived")
-  textFeatureSummary        String?    @map("text_feature_summary") @db.Text
+  textFeatureSummary        String?    @map("text_feature_summary")
   sourceDataQualityLevel    String?    @map("source_data_quality_level") @db.VarChar(100)
-  case                      CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                      CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_feature_case")
 
-  @@unique([caseMasterId, featureSetName, featureSetVersion])
+  @@unique([caseMasterId, featureSetName, featureSetVersion], map: "uq_case_feature_version")
   @@map("case_feature_snapshot")
 }
 
@@ -1013,49 +947,50 @@ model GeoLocation {
   validatedLatitude         Decimal?    @map("validated_latitude") @db.Decimal(12, 8)
   validatedLongitude        Decimal?    @map("validated_longitude") @db.Decimal(12, 8)
   coordinateStatus          String?     @map("coordinate_status") @db.VarChar(100)
-  placeText                 String?     @map("place_text") @db.Text
+  placeText                 String?     @map("place_text")
   distanceFromPoliceStation String?     @map("distance_from_police_station") @db.VarChar(100)
   beatName                  String?     @map("beat_name") @db.VarChar(255)
   villageAreaName           String?     @map("village_area_name") @db.VarChar(255)
   geoConfidence             Decimal?    @map("geo_confidence") @db.Decimal(6, 4)
-  validationNotes           String?     @map("validation_notes") @db.Text
-  case                      CaseMaster? @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  validationNotes           String?     @map("validation_notes")
+  case                      CaseMaster? @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_geo_case")
 
-  @@index([caseMasterId])
-  @@index([validatedLatitude, validatedLongitude])
+  @@index([caseMasterId], map: "idx_geo_case")
+  @@index([validatedLatitude, validatedLongitude], map: "idx_geo_validated")
   @@map("geo_location")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model Evidence {
   id                    BigInt                   @id @default(autoincrement()) @map("evidence_id")
   caseMasterId          BigInt                   @map("case_master_id")
   evidenceType          String                   @map("evidence_type") @db.VarChar(150)
-  evidenceDescription   String?                  @map("evidence_description") @db.Text
+  evidenceDescription   String?                  @map("evidence_description")
   collectionDate        DateTime?                @map("collection_date") @db.Timestamp(6)
   collectedByEmployeeId BigInt?                  @map("collected_by_employee_id")
-  sourceLocationText    String?                  @map("source_location_text") @db.Text
+  sourceLocationText    String?                  @map("source_location_text")
   forensicStatus        String?                  @map("forensic_status") @db.VarChar(100)
   chainOfCustodyStatus  String?                  @map("chain_of_custody_status") @db.VarChar(100)
   evidenceConfidence    Decimal?                 @map("evidence_confidence") @db.Decimal(6, 4)
   dataSourceId          BigInt?                  @map("data_source_id")
   createdAt             DateTime                 @default(now()) @map("created_at") @db.Timestamp(6)
-  case                  CaseMaster               @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  collectedBy           Employee?                @relation(fields: [collectedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  dataSource            DataSource?              @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  propertyAssets        PropertyAsset[]
-  vehicles              Vehicle[]
-  digitalIdentifiers    PhoneDigitalIdentifier[]
+  addressHistory        AddressHistory[]
+  case                  CaseMaster               @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_evidence_case")
+  collectedBy           Employee?                @relation(fields: [collectedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_evidence_employee")
+  dataSource            DataSource?              @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_evidence_source")
   financialAccounts     FinancialAccount[]
   financialTransactions FinancialTransaction[]
-  weapons               Weapon[]
   forensicReports       ForensicReport[]
   gangMemberships       GangNetworkMember[]
-  socialRelationships   SocialRelationship[]
-  addressHistory        AddressHistory[]
   knowledgeGraphEdges   KgEdge[]
+  digitalIdentifiers    PhoneDigitalIdentifier[]
+  propertyAssets        PropertyAsset[]
+  socialRelationships   SocialRelationship[]
+  vehicles              Vehicle[]
+  weapons               Weapon[]
 
-  @@index([caseMasterId])
-  @@index([evidenceType])
+  @@index([caseMasterId], map: "idx_evidence_case")
+  @@index([evidenceType], map: "idx_evidence_type")
   @@map("evidence")
 }
 
@@ -1063,19 +998,19 @@ model PropertyAsset {
   id                   BigInt     @id @default(autoincrement()) @map("property_asset_id")
   caseMasterId         BigInt     @map("case_master_id")
   propertyType         String?    @map("property_type") @db.VarChar(150)
-  description          String?    @db.Text
+  description          String?
   estimatedValue       Decimal?   @map("estimated_value") @db.Decimal(18, 2)
   ownerVictimId        BigInt?    @map("owner_victim_id")
   recoveryStatus       String?    @map("recovery_status") @db.VarChar(100)
   stolenDate           DateTime?  @map("stolen_date") @db.Date
   recoveredDate        DateTime?  @map("recovered_date") @db.Date
-  recoveryLocationText String?    @map("recovery_location_text") @db.Text
+  recoveryLocationText String?    @map("recovery_location_text")
   evidenceId           BigInt?    @map("evidence_id")
-  case                 CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ownerVictim          Victim?    @relation(fields: [ownerVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  evidence             Evidence?  @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                 CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_property_case")
+  evidence             Evidence?  @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_property_evidence")
+  ownerVictim          Victim?    @relation(fields: [ownerVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_property_victim")
 
-  @@index([caseMasterId])
+  @@index([caseMasterId], map: "idx_property_case")
   @@map("property_asset")
 }
 
@@ -1092,13 +1027,13 @@ model Vehicle {
   accidentStatus         String?     @map("accident_status") @db.VarChar(100)
   recoveryStatus         String?     @map("recovery_status") @db.VarChar(100)
   evidenceId             BigInt?     @map("evidence_id")
-  case                   CaseMaster? @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ownerVictim            Victim?     @relation(fields: [ownerVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ownerAccused           Accused?    @relation(fields: [ownerAccusedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  evidence               Evidence?   @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ownerAccused           Accused?    @relation(fields: [ownerAccusedId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_vehicle_accused")
+  case                   CaseMaster? @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_vehicle_case")
+  evidence               Evidence?   @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_vehicle_evidence")
+  ownerVictim            Victim?     @relation(fields: [ownerVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_vehicle_victim")
 
-  @@index([caseMasterId])
-  @@index([registrationNumberHash])
+  @@index([caseMasterId], map: "idx_vehicle_case")
+  @@index([registrationNumberHash], map: "idx_vehicle_reg_hash")
   @@map("vehicle")
 }
 
@@ -1115,14 +1050,14 @@ model PhoneDigitalIdentifier {
   lastSeenDate        DateTime?    @map("last_seen_date") @db.Date
   verificationStatus  String?      @map("verification_status") @db.VarChar(100)
   evidenceId          BigInt?      @map("evidence_id")
-  case                CaseMaster?  @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  victim              Victim?      @relation(fields: [linkedVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  accused             Accused?     @relation(fields: [linkedAccusedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  complainant         Complainant? @relation(fields: [linkedComplainantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  evidence            Evidence?    @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accused             Accused?     @relation(fields: [linkedAccusedId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pdi_accused")
+  case                CaseMaster?  @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pdi_case")
+  complainant         Complainant? @relation(fields: [linkedComplainantId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pdi_complainant")
+  evidence            Evidence?    @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pdi_evidence")
+  victim              Victim?      @relation(fields: [linkedVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pdi_victim")
 
-  @@index([caseMasterId])
-  @@index([identifierHash])
+  @@index([caseMasterId], map: "idx_pdi_case")
+  @@index([identifierHash], map: "idx_pdi_identifier_hash")
   @@map("phone_digital_identifier")
 }
 
@@ -1137,14 +1072,14 @@ model FinancialAccount {
   kycStatus             String?                @map("kyc_status") @db.VarChar(100)
   freezeStatus          String?                @map("freeze_status") @db.VarChar(100)
   evidenceId            BigInt?                @map("evidence_id")
-  case                  CaseMaster?            @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ownerAccused          Accused?               @relation(fields: [ownerAccusedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ownerVictim           Victim?                @relation(fields: [ownerVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  evidence              Evidence?              @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ownerAccused          Accused?               @relation(fields: [ownerAccusedId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fin_account_accused")
+  case                  CaseMaster?            @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fin_account_case")
+  evidence              Evidence?              @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fin_account_evidence")
+  ownerVictim           Victim?                @relation(fields: [ownerVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fin_account_victim")
   outgoingTransactions  FinancialTransaction[] @relation("TransactionFromAccount")
   incomingTransactions  FinancialTransaction[] @relation("TransactionToAccount")
 
-  @@index([accountIdentifierHash])
+  @@index([accountIdentifierHash], map: "idx_fin_account_hash")
   @@map("financial_account")
 }
 
@@ -1161,15 +1096,15 @@ model FinancialTransaction {
   freezeStatus             String?           @map("freeze_status") @db.VarChar(100)
   recoveryStatus           String?           @map("recovery_status") @db.VarChar(100)
   evidenceId               BigInt?           @map("evidence_id")
-  case                     CaseMaster?       @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  fromAccount              FinancialAccount? @relation("TransactionFromAccount", fields: [fromFinancialAccountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  toAccount                FinancialAccount? @relation("TransactionToAccount", fields: [toFinancialAccountId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  evidence                 Evidence?         @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                     CaseMaster?       @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fin_txn_case")
+  evidence                 Evidence?         @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fin_txn_evidence")
+  fromAccount              FinancialAccount? @relation("TransactionFromAccount", fields: [fromFinancialAccountId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fin_txn_from")
+  toAccount                FinancialAccount? @relation("TransactionToAccount", fields: [toFinancialAccountId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fin_txn_to")
 
-  @@index([caseMasterId])
-  @@index([fromFinancialAccountId])
-  @@index([toFinancialAccountId])
-  @@index([transactionDateTime])
+  @@index([caseMasterId], map: "idx_fin_txn_case")
+  @@index([transactionDateTime], map: "idx_fin_txn_date")
+  @@index([fromFinancialAccountId], map: "idx_fin_txn_from")
+  @@index([toFinancialAccountId], map: "idx_fin_txn_to")
   @@map("financial_transaction")
 }
 
@@ -1177,19 +1112,19 @@ model Weapon {
   id              BigInt     @id @default(autoincrement()) @map("weapon_id")
   caseMasterId    BigInt     @map("case_master_id")
   weaponType      String?    @map("weapon_type") @db.VarChar(150)
-  description     String?    @db.Text
+  description     String?
   licenseStatus   String?    @map("license_status") @db.VarChar(100)
   recoveryStatus  String?    @map("recovery_status") @db.VarChar(100)
   recoveredDate   DateTime?  @map("recovered_date") @db.Date
   evidenceId      BigInt?    @map("evidence_id")
   linkedAccusedId BigInt?    @map("linked_accused_id")
   linkedVictimId  BigInt?    @map("linked_victim_id")
-  case            CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  evidence        Evidence?  @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  accused         Accused?   @relation(fields: [linkedAccusedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  victim          Victim?    @relation(fields: [linkedVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accused         Accused?   @relation(fields: [linkedAccusedId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_weapon_accused")
+  case            CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_weapon_case")
+  evidence        Evidence?  @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_weapon_evidence")
+  victim          Victim?    @relation(fields: [linkedVictimId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_weapon_victim")
 
-  @@index([caseMasterId])
+  @@index([caseMasterId], map: "idx_weapon_case")
   @@map("weapon")
 }
 
@@ -1200,16 +1135,16 @@ model DocumentAttachment {
   documentType         String?           @map("document_type") @db.VarChar(150)
   documentTitle        String?           @map("document_title") @db.VarChar(500)
   documentDate         DateTime?         @map("document_date") @db.Date
-  fileReference        String?           @map("file_reference") @db.Text
+  fileReference        String?           @map("file_reference")
   fileHash             String?           @map("file_hash") @db.VarChar(128)
   extractionStatus     String?           @map("extraction_status") @db.VarChar(100)
-  extractedTextSummary String?           @map("extracted_text_summary") @db.Text
+  extractedTextSummary String?           @map("extracted_text_summary")
   sensitivityLevel     String?           @map("sensitivity_level") @db.VarChar(100)
-  dataSource           DataSource?       @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  case                 CaseMaster?       @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  forensicReports      ForensicReport[]
   diaryEntries         CaseDiaryEntry[]
   courtProceedings     CourtProceeding[]
+  case                 CaseMaster?       @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_doc_attach_case")
+  dataSource           DataSource?       @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_doc_attach_source")
+  forensicReports      ForensicReport[]
 
   @@map("document_attachment")
 }
@@ -1222,15 +1157,15 @@ model ForensicReport {
   testType             String?             @map("test_type") @db.VarChar(150)
   requestDate          DateTime?           @map("request_date") @db.Date
   reportDate           DateTime?           @map("report_date") @db.Date
-  resultSummary        String?             @map("result_summary") @db.Text
+  resultSummary        String?             @map("result_summary")
   resultStatus         String?             @map("result_status") @db.VarChar(100)
   confidenceLevel      String?             @map("confidence_level") @db.VarChar(100)
   documentAttachmentId BigInt?             @map("document_attachment_id")
-  case                 CaseMaster          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  evidence             Evidence?           @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  document             DocumentAttachment? @relation(fields: [documentAttachmentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                 CaseMaster          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_forensic_case")
+  document             DocumentAttachment? @relation(fields: [documentAttachmentId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_forensic_doc")
+  evidence             Evidence?           @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_forensic_evidence")
 
-  @@index([caseMasterId])
+  @@index([caseMasterId], map: "idx_forensic_case")
   @@map("forensic_report")
 }
 
@@ -1243,31 +1178,32 @@ model Witness {
   witnessRole            String?       @map("witness_role") @db.VarChar(150)
   statementDate          DateTime?     @map("statement_date") @db.Date
   protectionStatus       String?       @map("protection_status") @db.VarChar(100)
-  credibilityNotes       String?       @map("credibility_notes") @db.Text
+  credibilityNotes       String?       @map("credibility_notes")
   contactRestrictionFlag Boolean?      @default(false) @map("contact_restriction_flag")
-  case                   CaseMaster    @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  gender                 GenderMaster? @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                   CaseMaster    @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_witness_case")
+  gender                 GenderMaster? @relation(fields: [genderId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_witness_gender")
 
-  @@index([caseMasterId])
+  @@index([caseMasterId], map: "idx_witness_case")
   @@map("witness")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model CaseDiaryEntry {
   id               BigInt              @id @default(autoincrement()) @map("case_diary_entry_id")
   caseMasterId     BigInt              @map("case_master_id")
   employeeId       BigInt?             @map("employee_id")
   entryDateTime    DateTime            @map("entry_date_time") @db.Timestamp(6)
   entryType        String?             @map("entry_type") @db.VarChar(150)
-  entryText        String?             @map("entry_text") @db.Text
-  actionTaken      String?             @map("action_taken") @db.Text
-  nextAction       String?             @map("next_action") @db.Text
+  entryText        String?             @map("entry_text")
+  actionTaken      String?             @map("action_taken")
+  nextAction       String?             @map("next_action")
   sourceDocumentId BigInt?             @map("source_document_id")
   sensitivityLevel String?             @map("sensitivity_level") @db.VarChar(100)
-  case             CaseMaster          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  employee         Employee?           @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sourceDocument   DocumentAttachment? @relation(fields: [sourceDocumentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case             CaseMaster          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_diary_case")
+  sourceDocument   DocumentAttachment? @relation(fields: [sourceDocumentId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_diary_document")
+  employee         Employee?           @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_diary_employee")
 
-  @@index([caseMasterId, entryDateTime])
+  @@index([caseMasterId, entryDateTime], map: "idx_diary_case_date")
   @@map("case_diary_entry")
 }
 
@@ -1277,15 +1213,15 @@ model CourtProceeding {
   courtId              BigInt?             @map("court_id")
   proceedingDate       DateTime?           @map("proceeding_date") @db.Date
   proceedingType       String?             @map("proceeding_type") @db.VarChar(150)
-  orderSummary         String?             @map("order_summary") @db.Text
+  orderSummary         String?             @map("order_summary")
   nextDate             DateTime?           @map("next_date") @db.Date
   proceedingStatus     String?             @map("proceeding_status") @db.VarChar(100)
   documentAttachmentId BigInt?             @map("document_attachment_id")
-  case                 CaseMaster          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  court                Court?              @relation(fields: [courtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  document             DocumentAttachment? @relation(fields: [documentAttachmentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                 CaseMaster          @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_court_proc_case")
+  court                Court?              @relation(fields: [courtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_court_proc_court")
+  document             DocumentAttachment? @relation(fields: [documentAttachmentId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_court_proc_doc")
 
-  @@index([caseMasterId, proceedingDate])
+  @@index([caseMasterId, proceedingDate], map: "idx_court_proc_case_date")
   @@map("court_proceeding")
 }
 
@@ -1296,12 +1232,12 @@ model Jail {
   stateId         BigInt?         @map("state_id")
   capacity        Int?
   active          Boolean         @default(true)
-  notes           String?         @db.Text
-  district        District?       @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  state           State?          @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  notes           String?
   custodyStatuses CustodyStatus[]
+  district        District?       @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_jail_district")
+  state           State?          @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_jail_state")
 
-  @@unique([name, districtId])
+  @@unique([name, districtId], map: "uq_jail_name_district")
   @@map("jail")
 }
 
@@ -1314,14 +1250,14 @@ model CustodyStatus {
   custodyType     String?    @map("custody_type") @db.VarChar(150)
   startDate       DateTime?  @map("start_date") @db.Date
   endDate         DateTime?  @map("end_date") @db.Date
-  bailConditions  String?    @map("bail_conditions") @db.Text
-  statusNotes     String?    @map("status_notes") @db.Text
-  case            CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  accused         Accused    @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  court           Court?     @relation(fields: [courtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  jail            Jail?      @relation(fields: [jailId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  bailConditions  String?    @map("bail_conditions")
+  statusNotes     String?    @map("status_notes")
+  accused         Accused    @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_custody_accused")
+  case            CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_custody_case")
+  court           Court?     @relation(fields: [courtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_custody_court")
+  jail            Jail?      @relation(fields: [jailId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_custody_jail")
 
-  @@index([accusedMasterId, startDate, endDate])
+  @@index([accusedMasterId, startDate, endDate], map: "idx_custody_accused")
   @@map("custody_status")
 }
 
@@ -1330,18 +1266,18 @@ model RepeatOffenderProfile {
   profileNameHash    String?                     @map("profile_name_hash") @db.VarChar(256)
   identityConfidence Decimal?                    @map("identity_confidence") @db.Decimal(6, 4)
   primaryDistrictId  BigInt?                     @map("primary_district_id")
-  knownAliasText     String?                     @map("known_alias_text") @db.Text
+  knownAliasText     String?                     @map("known_alias_text")
   firstKnownCaseDate DateTime?                   @map("first_known_case_date") @db.Date
   lastKnownCaseDate  DateTime?                   @map("last_known_case_date") @db.Date
   totalLinkedCases   Int?                        @default(0) @map("total_linked_cases")
   totalConvictions   Int?                        @default(0) @map("total_convictions")
   riskLevel          String?                     @map("risk_level") @db.VarChar(100)
   profileStatus      String?                     @map("profile_status") @db.VarChar(100)
-  primaryDistrict    District?                   @relation(fields: [primaryDistrictId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  accusedLinks       RepeatOffenderAccusedLink[]
   gangMemberships    GangNetworkMember[]
+  accusedLinks       RepeatOffenderAccusedLink[]
+  primaryDistrict    District?                   @relation(fields: [primaryDistrictId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rop_district")
 
-  @@index([primaryDistrictId])
+  @@index([primaryDistrictId], map: "idx_rop_district")
   @@map("repeat_offender_profile")
 }
 
@@ -1354,21 +1290,21 @@ model RepeatOffenderAccusedLink {
   matchConfidence         Decimal?              @map("match_confidence") @db.Decimal(6, 4)
   reviewedByEmployeeId    BigInt?               @map("reviewed_by_employee_id")
   reviewStatus            String?               @default("pending") @map("review_status") @db.VarChar(100)
-  profile                 RepeatOffenderProfile @relation(fields: [repeatOffenderProfileId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  accused                 Accused               @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  case                    CaseMaster            @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  reviewedBy              Employee?             @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accused                 Accused               @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_roal_accused")
+  case                    CaseMaster            @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_roal_case")
+  profile                 RepeatOffenderProfile @relation(fields: [repeatOffenderProfileId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_roal_profile")
+  reviewedBy              Employee?             @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_roal_reviewer")
 
-  @@unique([repeatOffenderProfileId, accusedMasterId, caseMasterId])
-  @@index([accusedMasterId])
-  @@index([caseMasterId])
+  @@unique([repeatOffenderProfileId, accusedMasterId, caseMasterId], map: "uq_roal")
+  @@index([accusedMasterId], map: "idx_roal_accused")
+  @@index([caseMasterId], map: "idx_roal_case")
   @@map("repeat_offender_accused_link")
 }
 
 model GangNetwork {
   id                BigInt              @id @default(autoincrement()) @map("gang_network_id")
   networkName       String?             @map("network_name") @db.VarChar(255)
-  aliasNames        String?             @map("alias_names") @db.Text
+  aliasNames        String?             @map("alias_names")
   primaryDistrictId BigInt?             @map("primary_district_id")
   primaryUnitId     BigInt?             @map("primary_unit_id")
   knownCrimeHeadId  BigInt?             @map("known_crime_head_id")
@@ -1376,13 +1312,13 @@ model GangNetwork {
   activeToDate      DateTime?           @map("active_to_date") @db.Date
   threatLevel       String?             @map("threat_level") @db.VarChar(100)
   confidenceScore   Decimal?            @map("confidence_score") @db.Decimal(6, 4)
-  notes             String?             @db.Text
-  primaryDistrict   District?           @relation(fields: [primaryDistrictId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  primaryUnit       Unit?               @relation(fields: [primaryUnitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  knownCrimeHead    CrimeHead?          @relation(fields: [knownCrimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  notes             String?
+  knownCrimeHead    CrimeHead?          @relation(fields: [knownCrimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_gang_crime_head")
+  primaryDistrict   District?           @relation(fields: [primaryDistrictId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_gang_district")
+  primaryUnit       Unit?               @relation(fields: [primaryUnitId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_gang_unit")
   members           GangNetworkMember[]
 
-  @@index([primaryDistrictId])
+  @@index([primaryDistrictId], map: "idx_gang_district")
   @@map("gang_network")
 }
 
@@ -1396,13 +1332,13 @@ model GangNetworkMember {
   endDate                 DateTime?              @map("end_date") @db.Date
   confidenceScore         Decimal?               @map("confidence_score") @db.Decimal(6, 4)
   sourceEvidenceId        BigInt?                @map("source_evidence_id")
-  network                 GangNetwork            @relation(fields: [gangNetworkId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  accused                 Accused?               @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  repeatOffenderProfile   RepeatOffenderProfile? @relation(fields: [repeatOffenderProfileId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sourceEvidence          Evidence?              @relation(fields: [sourceEvidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  accused                 Accused?               @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_gnm_accused")
+  sourceEvidence          Evidence?              @relation(fields: [sourceEvidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_gnm_evidence")
+  network                 GangNetwork            @relation(fields: [gangNetworkId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_gnm_network")
+  repeatOffenderProfile   RepeatOffenderProfile? @relation(fields: [repeatOffenderProfileId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_gnm_profile")
 
-  @@index([accusedMasterId])
-  @@index([repeatOffenderProfileId])
+  @@index([accusedMasterId], map: "idx_gang_member_accused")
+  @@index([repeatOffenderProfileId], map: "idx_gang_member_profile")
   @@map("gang_network_member")
 }
 
@@ -1413,17 +1349,17 @@ model ModusOperandi {
   patternType       String?    @map("pattern_type") @db.VarChar(150)
   targetType        String?    @map("target_type") @db.VarChar(150)
   entryMethod       String?    @map("entry_method") @db.VarChar(150)
-  toolsUsed         String?    @map("tools_used") @db.Text
-  deceptionPattern  String?    @map("deception_pattern") @db.Text
+  toolsUsed         String?    @map("tools_used")
+  deceptionPattern  String?    @map("deception_pattern")
   timePattern       String?    @map("time_pattern") @db.VarChar(150)
-  victimApproach    String?    @map("victim_approach") @db.Text
+  victimApproach    String?    @map("victim_approach")
   confidenceScore   Decimal?   @map("confidence_score") @db.Decimal(6, 4)
-  extractedFromText String?    @map("extracted_from_text") @db.Text
-  case              CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  crimeHead         CrimeHead? @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  extractedFromText String?    @map("extracted_from_text")
+  case              CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mo_case")
+  crimeHead         CrimeHead? @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mo_crime_head")
 
-  @@index([caseMasterId])
-  @@index([patternType, targetType, timePattern])
+  @@index([caseMasterId], map: "idx_mo_case")
+  @@index([patternType, targetType, timePattern], map: "idx_mo_pattern")
   @@map("modus_operandi")
 }
 
@@ -1439,12 +1375,12 @@ model SocialRelationship {
   sourceEvidenceId  BigInt?     @map("source_evidence_id")
   dataSourceId      BigInt?     @map("data_source_id")
   reviewStatus      String?     @default("pending") @map("review_status") @db.VarChar(100)
-  case              CaseMaster? @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sourceEvidence    Evidence?   @relation(fields: [sourceEvidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  dataSource        DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case              CaseMaster? @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_social_case")
+  sourceEvidence    Evidence?   @relation(fields: [sourceEvidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_social_evidence")
+  dataSource        DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_social_source")
 
-  @@index([personAType, personAOfficialId])
-  @@index([personBType, personBOfficialId])
+  @@index([personAType, personAOfficialId], map: "idx_social_person_a")
+  @@index([personBType, personBOfficialId], map: "idx_social_person_b")
   @@map("social_relationship")
 }
 
@@ -1452,7 +1388,7 @@ model AddressHistory {
   id                 BigInt    @id @default(autoincrement()) @map("address_history_id")
   entityType         String    @map("entity_type") @db.VarChar(100)
   entityOfficialId   BigInt    @map("entity_official_id")
-  addressText        String?   @map("address_text") @db.Text
+  addressText        String?   @map("address_text")
   districtId         BigInt?   @map("district_id")
   stateId            BigInt?   @map("state_id")
   latitude           Decimal?  @db.Decimal(12, 8)
@@ -1461,11 +1397,11 @@ model AddressHistory {
   validToDate        DateTime? @map("valid_to_date") @db.Date
   verificationStatus String?   @map("verification_status") @db.VarChar(100)
   sourceEvidenceId   BigInt?   @map("source_evidence_id")
-  district           District? @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  state              State?    @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sourceEvidence     Evidence? @relation(fields: [sourceEvidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  district           District? @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_district")
+  sourceEvidence     Evidence? @relation(fields: [sourceEvidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_evidence")
+  state              State?    @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_state")
 
-  @@index([entityType, entityOfficialId])
+  @@index([entityType, entityOfficialId], map: "idx_address_entity")
   @@map("address_history")
 }
 
@@ -1476,11 +1412,11 @@ model Organization {
   registrationIdentifierHash String?   @map("registration_identifier_hash") @db.VarChar(256)
   districtId                 BigInt?   @map("district_id")
   stateId                    BigInt?   @map("state_id")
-  addressText                String?   @map("address_text") @db.Text
+  addressText                String?   @map("address_text")
   roleInCase                 String?   @map("role_in_case") @db.VarChar(150)
   verificationStatus         String?   @map("verification_status") @db.VarChar(100)
-  district                   District? @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  state                      State?    @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  district                   District? @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_org_district")
+  state                      State?    @relation(fields: [stateId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_org_state")
 
   @@map("organization")
 }
@@ -1494,7 +1430,7 @@ model Hotspot {
   crimeSubHeadId    BigInt?          @map("crime_sub_head_id")
   timeWindowStart   DateTime?        @map("time_window_start") @db.Timestamp(6)
   timeWindowEnd     DateTime?        @map("time_window_end") @db.Timestamp(6)
-  boundaryReference String?          @map("boundary_reference") @db.Text
+  boundaryReference String?          @map("boundary_reference")
   centerLatitude    Decimal?         @map("center_latitude") @db.Decimal(12, 8)
   centerLongitude   Decimal?         @map("center_longitude") @db.Decimal(12, 8)
   riskLevel         String?          @map("risk_level") @db.VarChar(100)
@@ -1502,18 +1438,18 @@ model Hotspot {
   trendDirection    String?          @map("trend_direction") @db.VarChar(100)
   generatedOn       DateTime         @default(now()) @map("generated_on") @db.Timestamp(6)
   modelVersion      String?          @map("model_version") @db.VarChar(100)
-  district          District?        @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  unit              Unit?            @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  crimeHead         CrimeHead?       @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  crimeSubHead      CrimeSubHead?    @relation(fields: [crimeSubHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  cases             HotspotCase[]
-  riskScores        RiskScore[]
-  recommendations   Recommendation[]
   alerts            Alert[]
+  district          District?        @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_hotspot_district")
+  crimeHead         CrimeHead?       @relation(fields: [crimeHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_hotspot_head")
+  crimeSubHead      CrimeSubHead?    @relation(fields: [crimeSubHeadId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_hotspot_sub_head")
+  unit              Unit?            @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_hotspot_unit")
+  cases             HotspotCase[]
+  recommendations   Recommendation[]
+  riskScores        RiskScore[]
 
-  @@index([districtId, timeWindowStart, timeWindowEnd])
-  @@index([unitId, timeWindowStart, timeWindowEnd])
-  @@index([riskLevel, confidenceScore])
+  @@index([districtId, timeWindowStart, timeWindowEnd], map: "idx_hotspot_district_time")
+  @@index([riskLevel, confidenceScore], map: "idx_hotspot_risk")
+  @@index([unitId, timeWindowStart, timeWindowEnd], map: "idx_hotspot_unit_time")
   @@map("hotspot")
 }
 
@@ -1522,12 +1458,12 @@ model HotspotCase {
   hotspotId         BigInt     @map("hotspot_id")
   caseMasterId      BigInt     @map("case_master_id")
   contributionScore Decimal?   @map("contribution_score") @db.Decimal(6, 4)
-  matchReason       String?    @map("match_reason") @db.Text
-  hotspot           Hotspot    @relation(fields: [hotspotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  case              CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  matchReason       String?    @map("match_reason")
+  case              CaseMaster @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_hotspot_case_case")
+  hotspot           Hotspot    @relation(fields: [hotspotId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_hotspot_case_hotspot")
 
-  @@unique([hotspotId, caseMasterId])
-  @@index([caseMasterId])
+  @@unique([hotspotId, caseMasterId], map: "uq_hotspot_case")
+  @@index([caseMasterId], map: "idx_hotspot_case_case")
   @@map("hotspot_case")
 }
 
@@ -1542,24 +1478,24 @@ model RiskScore {
   scoreType            String           @map("score_type") @db.VarChar(150)
   scoreValue           Decimal?         @map("score_value") @db.Decimal(10, 4)
   riskLevel            String?          @map("risk_level") @db.VarChar(100)
-  explanationText      String?          @map("explanation_text") @db.Text
+  explanationText      String?          @map("explanation_text")
   confidenceScore      Decimal?         @map("confidence_score") @db.Decimal(6, 4)
   modelVersion         String?          @map("model_version") @db.VarChar(100)
   generatedOn          DateTime         @default(now()) @map("generated_on") @db.Timestamp(6)
   reviewStatus         String?          @default("pending") @map("review_status") @db.VarChar(100)
   reviewedByEmployeeId BigInt?          @map("reviewed_by_employee_id")
-  case                 CaseMaster?      @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  accused              Accused?         @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  victim               Victim?          @relation(fields: [victimMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  unit                 Unit?            @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  hotspot              Hotspot?         @relation(fields: [hotspotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  reviewedBy           Employee?        @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  recommendations      Recommendation[]
   alerts               Alert[]
+  recommendations      Recommendation[]
+  accused              Accused?         @relation(fields: [accusedMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_risk_accused")
+  case                 CaseMaster?      @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_risk_case")
+  hotspot              Hotspot?         @relation(fields: [hotspotId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_risk_hotspot")
+  reviewedBy           Employee?        @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_risk_reviewer")
+  unit                 Unit?            @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_risk_unit")
+  victim               Victim?          @relation(fields: [victimMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_risk_victim")
 
-  @@index([caseMasterId, scoreType, generatedOn])
-  @@index([accusedMasterId, scoreType, generatedOn])
-  @@index([hotspotId, scoreType, generatedOn])
+  @@index([accusedMasterId, scoreType, generatedOn], map: "idx_risk_accused")
+  @@index([caseMasterId, scoreType, generatedOn], map: "idx_risk_case")
+  @@index([hotspotId, scoreType, generatedOn], map: "idx_risk_hotspot")
   @@map("risk_score")
 }
 
@@ -1569,27 +1505,27 @@ model Recommendation {
   hotspotId            BigInt?                      @map("hotspot_id")
   riskScoreId          BigInt?                      @map("risk_score_id")
   recommendationType   String                       @map("recommendation_type") @db.VarChar(150)
-  recommendationText   String                       @map("recommendation_text") @db.Text
-  rationaleText        String?                      @map("rationale_text") @db.Text
+  recommendationText   String                       @map("recommendation_text")
+  rationaleText        String?                      @map("rationale_text")
   confidenceScore      Decimal?                     @map("confidence_score") @db.Decimal(6, 4)
   priorityLevel        String?                      @map("priority_level") @db.VarChar(100)
   modelVersion         String?                      @map("model_version") @db.VarChar(100)
   generatedOn          DateTime                     @default(now()) @map("generated_on") @db.Timestamp(6)
   status               String?                      @default("pending") @db.VarChar(100)
   reviewedByEmployeeId BigInt?                      @map("reviewed_by_employee_id")
-  reviewNotes          String?                      @map("review_notes") @db.Text
-  case                 CaseMaster?                  @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  hotspot              Hotspot?                     @relation(fields: [hotspotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  riskScore            RiskScore?                   @relation(fields: [riskScoreId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  reviewedBy           Employee?                    @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  legalSections        RecommendationLegalSection[]
+  reviewNotes          String?                      @map("review_notes")
   alerts               Alert[]
-  tasks                Task[]
   chatMessages         ChatMessage[]
+  case                 CaseMaster?                  @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reco_case")
+  hotspot              Hotspot?                     @relation(fields: [hotspotId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reco_hotspot")
+  reviewedBy           Employee?                    @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reco_reviewer")
+  riskScore            RiskScore?                   @relation(fields: [riskScoreId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reco_risk")
+  legalSections        RecommendationLegalSection[]
   searchRequests       SearchRequest[]
+  tasks                Task[]
 
-  @@index([caseMasterId, status, generatedOn])
-  @@index([hotspotId, status, generatedOn])
+  @@index([caseMasterId, status, generatedOn], map: "idx_reco_case_status")
+  @@index([hotspotId, status, generatedOn], map: "idx_reco_hotspot_status")
   @@map("recommendation")
 }
 
@@ -1599,13 +1535,13 @@ model RecommendationLegalSection {
   actCode              String         @map("act_code") @db.VarChar(50)
   sectionCode          String         @map("section_code") @db.VarChar(100)
   recommendationAction String         @map("recommendation_action") @db.VarChar(100)
-  reasonText           String?        @map("reason_text") @db.Text
+  reasonText           String?        @map("reason_text")
   confidenceScore      Decimal?       @map("confidence_score") @db.Decimal(6, 4)
-  recommendation       Recommendation @relation(fields: [recommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  section              LegalSection   @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction)
+  recommendation       Recommendation @relation(fields: [recommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reco_legal_reco")
+  section              LegalSection   @relation(fields: [actCode, sectionCode], references: [actCode, sectionCode], onDelete: NoAction, onUpdate: NoAction, map: "fk_reco_legal_section")
 
-  @@unique([recommendationId, actCode, sectionCode, recommendationAction])
-  @@index([actCode, sectionCode])
+  @@unique([recommendationId, actCode, sectionCode, recommendationAction], map: "uq_reco_legal")
+  @@index([actCode, sectionCode], map: "idx_reco_legal_section")
   @@map("recommendation_legal_section")
 }
 
@@ -1615,18 +1551,18 @@ model CaseSimilarity {
   matchedCaseMasterId  BigInt     @map("matched_case_master_id")
   similarityScore      Decimal    @map("similarity_score") @db.Decimal(10, 6)
   similarityType       String?    @map("similarity_type") @db.VarChar(150)
-  reasonFeatures       String?    @map("reason_features") @db.Text
+  reasonFeatures       String?    @map("reason_features")
   modelVersion         String?    @map("model_version") @db.VarChar(100)
   generatedOn          DateTime   @default(now()) @map("generated_on") @db.Timestamp(6)
   reviewStatus         String?    @default("pending") @map("review_status") @db.VarChar(100)
   reviewedByEmployeeId BigInt?    @map("reviewed_by_employee_id")
-  sourceCase           CaseMaster @relation("SimilaritySourceCase", fields: [sourceCaseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  matchedCase          CaseMaster @relation("SimilarityMatchedCase", fields: [matchedCaseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  reviewedBy           Employee?  @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  matchedCase          CaseMaster @relation("SimilarityMatchedCase", fields: [matchedCaseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_similarity_match_case")
+  reviewedBy           Employee?  @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_similarity_reviewer")
+  sourceCase           CaseMaster @relation("SimilaritySourceCase", fields: [sourceCaseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_similarity_source_case")
 
-  @@unique([sourceCaseMasterId, matchedCaseMasterId, similarityType])
-  @@index([sourceCaseMasterId, similarityScore(sort: Desc)])
-  @@index([matchedCaseMasterId, similarityScore(sort: Desc)])
+  @@unique([sourceCaseMasterId, matchedCaseMasterId, similarityType], map: "uq_case_similarity")
+  @@index([matchedCaseMasterId, similarityScore(sort: Desc)], map: "idx_similarity_match")
+  @@index([sourceCaseMasterId, similarityScore(sort: Desc)], map: "idx_similarity_source")
   @@map("case_similarity")
 }
 
@@ -1638,12 +1574,12 @@ model FeatureVectorRef {
   vectorPurpose        String      @map("vector_purpose") @db.VarChar(150)
   modelVersion         String?     @map("model_version") @db.VarChar(100)
   generatedOn          DateTime    @default(now()) @map("generated_on") @db.Timestamp(6)
-  vectorStoreReference String      @map("vector_store_reference") @db.Text
-  featureSummary       String?     @map("feature_summary") @db.Text
+  vectorStoreReference String      @map("vector_store_reference")
+  featureSummary       String?     @map("feature_summary")
   dataSourceId         BigInt?     @map("data_source_id")
-  dataSource           DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dataSource           DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_feature_source")
 
-  @@index([entityType, entityOfficialId, vectorPurpose])
+  @@index([entityType, entityOfficialId, vectorPurpose], map: "idx_feature_vector_entity")
   @@map("feature_vector_ref")
 }
 
@@ -1656,20 +1592,20 @@ model Alert {
   riskScoreId          BigInt?         @map("risk_score_id")
   recommendationId     BigInt?         @map("recommendation_id")
   severity             String?         @db.VarChar(100)
-  alertText            String          @map("alert_text") @db.Text
+  alertText            String          @map("alert_text")
   generatedOn          DateTime        @default(now()) @map("generated_on") @db.Timestamp(6)
   status               String?         @default("open") @db.VarChar(100)
   assignedToEmployeeId BigInt?         @map("assigned_to_employee_id")
-  case                 CaseMaster?     @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  unit                 Unit?           @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  hotspot              Hotspot?        @relation(fields: [hotspotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  riskScore            RiskScore?      @relation(fields: [riskScoreId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  recommendation       Recommendation? @relation(fields: [recommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  assignedTo           Employee?       @relation(fields: [assignedToEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assignedTo           Employee?       @relation(fields: [assignedToEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_alert_assignee")
+  case                 CaseMaster?     @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_alert_case")
+  hotspot              Hotspot?        @relation(fields: [hotspotId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_alert_hotspot")
+  recommendation       Recommendation? @relation(fields: [recommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_alert_reco")
+  riskScore            RiskScore?      @relation(fields: [riskScoreId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_alert_risk")
+  unit                 Unit?           @relation(fields: [unitId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_alert_unit")
   tasks                Task[]
 
-  @@index([status, severity, generatedOn])
-  @@index([assignedToEmployeeId, status])
+  @@index([assignedToEmployeeId, status], map: "idx_alert_assignee")
+  @@index([status, severity, generatedOn], map: "idx_alert_status_severity")
   @@map("alert")
 }
 
@@ -1680,19 +1616,19 @@ model Task {
   alertId              BigInt?         @map("alert_id")
   assignedToEmployeeId BigInt?         @map("assigned_to_employee_id")
   taskTitle            String          @map("task_title") @db.VarChar(255)
-  taskDescription      String?         @map("task_description") @db.Text
+  taskDescription      String?         @map("task_description")
   priorityLevel        String?         @map("priority_level") @db.VarChar(100)
   dueDate              DateTime?       @map("due_date") @db.Date
   status               String?         @default("open") @db.VarChar(100)
-  closureNotes         String?         @map("closure_notes") @db.Text
+  closureNotes         String?         @map("closure_notes")
   createdAt            DateTime        @default(now()) @map("created_at") @db.Timestamp(6)
-  case                 CaseMaster?     @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  recommendation       Recommendation? @relation(fields: [recommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  alert                Alert?          @relation(fields: [alertId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  assignedTo           Employee?       @relation(fields: [assignedToEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  alert                Alert?          @relation(fields: [alertId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_task_alert")
+  assignedTo           Employee?       @relation(fields: [assignedToEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_task_assignee")
+  case                 CaseMaster?     @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_task_case")
+  recommendation       Recommendation? @relation(fields: [recommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_task_reco")
 
-  @@index([assignedToEmployeeId, status, dueDate])
-  @@index([caseMasterId, status])
+  @@index([assignedToEmployeeId, status, dueDate], map: "idx_task_assignee_status")
+  @@index([caseMasterId, status], map: "idx_task_case_status")
   @@map("task")
 }
 
@@ -1709,12 +1645,12 @@ model ModelAuditLog {
   generatedOn           DateTime      @default(now()) @map("generated_on") @db.Timestamp(6)
   triggeredByEmployeeId BigInt?       @map("triggered_by_employee_id")
   reviewStatus          String?       @default("pending") @map("review_status") @db.VarChar(100)
-  reviewNotes           String?       @map("review_notes") @db.Text
-  triggeredBy           Employee?     @relation(fields: [triggeredByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviewNotes           String?       @map("review_notes")
   chatMessages          ChatMessage[]
+  triggeredBy           Employee?     @relation(fields: [triggeredByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_audit_employee")
 
-  @@index([outputEntityType, outputEntityId])
-  @@index([inputEntityType, inputEntityId])
+  @@index([inputEntityType, inputEntityId], map: "idx_model_audit_input")
+  @@index([outputEntityType, outputEntityId], map: "idx_model_audit_output")
   @@map("model_audit_log")
 }
 
@@ -1727,13 +1663,13 @@ model ChatSession {
   sessionPurpose         String?         @map("session_purpose") @db.VarChar(150)
   securityClassification String?         @map("security_classification") @db.VarChar(100)
   modelVersion           String?         @map("model_version") @db.VarChar(100)
-  employee               Employee?       @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  case                   CaseMaster?     @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   messages               ChatMessage[]
+  case                   CaseMaster?     @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_chat_session_case")
+  employee               Employee?       @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_chat_session_employee")
   searchRequests         SearchRequest[]
 
-  @@index([employeeId, sessionStartedOn])
-  @@index([caseMasterId, sessionStartedOn])
+  @@index([caseMasterId, sessionStartedOn], map: "idx_chat_session_case")
+  @@index([employeeId, sessionStartedOn], map: "idx_chat_session_employee")
   @@map("chat_session")
 }
 
@@ -1742,16 +1678,16 @@ model ChatMessage {
   chatSessionId          BigInt          @map("chat_session_id")
   messageSequence        Int             @map("message_sequence")
   senderRole             String          @map("sender_role") @db.VarChar(50)
-  messageText            String          @map("message_text") @db.Text
+  messageText            String          @map("message_text")
   createdOn              DateTime        @default(now()) @map("created_on") @db.Timestamp(6)
   linkedRecommendationId BigInt?         @map("linked_recommendation_id")
   linkedAuditLogId       BigInt?         @map("linked_audit_log_id")
-  session                ChatSession     @relation(fields: [chatSessionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  linkedRecommendation   Recommendation? @relation(fields: [linkedRecommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  linkedAuditLog         ModelAuditLog?  @relation(fields: [linkedAuditLogId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  linkedAuditLog         ModelAuditLog?  @relation(fields: [linkedAuditLogId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_chat_message_audit")
+  linkedRecommendation   Recommendation? @relation(fields: [linkedRecommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_chat_message_reco")
+  session                ChatSession     @relation(fields: [chatSessionId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_chat_message_session")
 
-  @@unique([chatSessionId, messageSequence])
-  @@index([chatSessionId, messageSequence])
+  @@unique([chatSessionId, messageSequence], map: "uq_chat_message_sequence")
+  @@index([chatSessionId, messageSequence], map: "idx_chat_message_session")
   @@map("chat_message")
 }
 
@@ -1759,18 +1695,18 @@ model SearchRequest {
   id                     BigInt          @id @default(autoincrement()) @map("search_request_id")
   employeeId             BigInt?         @map("employee_id")
   caseMasterId           BigInt?         @map("case_master_id")
-  searchText             String          @map("search_text") @db.Text
-  searchFiltersSummary   String?         @map("search_filters_summary") @db.Text
+  searchText             String          @map("search_text")
+  searchFiltersSummary   String?         @map("search_filters_summary")
   requestedOn            DateTime        @default(now()) @map("requested_on") @db.Timestamp(6)
-  resultSummary          String?         @map("result_summary") @db.Text
+  resultSummary          String?         @map("result_summary")
   linkedChatSessionId    BigInt?         @map("linked_chat_session_id")
   linkedRecommendationId BigInt?         @map("linked_recommendation_id")
-  employee               Employee?       @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  case                   CaseMaster?     @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  linkedChatSession      ChatSession?    @relation(fields: [linkedChatSessionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  linkedRecommendation   Recommendation? @relation(fields: [linkedRecommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  case                   CaseMaster?     @relation(fields: [caseMasterId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_search_case")
+  linkedChatSession      ChatSession?    @relation(fields: [linkedChatSessionId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_search_chat")
+  employee               Employee?       @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_search_employee")
+  linkedRecommendation   Recommendation? @relation(fields: [linkedRecommendationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_search_reco")
 
-  @@index([employeeId, requestedOn])
+  @@index([employeeId, requestedOn], map: "idx_search_employee_time")
   @@map("search_request")
 }
 
@@ -1786,13 +1722,13 @@ model KgNode {
   dataSourceId     BigInt?     @map("data_source_id")
   createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt        DateTime    @default(now()) @map("updated_at") @db.Timestamp(6)
-  dataSource       DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   outgoingEdges    KgEdge[]    @relation("KgEdgeFrom")
   incomingEdges    KgEdge[]    @relation("KgEdgeTo")
+  dataSource       DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_kg_node_source")
 
-  @@unique([sourceTable, sourceRecordId, nodeLabel])
-  @@index([nodeLabel])
-  @@index([sourceTable, sourceRecordId])
+  @@unique([sourceTable, sourceRecordId, nodeLabel], map: "uq_kg_node_source")
+  @@index([nodeLabel], map: "idx_kg_node_label")
+  @@index([sourceTable, sourceRecordId], map: "idx_kg_node_source")
   @@map("kg_node")
 }
 
@@ -1812,17 +1748,51 @@ model KgEdge {
   modelVersion         String?     @map("model_version") @db.VarChar(100)
   reviewStatus         String?     @default("accepted") @map("review_status") @db.VarChar(100)
   reviewedByEmployeeId BigInt?     @map("reviewed_by_employee_id")
-  explanation          String?     @db.Text
+  explanation          String?
   createdAt            DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
-  fromNode             KgNode      @relation("KgEdgeFrom", fields: [fromKgNodeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  toNode               KgNode      @relation("KgEdgeTo", fields: [toKgNodeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  evidence             Evidence?   @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  dataSource           DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  reviewedBy           Employee?   @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evidence             Evidence?   @relation(fields: [evidenceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_kg_edge_evidence")
+  fromNode             KgNode      @relation("KgEdgeFrom", fields: [fromKgNodeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_kg_edge_from")
+  reviewedBy           Employee?   @relation(fields: [reviewedByEmployeeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_kg_edge_reviewer")
+  dataSource           DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_kg_edge_source")
+  toNode               KgNode      @relation("KgEdgeTo", fields: [toKgNodeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_kg_edge_to")
 
-  @@index([fromKgNodeId, relationshipType])
-  @@index([toKgNodeId, relationshipType])
-  @@index([relationshipType])
-  @@index([confidenceScore])
+  @@index([confidenceScore], map: "idx_kg_edge_confidence")
+  @@index([fromKgNodeId, relationshipType], map: "idx_kg_edge_from_type")
+  @@index([relationshipType], map: "idx_kg_edge_relationship")
+  @@index([toKgNodeId, relationshipType], map: "idx_kg_edge_to_type")
   @@map("kg_edge")
+}
+
+model RefreshToken {
+  id                String    @id @default(uuid()) @db.Uuid
+  tokenHash         String    @unique @map("token_hash") @db.VarChar(255)
+  employeeId        BigInt    @map("employee_id")
+  familyId          String    @map("family_id") @db.Uuid
+  expiresAt         DateTime  @map("expires_at") @db.Timestamptz
+  revokedAt         DateTime? @map("revoked_at") @db.Timestamptz
+  replacedByTokenId String?   @map("replaced_by_token_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  createdByIp       String?   @map("created_by_ip") @db.VarChar(45)
+
+  employee          Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+  @@index([familyId])
+  @@map("auth_refresh_token")
+}
+
+model AuthAuditLog {
+  id          String    @id @default(uuid()) @db.Uuid
+  employeeId  BigInt?   @map("employee_id")
+  event       String    @db.VarChar(50)
+  ipAddress   String?   @map("ip_address") @db.VarChar(45)
+  userAgent   String?   @map("user_agent")
+  metadata    Json?     @db.JsonB
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  employee    Employee? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+
+  @@index([employeeId])
+  @@index([event])
+  @@map("auth_audit_log")
 }

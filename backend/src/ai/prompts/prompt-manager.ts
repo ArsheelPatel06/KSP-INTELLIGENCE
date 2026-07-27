@@ -1,5 +1,5 @@
 import { AI_PROMPT_LIBRARY } from './prompt-library';
-import { aiLogger } from '../../shared/ai-logger';
+import { aiLogger } from '../shared/ai-logger';
 
 export class PromptManager {
   /**

@@ -4,7 +4,7 @@ import { OllamaProvider } from '../../../providers/ollama-provider';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { promptManager } from '../../prompts/prompt-manager';
+import { promptManager } from '../../../prompts/prompt-manager';
 
 const EntitySchema = z.object({
   people: z.array(z.string()).optional(),
@@ -15,17 +15,19 @@ const EntitySchema = z.object({
 });
 
 export async function entityExtractionNode(state: typeof AiGraphState.State): Promise<Partial<typeof AiGraphState.State>> {
-  const llm = new OllamaProvider('llama3.1');
+  const llm = new OllamaProvider();
   const userQuery = state.messages[state.messages.length - 1]?.content.toString() || '';
 
   try {
     const systemPromptStr = promptManager.buildPrompt('entity', {});
-    const response = await llm.generateStructured(
+    const response = await llm.generateStructuredJson(
       [
-        new SystemMessage(systemPromptStr),
-        new HumanMessage(userQuery)
+        { role: 'system', content: systemPromptStr },
+        { role: 'user', content: userQuery }
       ],
-      zodToJsonSchema(EntitySchema)
+      zodToJsonSchema(EntitySchema) as Record<string, unknown>,
+      { model: 'llama3.1' },
+      state.context
     );
 
     const parsed = EntitySchema.parse(response.data);

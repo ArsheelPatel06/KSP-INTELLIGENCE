@@ -98,8 +98,17 @@ export class OllamaProvider implements AiProvider {
 
       aiLogger.logUsage(context, usage, durationMs);
 
+      let cleanContent = response.message.content.trim();
+      if (cleanContent.startsWith('```json')) {
+        cleanContent = cleanContent.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+      } else if (cleanContent.startsWith('```')) {
+        cleanContent = cleanContent.replace(/^```\n?/, '').replace(/\n?```$/, '');
+      }
+      const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+      const parsedData = JSON.parse(jsonMatch ? jsonMatch[0] : cleanContent) as TData;
+
       return {
-        data: JSON.parse(response.message.content) as TData,
+        data: parsedData,
         modelName: model,
         provider: this.name,
         usage,

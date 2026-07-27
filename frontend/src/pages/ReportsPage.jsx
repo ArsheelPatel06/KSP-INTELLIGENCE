@@ -1,20 +1,6 @@
 import React, { useState } from 'react';
 import { FileCheck2, Download, Printer, Sparkles, CheckCircle2 } from 'lucide-react';
-import { Badge } from '../components/common/Badge';
-
-const sectionCard = {
-  marginBottom: 0,
-  padding: '1.25rem',
-  borderRadius: '0.75rem',
-  backgroundColor: 'var(--t-bg-card)',
-  border: '1px solid var(--t-border)',
-};
-
-const sectionTitle = {
-  fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase',
-  letterSpacing: '0.07em', color: 'var(--t-text-secondary)',
-  display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '1rem'
-};
+import { Btn, BtnIcon } from '../components/common/ButtonSystem';
 
 export const ReportsPage = () => {
   const [reportType, setReportType] = useState('monthly_summary');
@@ -28,75 +14,79 @@ export const ReportsPage = () => {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+    <div className="flex flex-col gap-5 pb-8 animate-fade-in font-sans">
 
       {/* Header */}
-      <div style={{ ...sectionCard, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-200 rounded-[18px] p-6 shadow-sm">
         <div>
-          <h1 style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--t-text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <FileCheck2 size={20} style={{ color: '#3B82F6' }} />
-            Executive Intelligence Reports &amp; Case Dossier Generator
+          <h1 className="text-[22px] font-extrabold text-slate-900 flex items-center gap-2">
+            <FileCheck2 size={24} className="text-blue-600" />
+            Executive Intelligence Reports &amp; Case Dossier
           </h1>
-          <p style={{ fontSize: '0.75rem', color: 'var(--t-text-secondary)', marginTop: '0.25rem' }}>
+          <p className="text-[14px] text-slate-500 mt-1 font-medium">
             Build print-ready PDF reports with AI summaries, charts, map snapshots, and evidence logs.
           </p>
         </div>
-        <button onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1.25rem', backgroundColor: '#1E3A8A', color: '#FFF', border: 'none', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}>
-          <Printer size={14} /> Export / Print PDF
-        </button>
+        <Btn variant="primary" size="md" icon={Printer} onClick={() => window.print()}>
+          Export / Print PDF
+        </Btn>
       </div>
 
       {/* Generator Controls */}
-      <div style={{ ...sectionCard, display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1rem', alignItems: 'end' }}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-white border border-gray-200 rounded-[18px] p-6 shadow-sm items-end">
         <div>
-          <label className="t-label">Report Template</label>
-          <select value={reportType} onChange={e => setReportType(e.target.value)} className="t-input">
+          <label className="block text-[12px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Report Template</label>
+          <select value={reportType} onChange={e => setReportType(e.target.value)} className="w-full h-11 px-4 rounded-[12px] border border-gray-200 bg-slate-50 text-[14px] font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white appearance-none cursor-pointer">
             <option value="monthly_summary">Monthly Executive Intelligence Dossier</option>
             <option value="syndicate_dossier">Organized Crime Syndicate Profile</option>
-            <option value="cyber_fraud">Cyber Heist Cluster & Financial Analysis</option>
+            <option value="cyber_fraud">Cyber Heist Cluster &amp; Financial Analysis</option>
           </select>
         </div>
         <div>
-          <label className="t-label">District Jurisdiction</label>
-          <select value={selectedDistrict} onChange={e => setSelectedDistrict(e.target.value)} className="t-input">
+          <label className="block text-[12px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">District Jurisdiction</label>
+          <select value={selectedDistrict} onChange={e => setSelectedDistrict(e.target.value)} className="w-full h-11 px-4 rounded-[12px] border border-gray-200 bg-slate-50 text-[14px] font-bold text-slate-700 outline-none focus:border-blue-400 focus:bg-white appearance-none cursor-pointer">
             <option>Bengaluru Urban</option>
             <option>Mysuru</option>
             <option>Hubballi-Dharwad</option>
             <option>Statewide</option>
           </select>
         </div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, color: 'var(--t-text-primary)', paddingBottom: '0.125rem', whiteSpace: 'nowrap' }}>
-          <input type="checkbox" checked={includeAiSynthesis} onChange={e => setIncludeAiSynthesis(e.target.checked)} />
-          <Sparkles size={13} style={{ color: '#F59E0B' }} />
-          Include AI Synthesis
-        </label>
+        <div className="flex h-11 items-center px-4 bg-slate-50 border border-gray-200 rounded-[12px] cursor-pointer hover:border-blue-200 transition-colors" onClick={() => setIncludeAiSynthesis(!includeAiSynthesis)}>
+          <input 
+            type="checkbox" 
+            checked={includeAiSynthesis} 
+            onChange={e => setIncludeAiSynthesis(e.target.checked)}
+            className="w-4 h-4 rounded-[4px] border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer mr-3"
+            onClick={e => e.stopPropagation()}
+          />
+          <div className="flex items-center gap-1.5 text-[14px] font-bold text-slate-700">
+            <Sparkles size={16} className="text-amber-500" /> Include AI Synthesis
+          </div>
+        </div>
       </div>
 
       {/* Printable Preview */}
-      <div style={{ ...sectionCard, gap: '1.25rem', display: 'flex', flexDirection: 'column' }} className="print:bg-white">
+      <div className="bg-white border border-gray-200 rounded-[18px] p-8 shadow-sm flex flex-col gap-6 print:border-none print:shadow-none print:p-0">
+        
         {/* Doc Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--t-border)', paddingBottom: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-            <div style={{ width: '3rem', height: '3rem', borderRadius: '0.75rem', backgroundColor: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#1E3A8A', fontSize: '0.875rem' }}>KSP</div>
+        <div className="flex justify-between items-center border-b-2 border-gray-100 pb-5">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-[12px] bg-blue-50 border border-blue-200 flex items-center justify-center font-extrabold text-blue-700 text-[16px]">KSP</div>
             <div>
-              <div style={{ fontSize: '0.875rem', fontWeight: 800, color: 'var(--t-text-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Karnataka State Police · Crime Intelligence Division</div>
-              <div style={{ fontSize: '0.625rem', color: 'var(--t-text-muted)', fontFamily: 'monospace', marginTop: '0.125rem' }}>
-                DOSSIER-{reportType.toUpperCase()}-2026-0725 · CLASSIFIED / EYES ONLY
-              </div>
+              <div className="text-[16px] font-extrabold text-slate-900 uppercase tracking-wide">Karnataka State Police · Crime Intelligence Division</div>
+              <div className="text-[12px] text-slate-500 font-mono mt-0.5">DOSSIER-{reportType.toUpperCase()}-2026-0725 · CLASSIFIED / EYES ONLY</div>
             </div>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <Badge variant="danger" size="md">RESTRICTED</Badge>
-            <div style={{ fontSize: '0.625rem', color: 'var(--t-text-muted)', marginTop: '0.25rem' }}>Generated: 25 July 2026</div>
+          <div className="text-right">
+            <span className="inline-block px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-[6px] text-[11px] font-extrabold tracking-widest uppercase mb-1">Restricted</span>
+            <div className="text-[11px] text-slate-400 font-medium">Generated: 25 July 2026</div>
           </div>
         </div>
 
         {/* Section 1: Executive Summary */}
         <div>
-          <div style={{ fontSize: '0.6875rem', fontWeight: 800, color: '#3B82F6', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
-            1. Executive Crime Overview — {selectedDistrict}
-          </div>
-          <p style={{ fontSize: '0.8125rem', color: 'var(--t-text-secondary)', lineHeight: 1.7 }}>
+          <div className="text-[13px] font-extrabold text-blue-600 uppercase tracking-widest mb-3">1. Executive Crime Overview — {selectedDistrict}</div>
+          <p className="text-[14px] text-slate-700 font-medium leading-relaxed">
             During the July 2026 evaluation window, 1,000 active FIR cases were evaluated across 10 police districts.
             Cyber financial fraud accounted for 38% of total recorded offenses, followed by property theft (24%) and organized syndicate activities.
             Resolution rates maintained an upward trajectory at 78.2%, with 245 cases resolved in Bengaluru Urban.
@@ -105,12 +95,12 @@ export const ReportsPage = () => {
 
         {/* Section 2: AI Synthesis */}
         {includeAiSynthesis && (
-          <div style={{ padding: '1rem', backgroundColor: 'var(--t-bg-card-alt)', border: '1px solid var(--t-border)', borderLeft: '3px solid #3B82F6', borderRadius: '0.5rem' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#3B82F6', display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.5rem' }}>
-              <Sparkles size={13} style={{ color: '#F59E0B' }} />
+          <div className="p-5 bg-blue-50 border border-blue-100 border-l-4 border-l-blue-500 rounded-r-[12px] rounded-l-[4px]">
+            <div className="flex items-center gap-2 text-[13px] font-extrabold text-blue-700 uppercase tracking-widest mb-3">
+              <Sparkles size={14} className="text-amber-500" />
               2. SENTINEL AI Pattern Synthesis &amp; Predictive Assessment
             </div>
-            <p style={{ fontSize: '0.8125rem', color: 'var(--t-text-secondary)', lineHeight: 1.7 }}>
+            <p className="text-[14px] text-slate-700 font-medium leading-relaxed">
               AI vector clustering identified a high-confidence link between 4 recent cyber heist FIRs in Electronic City and 2 burner SIM cards
               registered to Ramesh 'Snake' Shetty's syndicate. Vector analysis predicts a 14% potential spike in cyber fraud during early August 2026 targeting corporate banking hubs.
             </p>
@@ -118,59 +108,63 @@ export const ReportsPage = () => {
         )}
 
         {/* Section 3: Metrics */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.75rem' }}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Total FIRs', value: '1,000', color: 'var(--t-text-primary)' },
-            { label: 'Solved', value: '782', color: '#10B981' },
-            { label: 'Active Probes', value: '142', color: '#F59E0B' },
-            { label: 'Mule Accounts', value: '28', color: '#8B5CF6' },
+            { label: 'Total FIRs', value: '1,000', color: 'text-slate-800' },
+            { label: 'Solved', value: '782', color: 'text-emerald-600' },
+            { label: 'Active Probes', value: '142', color: 'text-amber-600' },
+            { label: 'Mule Accounts', value: '28', color: 'text-purple-600' },
           ].map(m => (
-            <div key={m.label} style={{ textAlign: 'center', padding: '0.875rem', backgroundColor: 'var(--t-bg-card-alt)', border: '1px solid var(--t-border)', borderRadius: '0.5rem' }}>
-              <div style={{ fontSize: '0.6rem', color: 'var(--t-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em', marginBottom: '0.25rem' }}>{m.label}</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: m.color }}>{m.value}</div>
+            <div key={m.label} className="text-center p-4 bg-slate-50 border border-gray-100 rounded-[14px]">
+              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">{m.label}</div>
+              <div className={`text-[28px] font-extrabold leading-none ${m.color}`}>{m.value}</div>
             </div>
           ))}
         </div>
 
         {/* Signatures */}
-        <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--t-border)', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--t-text-secondary)' }}>
+        <div className="pt-6 border-t border-gray-100 flex justify-between mt-4">
           <div>
-            <div style={{ fontWeight: 700, color: 'var(--t-text-primary)' }}>DCP Vikram Rathore, IPS</div>
-            <div>Deputy Commissioner of Police, Crime Branch</div>
+            <div className="text-[14px] font-extrabold text-slate-900">DCP Vikram Rathore, IPS</div>
+            <div className="text-[12px] font-medium text-slate-500">Deputy Commissioner of Police, Crime Branch</div>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontWeight: 700, color: 'var(--t-text-primary)' }}>ACP Ananya Hegde</div>
-            <div>Assistant Commissioner, Cyber Unit</div>
+          <div className="text-right">
+            <div className="text-[14px] font-extrabold text-slate-900">ACP Ananya Hegde</div>
+            <div className="text-[12px] font-medium text-slate-500">Assistant Commissioner, Cyber Unit</div>
           </div>
         </div>
       </div>
 
       {/* Archive Table */}
-      <div style={sectionCard}>
-        <h3 style={sectionTitle}>Archived Intelligence Reports History</h3>
-        <div style={{ overflowX: 'auto' }}>
-          <table className="t-table">
-            <thead>
+      <div className="bg-white border border-gray-200 rounded-[18px] shadow-sm overflow-hidden">
+        <div className="bg-slate-50 border-b border-gray-100 px-5 py-4 text-[12px] font-extrabold text-slate-700 uppercase tracking-widest">
+          Archived Intelligence Reports History
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-[13px] border-collapse">
+            <thead className="bg-white border-b border-gray-100 text-[11px] uppercase tracking-widest text-slate-400 font-extrabold">
               <tr>
                 {['Report ID', 'Dossier Title', 'Date', 'Size', 'Status', 'Action'].map(h => (
-                  <th key={h} style={{ textAlign: h === 'Dossier Title' ? 'left' : 'center' }}>{h}</th>
+                  <th key={h} className={`px-5 py-4 ${h === 'Dossier Title' ? '' : 'text-center'}`}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-50 bg-white">
               {archiveReports.map(rep => (
-                <tr key={rep.id}>
-                  <td style={{ textAlign: 'center', fontFamily: 'monospace', fontWeight: 700, color: '#3B82F6' }}>{rep.id}</td>
-                  <td style={{ fontWeight: 600 }}>{rep.title}</td>
-                  <td style={{ textAlign: 'center', color: 'var(--t-text-secondary)' }}>{rep.date}</td>
-                  <td style={{ textAlign: 'center', color: 'var(--t-text-muted)' }}>{rep.size}</td>
-                  <td style={{ textAlign: 'center' }}>
-                    <span style={{ padding: '0.125rem 0.5rem', backgroundColor: 'rgba(16,185,129,0.12)', color: '#10B981', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '0.25rem', fontSize: '0.625rem', fontWeight: 700 }}>{rep.status}</span>
+                <tr key={rep.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-5 py-4 text-center font-mono font-bold text-blue-600 text-[12px]">{rep.id}</td>
+                  <td className="px-5 py-4 font-extrabold text-slate-800">{rep.title}</td>
+                  <td className="px-5 py-4 text-center font-medium text-slate-500 text-[12px]">{rep.date}</td>
+                  <td className="px-5 py-4 text-center font-medium text-slate-400 text-[12px]">{rep.size}</td>
+                  <td className="px-5 py-4 text-center">
+                    <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-[6px] text-[11px] font-extrabold">
+                      {rep.status}
+                    </span>
                   </td>
-                  <td style={{ textAlign: 'center' }}>
-                    <button onClick={() => alert(`Downloading ${rep.id}`)} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.625rem', backgroundColor: 'var(--t-bg-card-alt)', border: '1px solid var(--t-border)', color: 'var(--t-text-primary)', borderRadius: '0.375rem', fontSize: '0.625rem', fontWeight: 600, cursor: 'pointer' }}>
-                      <Download size={11} /> Download
-                    </button>
+                  <td className="px-5 py-4 text-center">
+                    <Btn variant="secondary" size="sm" icon={Download} onClick={() => alert(`Downloading ${rep.id}`)}>
+                      Download
+                    </Btn>
                   </td>
                 </tr>
               ))}

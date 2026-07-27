@@ -12,7 +12,8 @@ import {
 import { CustomEntityNode } from '../components/network/CustomEntityNode';
 import { NodeInspector } from '../components/network/NodeInspector';
 import { initialNetworkNodes, initialNetworkEdges } from '../mockData/mockNetwork';
-import { Network, Search } from 'lucide-react';
+import { Network, Search, Filter } from 'lucide-react';
+import { Btn } from '../components/common/ButtonSystem';
 
 const nodeTypes = { customEntity: CustomEntityNode };
 
@@ -41,49 +42,54 @@ export const CriminalNetworkPage = () => {
   });
 
   return (
-    <div className="h-[calc(100vh-100px)] flex flex-col space-y-4 animate-fade-in">
+    <div className="h-[calc(100vh-100px)] flex flex-col gap-5 pb-4 animate-fade-in font-sans">
+      
       {/* Top Header & Toolbar */}
-      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-xl p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-3 shrink-0">
+      <div className="bg-white border border-gray-200 rounded-[18px] p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 shrink-0">
         <div>
-          <h1 className="text-lg font-extrabold text-white flex items-center space-x-2">
-            <Network size={20} className="text-blue-400" />
-            <span>Criminal Link Analysis & Entity Relationship Network</span>
+          <h1 className="text-[22px] font-extrabold text-slate-900 flex items-center gap-2">
+            <Network size={24} className="text-blue-600" />
+            Criminal Link Analysis &amp; Entity Relationship Network
           </h1>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Interactive multi-entity network: Suspects, Mule Accounts, Burner IMEIs, Vehicles & Cases.
+          <p className="text-[14px] text-slate-500 mt-1 font-medium">
+            Interactive multi-entity network: Suspects, Mule Accounts, Burner IMEIs, Vehicles &amp; Cases.
           </p>
         </div>
 
         {/* Filter Bar */}
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:w-56">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div className="relative flex-1 md:w-64">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter node by name / IMEI..."
-              className="w-full bg-[#000000] border border-[#27272A] rounded-lg pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500 font-semibold"
+              className="w-full h-10 pl-9 pr-4 rounded-[12px] border border-gray-200 bg-slate-50 text-[13px] font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)] outline-none transition-all"
             />
           </div>
 
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-[#000000] border border-[#27272A] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500 font-semibold"
-          >
-            <option value="all">All Entity Categories</option>
-            <option value="suspect">Suspects (Red)</option>
-            <option value="bank">Bank Accounts (Purple)</option>
-            <option value="phone">Burner SIMs (Cyan)</option>
-            <option value="vehicle">Vehicles (Amber)</option>
-            <option value="case">Cases (Blue)</option>
-          </select>
+          <div className="relative">
+            <Filter size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="h-10 pl-9 pr-4 rounded-[12px] border border-gray-200 bg-slate-50 text-[13px] font-bold text-slate-700 focus:bg-white focus:border-blue-400 outline-none transition-all cursor-pointer appearance-none"
+            >
+              <option value="all">All Entity Categories</option>
+              <option value="suspect">Suspects (Red)</option>
+              <option value="bank">Bank Accounts (Purple)</option>
+              <option value="phone">Burner SIMs (Cyan)</option>
+              <option value="vehicle">Vehicles (Amber)</option>
+              <option value="case">Cases (Blue)</option>
+            </select>
+          </div>
+          <Btn variant="primary" size="md">Run AI Scan</Btn>
         </div>
       </div>
 
       {/* Main Canvas + Inspector */}
-      <div className="flex-1 bg-[#000000] border border-[#27272A] rounded-xl overflow-hidden relative flex shadow-2xl">
+      <div className="flex-1 bg-white border border-gray-200 rounded-[18px] overflow-hidden relative flex shadow-sm">
         <div className="flex-1 h-full relative">
           <ReactFlow
             nodes={filteredNodes}
@@ -94,11 +100,11 @@ export const CriminalNetworkPage = () => {
             onNodeClick={onNodeClick}
             nodeTypes={nodeTypes}
             fitView
-            className="bg-[#000000]"
+            className="bg-slate-50"
           >
-            <Background color="#27272A" gap={20} />
-            <Controls className="!bg-[#0A0A0A] !border-[#27272A] !text-white" />
-            <MiniMap nodeColor="#3B82F6" maskColor="rgba(0, 0, 0, 0.8)" className="!bg-[#0A0A0A] !border-[#27272A]" />
+            <Background color="#cbd5e1" gap={20} />
+            <Controls className="!bg-white !border-gray-200 !text-slate-700 shadow-sm rounded-lg overflow-hidden" />
+            <MiniMap nodeColor="#3b82f6" maskColor="rgba(248, 250, 252, 0.7)" className="!bg-white !border-gray-200 shadow-sm rounded-lg overflow-hidden" />
           </ReactFlow>
         </div>
 

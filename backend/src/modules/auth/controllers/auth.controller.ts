@@ -48,6 +48,11 @@ export class AuthController {
     });
   };
 
+  me = async (req: Request, res: Response): Promise<Response> => {
+    // req.user is set by the authenticate middleware
+    return ok(res, req.user);
+  };
+
   private metadata(req: Request) {
     return {
       ipAddress: req.ip,

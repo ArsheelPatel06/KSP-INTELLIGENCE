@@ -29,16 +29,16 @@ export function issueTokenPair(user: AuthUser, existingFamilyId?: string): Issue
   const familyId = existingFamilyId ?? randomUUID();
 
   const accessPayload: AccessTokenPayload = {
-    sub: user.id,
+    sub: user.id.toString(),
     role: user.role,
     permissions: permissionsForRole(user.role),
-    employeeId: user.employeeId?.toString(),
+    employeeId: user.id.toString(),
     tokenVersion: user.tokenVersion,
     type: 'access',
   };
 
   const refreshPayload: RefreshTokenPayload = {
-    sub: user.id,
+    sub: user.id.toString(),
     jti: refreshTokenId,
     familyId,
     tokenVersion: user.tokenVersion,

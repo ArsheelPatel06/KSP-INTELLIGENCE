@@ -1,0 +1,164 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOBAL THEME TOKENS — Light Mode (default)
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --t-bg-root:       #F1F5F9;
+  --t-bg-page:       #F4F4F5;
+  --t-bg-card:       #FFFFFF;
+  --t-bg-card-alt:   #F8FAFC;
+  --t-bg-input:      #F4F4F5;
+  --t-bg-header:     #0A1628;
+  --t-bg-hover:      #EFF6FF;
+  --t-border:        #E2E8F0;
+  --t-border-strong: #CBD5E1;
+  --t-text-primary:  #0F172A;
+  --t-text-secondary:#64748B;
+  --t-text-muted:    #94A3B8;
+  --t-text-inverse:  #FFFFFF;
+  --t-accent:        #1E3A8A;
+  --t-accent-soft:   #EFF6FF;
+  --t-scrollbar-track: #E2E8F0;
+  --t-scrollbar-thumb: #CBD5E1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOBAL THEME TOKENS — Dark Mode (government navy palette)
+   ═══════════════════════════════════════════════════════════════════════════ */
+html[data-theme="dark"] {
+  --t-bg-root:       #070D19;
+  --t-bg-page:       #070D19;
+  --t-bg-card:       #0B1120;
+  --t-bg-card-alt:   #131B2E;
+  --t-bg-input:      #1E293B;
+  --t-bg-header:     #050C18;
+  --t-bg-hover:      rgba(30,58,138,0.2);
+  --t-border:        #1E293B;
+  --t-border-strong: #334155;
+  --t-text-primary:  #F1F5F9;
+  --t-text-secondary:#94A3B8;
+  --t-text-muted:    #475569;
+  --t-text-inverse:  #0F172A;
+  --t-accent:        #3B82F6;
+  --t-accent-soft:   rgba(59,130,246,0.12);
+  --t-scrollbar-track: #0B1120;
+  --t-scrollbar-thumb: #1E293B;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE ELEMENT DEFAULTS — inherit theme tokens
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer base {
+  html {
+    background-color: var(--t-bg-root);
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  body {
+    background-color: var(--t-bg-root);
+    color: var(--t-text-primary);
+    font-family: 'Noto Sans', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOBAL CARD/SURFACE OVERRIDES
+   All hardcoded bg-[#131B2E], bg-[#0A0A0A], bg-slate-900 etc. are caught here
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Catch Tailwind dark card classes used across pages */
+html[data-theme="light"] .bg-\[\#131B2E\],
+html[data-theme="light"] .bg-\[\#0A0A0A\],
+html[data-theme="light"] .bg-\[\#0E1525\],
+html[data-theme="light"] .bg-\[\#0D1627\] {
+  background-color: var(--t-bg-card) !important;
+}
+
+html[data-theme="light"] .border-slate-800,
+html[data-theme="light"] .border-\[\#27272A\] {
+  border-color: var(--t-border) !important;
+}
+
+html[data-theme="light"] .text-slate-100,
+html[data-theme="light"] .text-slate-200,
+html[data-theme="light"] .text-white {
+  color: var(--t-text-primary) !important;
+}
+
+html[data-theme="light"] .text-slate-300,
+html[data-theme="light"] .text-slate-400 {
+  color: var(--t-text-secondary) !important;
+}
+
+html[data-theme="light"] .text-slate-500,
+html[data-theme="light"] .text-zinc-400 {
+  color: var(--t-text-muted) !important;
+}
+
+/* Select, Input, Textarea light mode fix */
+html[data-theme="light"] select,
+html[data-theme="light"] input,
+html[data-theme="light"] textarea {
+  background-color: var(--t-bg-input) !important;
+  color: var(--t-text-primary) !important;
+  border-color: var(--t-border) !important;
+}
+
+html[data-theme="light"] .bg-\[\#000000\] {
+  background-color: var(--t-bg-input) !important;
+}
+
+/* Dark mode — ensure slate classes keep their values */
+html[data-theme="dark"] .bg-\[\#131B2E\] { background-color: #131B2E !important; }
+html[data-theme="dark"] .bg-\[\#0A0A0A\] { background-color: #0A0A0A !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PAGE WRAPPER — pages that use `space-y-6 animate-fade-in` wrapper
+   ═══════════════════════════════════════════════════════════════════════════ */
+.page-content {
+  background-color: var(--t-bg-page);
+  color: var(--t-text-primary);
+  min-height: 100%;
+  padding: 1.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOBAL UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════════════ */
+.t-text-primary  { color: var(--t-text-primary); }
+.t-text-secondary{ color: var(--t-text-secondary); }
+.t-text-muted    { color: var(--t-text-muted); }
+.t-border        { border-color: var(--t-border); }
+.t-bg-card       { background-color: var(--t-bg-card); }
+.t-bg-alt        { background-color: var(--t-bg-card-alt); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NOTIFICATIONS / REPORTS / SETTINGS — light mode fixes
+   ═══════════════════════════════════════════════════════════════════════════ */
+html[data-theme="light"] .divide-slate-800 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--t-border) !important;
+}
+
+html[data-theme="light"] .border-slate-800\/80 {
+  border-color: var(--t-border) !important;
+}
+
+html[data-theme="light"] .ring-1.ring-blue-500\/20 {
+  box-shadow: none;
+  border-color: #BFDBFE !important;
+  background-color: #EFF6FF !important;
+}
+
+html[data-theme="light"] .bg-\[\#131B2E\]\/60,
+html[data-theme="light"] .bg-slate-900,
+html[data-theme="light"] .bg-slate-800 {
+  background-color: var(--t-bg-card-alt) !important;
+}
+
+/* Filter tabs in light mode */
+html[data-theme="light"] .bg-blue-600\/20 {
+  background-color: #EFF6FF !important;
+  border-color: #BFDBFE !important;
+  color: #1D4ED8 !important;
+}

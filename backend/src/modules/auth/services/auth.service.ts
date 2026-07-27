@@ -1,4 +1,3 @@
-import { AuthAuditEvent } from '@prisma/client';
 import { permissionsForRole } from '../../../core/auth/permissions';
 import type { AuthContext } from '../../../core/auth/auth-context.interface';
 import { AppError } from '../../../core/exceptions/app-error';
@@ -28,20 +27,25 @@ export class AuthService {
 
     if (!user) {
       await performDummyPasswordCheck(input.password);
-      await this.audit(undefined, AuthAuditEvent.LOGIN_FAILURE, false, metadata, 'Invalid credentials');
+      await this.audit(undefined, 'LOGIN_FAILURE', false, metadata, 'Invalid credentials');
+      throw this.invalidCredentialsError();
+    }
+
+    if (!user.passwordHash) {
+      await this.audit(user.id, 'LOGIN_FAILURE', false, metadata, 'No password configured');
       throw this.invalidCredentialsError();
     }
 
     const passwordMatches = await verifyPassword(input.password, user.passwordHash);
     if (!passwordMatches || !user.isActive) {
-      await this.audit(user.id, AuthAuditEvent.LOGIN_FAILURE, false, metadata, 'Invalid credentials');
+      await this.audit(user.id, 'LOGIN_FAILURE', false, metadata, 'Invalid credentials');
       throw this.invalidCredentialsError();
     }
 
     const issued = issueTokenPair(user);
     await this.repository.createRefreshToken({
       id: issued.refreshTokenId,
-      userId: user.id,
+      employeeId: user.id,
       tokenHash: hashRefreshToken(issued.refreshToken),
       familyId: issued.familyId,
       expiresAt: issued.refreshExpiresAt,
@@ -49,7 +53,7 @@ export class AuthService {
       userAgent: metadata.userAgent,
     });
     await this.repository.updateLastLogin(user.id);
-    await this.audit(user.id, AuthAuditEvent.LOGIN_SUCCESS, true, metadata);
+    await this.audit(user.id, 'LOGIN_SUCCESS', true, metadata);
 
     return {
       user: toAuthenticatedUser({ ...user, lastLoginAt: new Date() }),
@@ -69,7 +73,7 @@ export class AuthService {
     } catch (error) {
       await this.audit(
         undefined,
-        AuthAuditEvent.TOKEN_REFRESH_FAILURE,
+        'TOKEN_REFRESH_FAILURE',
         false,
         metadata,
         'Refresh token verification failed',
@@ -82,8 +86,8 @@ export class AuthService {
 
     if (!storedToken) {
       await this.audit(
-        payload.sub,
-        AuthAuditEvent.TOKEN_REFRESH_FAILURE,
+        BigInt(payload.sub),
+        'TOKEN_REFRESH_FAILURE',
         false,
         metadata,
         'Refresh token not found',
@@ -94,8 +98,8 @@ export class AuthService {
     if (storedToken.revokedAt) {
       await this.repository.revokeTokenFamily(storedToken.familyId);
       await this.audit(
-        payload.sub,
-        AuthAuditEvent.TOKEN_REUSE_DETECTED,
+        BigInt(payload.sub),
+        'TOKEN_REUSE_DETECTED',
         false,
         metadata,
         'Revoked refresh token reuse detected; token family revoked',
@@ -106,10 +110,10 @@ export class AuthService {
       });
     }
 
-    if (storedToken.expiresAt <= new Date() || storedToken.userId !== payload.sub) {
+    if (storedToken.expiresAt <= new Date() || storedToken.employeeId.toString() !== payload.sub) {
       await this.audit(
-        payload.sub,
-        AuthAuditEvent.TOKEN_REFRESH_FAILURE,
+        BigInt(payload.sub),
+        'TOKEN_REFRESH_FAILURE',
         false,
         metadata,
         'Refresh token expired or subject mismatch',
@@ -117,12 +121,12 @@ export class AuthService {
       throw this.invalidRefreshTokenError();
     }
 
-    const user = await this.repository.findUserById(payload.sub);
+    const user = await this.repository.findUserById(BigInt(payload.sub));
     if (!user || !user.isActive || user.tokenVersion !== payload.tokenVersion) {
       await this.repository.revokeTokenFamily(storedToken.familyId);
       await this.audit(
-        payload.sub,
-        AuthAuditEvent.TOKEN_REFRESH_FAILURE,
+        BigInt(payload.sub),
+        'TOKEN_REFRESH_FAILURE',
         false,
         metadata,
         'User disabled or token version changed',
@@ -135,7 +139,7 @@ export class AuthService {
       currentTokenId: storedToken.id,
       nextToken: {
         id: issued.refreshTokenId,
-        userId: user.id,
+        employeeId: user.id,
         tokenHash: hashRefreshToken(issued.refreshToken),
         familyId: issued.familyId,
         expiresAt: issued.refreshExpiresAt,
@@ -143,7 +147,7 @@ export class AuthService {
         userAgent: metadata.userAgent,
       },
     });
-    await this.audit(user.id, AuthAuditEvent.TOKEN_REFRESH, true, metadata);
+    await this.audit(user.id, 'TOKEN_REFRESH', true, metadata);
 
     return {
       user: toAuthenticatedUser(user),
@@ -158,7 +162,7 @@ export class AuthService {
 
   async authenticate(accessToken: string): Promise<AuthContext> {
     const payload = verifyAccessToken(accessToken);
-    const user = await this.repository.findUserById(payload.sub);
+    const user = await this.repository.findUserById(BigInt(payload.sub));
 
     if (!user || !user.isActive || user.tokenVersion !== payload.tokenVersion) {
       throw new AppError('Authentication required', {
@@ -168,8 +172,8 @@ export class AuthService {
     }
 
     return {
-      userId: user.id,
-      employeeId: user.employeeId?.toString(),
+      userId: user.id.toString(),
+      employeeId: user.id.toString(),
       role: user.role,
       permissions: permissionsForRole(user.role),
       tokenVersion: user.tokenVersion,
@@ -191,14 +195,14 @@ export class AuthService {
   }
 
   private async audit(
-    userId: string | undefined,
-    event: AuthAuditEvent,
+    employeeId: bigint | undefined,
+    event: string,
     success: boolean,
     metadata: AuthRequestMetadata,
     details?: string,
   ): Promise<void> {
     await this.repository.createAuditLog({
-      userId,
+      employeeId,
       event,
       success,
       ipAddress: metadata.ipAddress,
@@ -208,3 +212,4 @@ export class AuthService {
     });
   }
 }
+
