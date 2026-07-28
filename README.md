@@ -73,13 +73,15 @@ Our platform goes beyond simple data retrieval. It discovers hidden relationship
 - **Granular Permissions:** Strict role-based access for investigators, analysts, supervisors, and policymakers.
 - **Audit Trails:** Secure handling of sensitive data with immutable audit logs and complete traceability in compliance with data protection frameworks.
 
+![Secure Login](frontend/public/gallery/4416.png)
+
 ---
 
 ## 🛠️ Technology Stack
 
 - **Frontend:** React, Vite, TailwindCSS, Lucide React (Icons)
 - **Backend:** Node.js, Express, TypeScript
-- **AI Core:** Llama 3 (via Groq API) for fast, structured natural language processing
+- **AI Core:** Llama 3 for fast, structured natural language processing
 - **Database Architecture:** Multi-agent pipeline with support for relational and graph database structures for entity mapping.
 
 ---
@@ -88,7 +90,6 @@ Our platform goes beyond simple data retrieval. It discovers hidden relationship
 
 ### Prerequisites
 - Node.js (v18+)
-- Groq API Key
 
 ### Installation
 
@@ -102,7 +103,6 @@ Our platform goes beyond simple data retrieval. It discovers hidden relationship
    ```bash
    cd backend
    npm install
-   # Add your GROQ_API_KEY to the .env file
    npm run dev
    ```
 
