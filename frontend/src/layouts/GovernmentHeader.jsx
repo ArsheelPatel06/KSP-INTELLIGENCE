@@ -9,6 +9,7 @@ export function GovernmentHeader() {
 
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   
   const searchRef = useRef(null);
   const notifRef = useRef(null);

@@ -4,11 +4,23 @@ import { useInvestigation } from './InvestigationState';
 import { IntentEngine } from './IntentEngine';
 
 export const AiChatArea = ({ onSendMessage, onToggleWorkspace, workspaceOpen }) => {
-  const { messages, status, activeAgents, currentContext } = useInvestigation();
+  const { messages, status, activeAgents, currentContext, setActiveTab } = useInvestigation();
   const [inputMessage, setInputMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const handleViewClick = (type) => {
+    const typeMap = {
+      'timeline': 'Timeline',
+      'evidence': 'Evidence',
+      'graph': 'Network',
+      'report': 'Reports',
+      'search_case': 'Overview',
+    };
+    setActiveTab(typeMap[type?.toLowerCase()] || 'Overview');
+    if (!workspaceOpen && onToggleWorkspace) onToggleWorkspace();
+  };
 
   // Only auto-scroll when the number of messages changes (new message added)
   const prevLenRef = useRef(0);
@@ -163,7 +175,7 @@ export const AiChatArea = ({ onSendMessage, onToggleWorkspace, workspaceOpen }) 
                         <div className="text-[11px] font-medium text-slate-500 mt-0.5">Loaded in Investigation Workspace</div>
                       </div>
                     </div>
-                    <button className="px-3 py-1.5 rounded-lg bg-white border border-emerald-200 text-emerald-700 text-[12px] font-bold shadow-sm hover:bg-emerald-100 transition-colors">
+                    <button onClick={() => handleViewClick(msg.type)} className="px-3 py-1.5 rounded-lg bg-white border border-emerald-200 text-emerald-700 text-[12px] font-bold shadow-sm hover:bg-emerald-100 transition-colors">
                       View →
                     </button>
                   </div>
