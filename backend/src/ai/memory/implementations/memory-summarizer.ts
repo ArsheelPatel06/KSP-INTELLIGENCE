@@ -1,3 +1,4 @@
+import { getProvider } from '../../providers/get-provider';
 import type { AiMemorySummarizer } from '../memory-components.interface';
 import type { AiMemoryKind, AiMemorySummary } from '../memory.types';
 import { OllamaProvider } from '../../providers/ollama-provider';

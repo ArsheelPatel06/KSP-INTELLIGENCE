@@ -6807,6 +6807,172 @@ async function securityShieldNode(state) {
   };
 }
 
+// src/ai/providers/groq-provider.ts
+var import_groq_sdk = __toESM(require("groq-sdk"));
+var GroqProvider = class {
+  name = "groq";
+  capabilities = [
+    "text_generation",
+    "structured_generation"
+  ];
+  client;
+  constructor() {
+    this.client = new import_groq_sdk.default({
+      apiKey: aiConfig.groq.apiKey
+    });
+  }
+  async generateText(messages, options, context) {
+    const startTime = Date.now();
+    const model = options.model || aiConfig.groq.defaultModel;
+    try {
+      const response = await this.executeWithRetry(async () => {
+        return this.client.chat.completions.create({
+          model,
+          messages,
+          temperature: options.temperature ?? aiConfig.generation.defaultTemperature,
+          top_p: options.topP ?? aiConfig.generation.defaultTopP,
+          stop: options.stopSequences
+        });
+      }, context);
+      const durationMs = Date.now() - startTime;
+      const usage = {
+        inputTokens: response.usage?.prompt_tokens || 0,
+        outputTokens: response.usage?.completion_tokens || 0,
+        totalTokens: response.usage?.total_tokens || 0,
+        latencyMs: durationMs
+      };
+      aiLogger.logUsage(context, usage, durationMs);
+      return {
+        data: response.choices[0]?.message?.content || "",
+        modelName: model,
+        provider: this.name,
+        usage
+      };
+    } catch (error) {
+      aiLogger.error("Groq generation failed", error, context, { model });
+      throw new AiProviderError("Failed to generate text from Groq", { originalError: error.message });
+    }
+  }
+  async generateStructuredJson(messages, jsonSchema, options, context) {
+    const startTime = Date.now();
+    const model = options.model || aiConfig.groq.defaultModel;
+    try {
+      const modifiedMessages = [...messages];
+      if (modifiedMessages[0]?.role === "system") {
+        modifiedMessages[0].content += `
+
+You MUST return your response as a valid JSON object matching this schema: ${JSON.stringify(jsonSchema)}`;
+      } else {
+        modifiedMessages.unshift({ role: "system", content: `You MUST return your response as a valid JSON object matching this schema: ${JSON.stringify(jsonSchema)}` });
+      }
+      const response = await this.executeWithRetry(async () => {
+        return this.client.chat.completions.create({
+          model,
+          messages: modifiedMessages,
+          temperature: options.temperature ?? aiConfig.generation.defaultTemperature,
+          top_p: options.topP ?? aiConfig.generation.defaultTopP,
+          response_format: { type: "json_object" }
+        });
+      }, context);
+      const durationMs = Date.now() - startTime;
+      const usage = {
+        inputTokens: response.usage?.prompt_tokens || 0,
+        outputTokens: response.usage?.completion_tokens || 0,
+        totalTokens: response.usage?.total_tokens || 0,
+        latencyMs: durationMs
+      };
+      aiLogger.logUsage(context, usage, durationMs);
+      let cleanContent = response.choices[0]?.message?.content?.trim() || "{}";
+      const parsedData = JSON.parse(cleanContent);
+      return {
+        data: parsedData,
+        modelName: model,
+        provider: this.name,
+        usage
+      };
+    } catch (error) {
+      aiLogger.error("Groq structured generation failed", error, context, { model });
+      throw new AiProviderError("Failed to generate structured JSON from Groq", { originalError: error.message });
+    }
+  }
+  async streamText(messages, options, context, onChunk) {
+    const startTime = Date.now();
+    const model = options.model || aiConfig.groq.defaultModel;
+    try {
+      const stream = await this.client.chat.completions.create({
+        model,
+        messages,
+        stream: true,
+        temperature: options.temperature ?? aiConfig.generation.defaultTemperature,
+        top_p: options.topP ?? aiConfig.generation.defaultTopP
+      });
+      let fullText = "";
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || "";
+        if (content) {
+          fullText += content;
+          onChunk(content);
+        }
+      }
+      const durationMs = Date.now() - startTime;
+      const usage = {
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        latencyMs: durationMs
+      };
+      aiLogger.logUsage(context, usage, durationMs);
+      return {
+        data: fullText,
+        modelName: model,
+        provider: this.name,
+        usage
+      };
+    } catch (error) {
+      aiLogger.error("Groq streaming failed", error, context, { model });
+      throw new AiProviderError("Failed to stream text from Groq", { originalError: error.message });
+    }
+  }
+  async healthCheck() {
+    try {
+      const models = await this.client.models.list();
+      return !!models.data.length;
+    } catch (error) {
+      aiLogger.error("Groq health check failed", error);
+      return false;
+    }
+  }
+  async executeWithRetry(operation, context, retries = aiConfig.groq.maxRetries) {
+    let attempt = 0;
+    while (attempt < retries) {
+      try {
+        return await operation();
+      } catch (error) {
+        attempt++;
+        const isRateLimit = error.status === 429;
+        if (attempt >= retries) {
+          throw error;
+        }
+        aiLogger.warn(`Groq request failed, retrying (${attempt}/${retries})`, context, { error: error.message });
+        await new Promise((res) => setTimeout(res, (isRateLimit ? 2e3 : 1e3) * Math.pow(2, attempt)));
+      }
+    }
+    throw new Error("Unreachable");
+  }
+};
+
+// src/ai/providers/get-provider.ts
+var providerInstance = null;
+function getProvider() {
+  if (providerInstance) return providerInstance;
+  if (aiConfig.provider === "groq") {
+    providerInstance = new GroqProvider();
+  } else {
+    providerInstance = getProvider();
+  }
+  return providerInstance;
+}
+
 // src/ai/core/workflow/nodes/intent-detection.ts
 var import_zod13 = require("zod");
 var import_zod_to_json_schema = require("zod-to-json-schema");
