@@ -38,7 +38,7 @@ const getRecommendations = (messages) => {
 };
 
 export const AiWorkspace = ({ isOpen, onToggle }) => {
-  const { currentContext, activeTab, setActiveTab, messages } = useInvestigation();
+  const { currentContext, activeTab, setActiveTab, messages, artifacts } = useInvestigation();
   const recommendations = getRecommendations(messages);
 
   return (
@@ -205,8 +205,21 @@ export const AiWorkspace = ({ isOpen, onToggle }) => {
                       <div className="absolute bottom-2 right-2 text-[9px] text-slate-400 font-bold uppercase tracking-widest">Preview</div>
                     </div>
                   )}
+                  {activeTab === 'Reports' && artifacts?.reports?.length > 0 && (
+                    <div className="flex flex-col gap-3">
+                      {artifacts.reports.map((report, i) => (
+                        <div key={i} className="p-4 rounded-[12px] bg-white border border-gray-200 shadow-sm">
+                          <div className="font-bold text-[14px] text-slate-800 mb-2 flex items-center gap-2">
+                            <FileText size={16} className="text-blue-500" />
+                            {report.title}
+                          </div>
+                          <div className="text-[12px] text-slate-600 leading-relaxed whitespace-pre-wrap">{report.summary}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                  {['Evidence', 'People', 'Vehicles', 'Reports'].includes(activeTab) && (
+                  {['Evidence', 'People', 'Vehicles', 'Reports'].includes(activeTab) && (!artifacts?.[activeTab.toLowerCase()] || artifacts[activeTab.toLowerCase()].length === 0) && (
                     <div className="flex flex-col items-center justify-center py-12 opacity-40">
                       <div className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1">No {activeTab} Yet</div>
                       <div className="text-[11px] text-slate-400 text-center">Ask Sentinel to analyze {activeTab.toLowerCase()}.</div>
