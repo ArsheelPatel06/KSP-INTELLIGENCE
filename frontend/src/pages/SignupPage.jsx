@@ -16,12 +16,20 @@ export const SignupPage = () => {
 
   const roles = ['Investigator', 'Analyst', 'Supervisor', 'Admin'];
 
+  const roleMap = {
+    'Investigator': 'INSPECTOR',
+    'Analyst': 'CRIME_ANALYST',
+    'Supervisor': 'SP',
+    'Admin': 'SUPER_ADMIN'
+  };
+
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
-      await authService.signup({ kgid, firstName, email, password, role: selectedRole });
+      const backendRole = roleMap[selectedRole] || 'INSPECTOR';
+      await authService.signup({ kgid, firstName, email, password, role: backendRole });
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.errors?.[0]?.message || err.response?.data?.message || 'Signup failed');
