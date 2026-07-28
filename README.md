@@ -2,7 +2,7 @@
 
 **Live Preview:** [https://ksp-intelligence.onslate.com](https://ksp-intelligence.onslate.com)
 
-![Sentinel Dashboard](frontend/public/gallery/Screenshot%202026-07-28%20at%204.42.48%20pm.png)
+![Sentinel Dashboard](frontend/public/gallery/4248.png)
 
 ## The Challenge
 
@@ -22,21 +22,21 @@ Our platform goes beyond simple data retrieval. It discovers hidden relationship
 - **Context-Aware Follow-ups:** Engage in natural, continuous dialogue. Sentinel remembers the context of the investigation so you don't have to repeat yourself.
 - **Export & Accessibility:** Save entire conversation histories and investigation timelines locally as PDFs. Voice interaction support for hands-free Q&A.
 
-![Conversational Interface](frontend/public/gallery/Screenshot%202026-07-28%20at%204.41.05%20pm.png)
+![Conversational Interface](frontend/public/gallery/4105.png)
 
 ### 2. Criminal Network & Relationship Analysis
 - **Entity Linking:** Automatically identifies hidden links between the accused, victims, geographical locations, financial accounts, and prior crime incidents.
 - **Network Visualization:** Generates interactive node-based graphs of criminal networks.
 - **Organized Crime Detection:** Automatically flags potential organized crime groups and highlights repeat offender networks.
 
-![Network Graph Analysis](frontend/public/gallery/Screenshot%202026-07-28%20at%204.41.23%20pm.png)
+![Network Graph Analysis](frontend/public/gallery/4123.png)
 
 ### 3. Crime Pattern & Trend Analytics
 - **Multi-dimensional Analysis:** Track crime trends across time, geography, modus operandi, and specific crime types.
 - **Hotspot Identification:** Detect emerging crime clusters and existing geographical hotspots.
 - **Temporal Analysis:** Execute seasonal and event-based crime trend predictions based on historical patterns.
 
-![Trend Analytics](frontend/public/gallery/Screenshot%202026-07-28%20at%204.43.14%20pm.png)
+![Trend Analytics](frontend/public/gallery/4314.png)
 
 ### 4. Sociological Crime Insights
 - **Demographic Profiling:** Correlate crime patterns with age, gender, and socio-economic backgrounds.
@@ -46,14 +46,14 @@ Our platform goes beyond simple data retrieval. It discovers hidden relationship
 - **Behavioral Analysis:** Construct comprehensive profiles of repeat offenders based on their crime history and modus operandi.
 - **Risk Scoring:** Assign automated threat and flight risk scores to offenders to help investigators prioritize resources.
 
-![Offender Profiling](frontend/public/gallery/Screenshot%202026-07-28%20at%204.42.22%20pm.png)
+![Offender Profiling](frontend/public/gallery/4222.png)
 
 ### 6. Investigator Decision Support
 - **Automated Summaries:** Generate one-click case summaries and chronologically accurate investigation timelines.
 - **Historical Precedents:** Automatically retrieve similar past cases and their investigation outcomes to guide current strategy.
 - **Smart Recommendations:** The AI actively suggests potential investigative leads and next steps.
 
-![Decision Support](frontend/public/gallery/Screenshot%202026-07-28%20at%204.44.06%20pm.png)
+![Decision Support](frontend/public/gallery/4406.png)
 
 ### 7. Financial Crime & Transaction Link Analysis
 - **Money Trails:** Detect financial transactions linked to criminal activities and visualize suspicious transaction networks.
@@ -67,7 +67,7 @@ Our platform goes beyond simple data retrieval. It discovers hidden relationship
 - **Evidence-Backed Responses:** Every AI conclusion is supported by clear data references and evidence trails (e.g., citing specific FIRs).
 - **Reasoning Paths:** Visualizes the logic and correlations used in analysis, ensuring full compliance with law enforcement accountability requirements.
 
-![Explainable AI & Evidence](frontend/public/gallery/Screenshot%202026-07-28%20at%204.43.38%20pm.png)
+![Explainable AI & Evidence](frontend/public/gallery/4338.png)
 
 ### 10. Secure Role-Based Access & Governance
 - **Granular Permissions:** Strict role-based access for investigators, analysts, supervisors, and policymakers.
