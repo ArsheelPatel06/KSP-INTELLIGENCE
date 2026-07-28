@@ -16,7 +16,7 @@ export async function conflictResolutionNode(state: typeof AiGraphState.State): 
     return { resolvedConflicts: [] };
   }
 
-  const llm = new OllamaProvider();
+  const llm = getProvider();
   const evidenceText = state.evidence.map(e => `Agent: ${e.sourceAgent}\nFacts: ${e.facts.join(', ')}`).join('\n\n');
 
   try {

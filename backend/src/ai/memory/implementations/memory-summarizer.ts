@@ -12,7 +12,7 @@ const SummarySchema = z.object({
 });
 
 export class MemorySummarizer implements AiMemorySummarizer {
-  private llm = new OllamaProvider();
+  private llm = getProvider();
 
   async summarize(kind: AiMemoryKind, content: unknown): Promise<AiMemorySummary> {
     try {

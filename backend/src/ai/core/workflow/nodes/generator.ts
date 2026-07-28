@@ -24,7 +24,7 @@ const outputSchema = z.object({
  * Generator Node synthesizes the aggregated evidence into the strict JSON output contract.
  */
 export async function generatorNode(state: typeofAiGraphState): Promise<Partial<typeofAiGraphState>> {
-  const provider = new OllamaProvider();
+  const provider = getProvider();
   
   const lastMessage = state.messages[state.messages.length - 1];
   const query = lastMessage?.content?.toString() || '';

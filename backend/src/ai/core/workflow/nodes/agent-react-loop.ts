@@ -37,7 +37,7 @@ export async function executeAgentReactLoop(
   state: typeofAiGraphState,
 ): Promise<Partial<typeofAiGraphState>> {
   aiLogger.info(`Executing ${agentName} Agent`, state.context);
-  const provider = new OllamaProvider();
+  const provider = getProvider();
 
   const queryMessage = state.messages && state.messages.length > 0 ? state.messages[state.messages.length - 1]?.content || '' : '';
   const toolDescriptions = tools.map((t: any) => `- ${t.name}: ${t.description}`).join('\n');

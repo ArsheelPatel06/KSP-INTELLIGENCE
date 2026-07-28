@@ -20,9 +20,10 @@ const envSchema = z.object({
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900000),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
   LOG_LEVEL: z.string().default('info'),
-  AI_PROVIDER: z.enum(['ollama', 'mock']).default('ollama'),
+  AI_PROVIDER: z.enum(['ollama', 'groq', 'mock']).default('groq'),
   OLLAMA_BASE_URL: z.string().url().default('http://localhost:11434'),
   OLLAMA_MODEL_DEFAULT: z.string().min(1).default('sentinel-ai-8b'),
+  GROQ_API_KEY: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

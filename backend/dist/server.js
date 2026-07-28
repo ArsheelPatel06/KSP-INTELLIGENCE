@@ -52,13 +52,14 @@ var envSchema = import_zod.z.object({
   AUTH_COOKIE_SECURE: import_zod.z.enum(["true", "false"]).default("false"),
   AUTH_COOKIE_SAME_SITE: import_zod.z.enum(["strict", "lax", "none"]).default("strict"),
   AUTH_COOKIE_DOMAIN: import_zod.z.string().optional(),
-  CORS_ORIGIN: import_zod.z.string().default("http://localhost:3000,http://localhost:5173,https://ksp-intelligence.onslate.com"),
+  CORS_ORIGIN: import_zod.z.string().default("http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:5173,https://ksp-intelligence.onslate.com"),
   RATE_LIMIT_WINDOW_MS: import_zod.z.coerce.number().int().positive().default(9e5),
   RATE_LIMIT_MAX: import_zod.z.coerce.number().int().positive().default(300),
   LOG_LEVEL: import_zod.z.string().default("info"),
-  AI_PROVIDER: import_zod.z.enum(["ollama", "mock"]).default("ollama"),
+  AI_PROVIDER: import_zod.z.enum(["ollama", "groq", "mock"]).default("groq"),
   OLLAMA_BASE_URL: import_zod.z.string().url().default("http://localhost:11434"),
-  OLLAMA_MODEL_DEFAULT: import_zod.z.string().min(1).default("sentinel-ai-8b")
+  OLLAMA_MODEL_DEFAULT: import_zod.z.string().min(1).default("sentinel-ai-8b"),
+  GROQ_API_KEY: import_zod.z.string().optional()
 });
 var parsed = envSchema.safeParse(process.env);
 if (!parsed.success) {
@@ -284,10 +285,31 @@ function setRefreshCookie(res, refreshToken) {
 
 // src/modules/auth/controllers/auth.controller.ts
 var AuthController = class {
-  constructor(authService2) {
+  constructor(authService2, catalystService2) {
     this.authService = authService2;
+    this.catalystService = catalystService2;
   }
   authService;
+  catalystService;
+  signup = async (req, res) => {
+    await this.authService.signup(req.body);
+    return ok(res, { message: "Account created successfully" }, 201);
+  };
+  forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    await this.authService.forgotPassword(email);
+    return ok(res, { message: "If an account exists, a reset link has been sent." });
+  };
+  resetPassword = async (req, res) => {
+    const { token, password } = req.body;
+    await this.authService.resetPassword(token, password);
+    return ok(res, { message: "Password has been reset successfully" });
+  };
+  catalystToken = async (req, res) => {
+    const user = req.user;
+    const tokenResponse = await this.catalystService.generateCustomToken(user);
+    return ok(res, tokenResponse);
+  };
   login = async (req, res) => {
     const input = req.body;
     const result = await this.authService.login(input, this.metadata(req));
@@ -471,6 +493,53 @@ var PrismaAuthRepository = class {
   roleExists(role) {
     return ROLE_VALUES.includes(role);
   }
+  async findUserByEmail(email) {
+    const emp = await this.client.employee.findUnique({
+      where: { email },
+      select: employeeSelect
+    });
+    if (!emp) return null;
+    return this.mapToAuthUser(emp);
+  }
+  async findUserByResetToken(token) {
+    const emp = await this.client.employee.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpiresAt: {
+          gt: /* @__PURE__ */ new Date()
+        }
+      },
+      select: employeeSelect
+    });
+    if (!emp) return null;
+    return this.mapToAuthUser(emp);
+  }
+  async createUser(data) {
+    const emp = await this.client.employee.create({
+      data,
+      select: employeeSelect
+    });
+    return this.mapToAuthUser(emp);
+  }
+  async saveResetToken(employeeId, token, expiresAt) {
+    await this.client.employee.update({
+      where: { id: employeeId },
+      data: {
+        resetToken: token,
+        resetTokenExpiresAt: expiresAt
+      }
+    });
+  }
+  async updatePassword(employeeId, passwordHash) {
+    await this.client.employee.update({
+      where: { id: employeeId },
+      data: {
+        passwordHash,
+        resetToken: null,
+        resetTokenExpiresAt: null
+      }
+    });
+  }
   mapToAuthUser(emp) {
     return {
       id: emp.id,
@@ -558,6 +627,9 @@ function toAuthenticatedUser(user) {
 // src/modules/auth/utils/password.ts
 var import_bcrypt = __toESM(require("bcrypt"));
 var DUMMY_PASSWORD_HASH = "$2b$12$9Qh3V9x2E5G58oMYBKrr8u/D1a1JONgQTq0fCFh.O7hJ1EzYhJx8S";
+function hashPassword(password) {
+  return import_bcrypt.default.hash(password, env.BCRYPT_SALT_ROUNDS);
+}
 function verifyPassword(password, passwordHash) {
   return import_bcrypt.default.compare(password, passwordHash);
 }
@@ -649,11 +721,55 @@ function hashRefreshToken(token) {
 }
 
 // src/modules/auth/services/auth.service.ts
+var import_crypto = __toESM(require("crypto"));
 var AuthService = class {
-  constructor(repository) {
+  constructor(repository, catalystService2) {
     this.repository = repository;
+    this.catalystService = catalystService2;
   }
   repository;
+  catalystService;
+  async signup(input) {
+    const existingKgid = await this.repository.findUserByIdentifier(input.kgid);
+    if (existingKgid) {
+      throw new AppError("KGID already in use", { statusCode: 400 });
+    }
+    const existingEmail = await this.repository.findUserByEmail(input.email);
+    if (existingEmail) {
+      throw new AppError("Email already in use", { statusCode: 400 });
+    }
+    const passwordHash = await hashPassword(input.password);
+    await this.repository.createUser({
+      kgid: input.kgid,
+      firstName: input.firstName,
+      email: input.email,
+      passwordHash,
+      role: input.role,
+      active: true,
+      tokenVersion: 0
+    });
+  }
+  async forgotPassword(email) {
+    const user = await this.repository.findUserByEmail(email);
+    if (!user) return;
+    const resetToken = import_crypto.default.randomBytes(32).toString("hex");
+    const resetTokenHash = import_crypto.default.createHash("sha256").update(resetToken).digest("hex");
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1e3);
+    await this.repository.saveResetToken(user.id, resetTokenHash, expiresAt);
+    if (this.catalystService) {
+      const resetLink = `${env.CLIENT_URL || "http://localhost:5173"}/reset-password?token=${resetToken}`;
+      await this.catalystService.sendPasswordResetEmail(email, resetLink);
+    }
+  }
+  async resetPassword(token, newPassword) {
+    const resetTokenHash = import_crypto.default.createHash("sha256").update(token).digest("hex");
+    const user = await this.repository.findUserByResetToken(resetTokenHash);
+    if (!user) {
+      throw new AppError("Invalid or expired reset token", { statusCode: 400 });
+    }
+    const passwordHash = await hashPassword(newPassword);
+    await this.repository.updatePassword(user.id, passwordHash);
+  }
   async login(input, metadata) {
     const identifier = input.username.trim();
     const user = await this.repository.findUserByIdentifier(identifier);
@@ -821,10 +937,75 @@ var AuthService = class {
   }
 };
 
+// src/modules/auth/services/catalyst.service.ts
+var catalyst = __toESM(require("zcatalyst-sdk-node"));
+var app = null;
+try {
+  if (process.env.ZOHO_PROJECT_ID && process.env.ZOHO_CLIENT_ID) {
+    app = catalyst.initializeApp({
+      project_id: process.env.ZOHO_PROJECT_ID,
+      project_key: process.env.ZOHO_PROJECT_KEY || "dummy_key",
+      environment: "Development",
+      credential: catalyst.credential.refreshToken({
+        client_id: process.env.ZOHO_CLIENT_ID,
+        client_secret: process.env.ZOHO_CLIENT_SECRET,
+        refresh_token: process.env.ZOHO_REFRESH_TOKEN
+      })
+    });
+  }
+} catch (e) {
+  console.warn("Catalyst SDK could not initialize.", e.message);
+}
+var CatalystService = class {
+  async generateCustomToken(user) {
+    try {
+      if (!app) {
+        console.warn("Catalyst not initialized, returning mock token");
+        return { custom_token: "MOCK_TOKEN" };
+      }
+      const userManagement = app.userManagement();
+      const customToken = await userManagement.generateCustomToken({
+        type: "web",
+        user_details: {
+          email_id: user.email || "admin@example.com",
+          first_name: user.firstName || "App",
+          last_name: user.lastName || "User",
+          org_id: "KSP",
+          role_name: user.role
+        }
+      });
+      return customToken;
+    } catch (e) {
+      console.warn("Catalyst Token Generation Failed (Ignoring to prevent 500 crash):", e.message);
+      return { custom_token: "MOCK_TOKEN" };
+    }
+  }
+  async sendPasswordResetEmail(email, resetLink) {
+    if (!app) {
+      console.warn(`[DEV MODE] Catalyst not initialized. Simulated Email sent to ${email}: ${resetLink}`);
+      return;
+    }
+    const mail = app.email();
+    const config = {
+      from_email: process.env.CATALYST_SENDER_EMAIL || "admin@ksp.gov.in",
+      to_email: [email],
+      subject: "KSP Intelligence OS - Password Reset",
+      content: `Hello, <br><br> Please click the link below to reset your password: <br><br> <a href="${resetLink}">Reset Password</a><br><br>If you did not request this, please ignore this email.`,
+      html_mode: true
+    };
+    try {
+      await mail.sendMail(config);
+    } catch (e) {
+      console.warn("Failed to send mail via Catalyst:", e);
+    }
+  }
+};
+
 // src/modules/auth/auth.container.ts
 var authRepository = new PrismaAuthRepository();
 var authService = new AuthService(authRepository);
-var authController = new AuthController(authService);
+var catalystService = new CatalystService();
+var authController = new AuthController(authService, catalystService);
 
 // src/modules/auth/validators/auth.validators.ts
 var import_zod2 = require("zod");
@@ -836,6 +1017,21 @@ var loginBodySchema = import_zod2.z.object({
 var refreshTokenBodySchema = import_zod2.z.object({
   refreshToken: import_zod2.z.string().min(1).optional(),
   deliveryMode: import_zod2.z.enum(["cookie", "body"]).default("cookie")
+});
+var signupBodySchema = import_zod2.z.object({
+  kgid: import_zod2.z.string().trim().min(3).max(255),
+  firstName: import_zod2.z.string().trim().min(1).max(255),
+  lastName: import_zod2.z.string().trim().max(255).optional(),
+  email: import_zod2.z.string().email(),
+  password: import_zod2.z.string().min(8).max(128),
+  role: import_zod2.z.string().optional().default("Investigator")
+});
+var forgotPasswordBodySchema = import_zod2.z.object({
+  email: import_zod2.z.string().email()
+});
+var resetPasswordBodySchema = import_zod2.z.object({
+  token: import_zod2.z.string().min(1),
+  password: import_zod2.z.string().min(8).max(128)
 });
 
 // src/middleware/authenticate.middleware.ts
@@ -857,6 +1053,10 @@ async function authenticateMiddleware(req, _res, next) {
 
 // src/modules/auth/routes/auth.routes.ts
 var authRouter = (0, import_express3.Router)();
+authRouter.post("/signup", validate({ body: signupBodySchema }), asyncHandler(authController.signup));
+authRouter.post("/forgot-password", validate({ body: forgotPasswordBodySchema }), asyncHandler(authController.forgotPassword));
+authRouter.post("/reset-password", validate({ body: resetPasswordBodySchema }), asyncHandler(authController.resetPassword));
+authRouter.post("/catalyst-token", authenticateMiddleware, asyncHandler(authController.catalystToken));
 authRouter.post("/login", validate({ body: loginBodySchema }), asyncHandler(authController.login));
 authRouter.post(
   "/refresh",
@@ -6206,12 +6406,17 @@ var import_ollama = require("ollama");
 // src/ai/config/ai-config.ts
 var import_zod12 = require("zod");
 var aiConfigSchema = import_zod12.z.object({
-  provider: import_zod12.z.enum(["ollama", "mock"]),
+  provider: import_zod12.z.enum(["ollama", "groq", "mock"]),
   ollama: import_zod12.z.object({
     baseUrl: import_zod12.z.string().url(),
     defaultModel: import_zod12.z.string().min(1),
     timeoutMs: import_zod12.z.number().int().positive().default(6e4),
     // 60 seconds
+    maxRetries: import_zod12.z.number().int().min(0).default(3)
+  }),
+  groq: import_zod12.z.object({
+    apiKey: import_zod12.z.string().optional(),
+    defaultModel: import_zod12.z.string().default("llama-3.3-70b-versatile"),
     maxRetries: import_zod12.z.number().int().min(0).default(3)
   }),
   generation: import_zod12.z.object({
@@ -6227,6 +6432,11 @@ var aiConfig = aiConfigSchema.parse({
     baseUrl: env.OLLAMA_BASE_URL,
     defaultModel: env.OLLAMA_MODEL_DEFAULT,
     timeoutMs: 6e4,
+    maxRetries: 3
+  },
+  groq: {
+    apiKey: env.GROQ_API_KEY,
+    defaultModel: "llama-3.3-70b-versatile",
     maxRetries: 3
   },
   generation: {
@@ -7072,7 +7282,7 @@ var IntentSchema = import_zod13.z.object({
   confidence: import_zod13.z.number().min(0).max(100)
 });
 async function intentDetectionNode(state) {
-  const llm = new OllamaProvider();
+  const llm = getProvider();
   const userQuery = state.messages[state.messages.length - 1]?.content.toString() || "";
   try {
     const systemPromptStr = promptManager.buildPrompt("intent", {});
@@ -7110,7 +7320,7 @@ var EntitySchema = import_zod14.z.object({
   dates: import_zod14.z.array(import_zod14.z.string()).optional()
 });
 async function entityExtractionNode(state) {
-  const llm = new OllamaProvider();
+  const llm = getProvider();
   const userQuery = state.messages[state.messages.length - 1]?.content.toString() || "";
   try {
     const systemPromptStr = promptManager.buildPrompt("entity", {});
@@ -7148,7 +7358,7 @@ var SupervisorPlanSchema = import_zod15.z.object({
   reasoning: import_zod15.z.string()
 });
 async function supervisorNode(state) {
-  const llm = new OllamaProvider();
+  const llm = getProvider();
   const userQuery = state.messages[state.messages.length - 1]?.content.toString() || "";
   const intent = state.detectedIntent || "general";
   const entities = state.extractedEntities ? JSON.stringify(state.extractedEntities) : "{}";
@@ -7679,7 +7889,7 @@ var agentActionJsonSchema = {
 };
 async function executeAgentReactLoop(agentName, persona, tools, state) {
   aiLogger.info(`Executing ${agentName} Agent`, state.context);
-  const provider = new OllamaProvider();
+  const provider = getProvider();
   const queryMessage = state.messages && state.messages.length > 0 ? state.messages[state.messages.length - 1]?.content || "" : "";
   const toolDescriptions = tools.map((t) => `- ${t.name}: ${t.description}`).join("\n");
   const messages = [
@@ -7845,7 +8055,7 @@ async function conflictResolutionNode(state) {
   if (!state.evidence || state.evidence.length === 0) {
     return { resolvedConflicts: [] };
   }
-  const llm = new OllamaProvider();
+  const llm = getProvider();
   const evidenceText = state.evidence.map((e) => `Agent: ${e.sourceAgent}
 Facts: ${e.facts.join(", ")}`).join("\n\n");
   try {
@@ -7887,7 +8097,7 @@ async function confidenceScoringNode(state) {
   if (!state.evidence || state.evidence.length === 0) {
     return { overallConfidence: 0 };
   }
-  const llm = new OllamaProvider();
+  const llm = getProvider();
   const evidenceText = state.evidence.map((e) => `Agent: ${e.sourceAgent}
 Facts: ${e.facts.join(", ")}
 Citations: ${e.citations.length}`).join("\n\n");
@@ -7971,7 +8181,7 @@ var outputSchema = import_zod25.z.object({
   warnings: import_zod25.z.array(import_zod25.z.string())
 });
 async function generatorNode(state) {
-  const provider = new OllamaProvider();
+  const provider = getProvider();
   const lastMessage = state.messages[state.messages.length - 1];
   const query = lastMessage?.content?.toString() || "";
   aiLogger.info("Generator synthesizing final response", state.context);
@@ -8067,7 +8277,7 @@ Citations: ${e.citations.join(", ")}`
 // src/ai/core/workflow/nodes/report.ts
 async function reportAgentNode(state) {
   aiLogger.info("Executing Report Agent to generate PDF-ready Markdown", state.context);
-  const provider = new OllamaProvider();
+  const provider = getProvider();
   const queryMessage = state.messages && state.messages.length > 0 ? state.messages[state.messages.length - 1]?.content || "" : "";
   const evidenceText = state.evidence.map(
     (e) => `Source [${e.sourceAgent}]:
@@ -8191,8 +8401,7 @@ var import_ioredis = __toESM(require("ioredis"));
 var RedisMemoryStore = class {
   redis;
   constructor() {
-    const uri = process.env.REDIS_URI || "redis://localhost:6379";
-    this.redis = new import_ioredis.default(uri);
+    this.redis = new import_ioredis.default(env.REDIS_URL);
     this.redis.on("error", (err) => logger.error({ err }, "Redis Memory Store Error"));
   }
   // --- Session Memory ---
@@ -8249,7 +8458,7 @@ var SummarySchema = import_zod26.z.object({
   entitiesMentioned: import_zod26.z.array(import_zod26.z.string()).describe("Key entities preserved in the summary.")
 });
 var MemorySummarizer = class {
-  llm = new OllamaProvider();
+  llm = getProvider();
   async summarize(kind, content) {
     try {
       const contentStr = typeof content === "string" ? content : JSON.stringify(content);
@@ -8438,7 +8647,7 @@ var OutputGuard = class {
 
 // src/modules/ai/controllers/ai.controller.ts
 var import_messages = require("@langchain/core/messages");
-var import_crypto = __toESM(require("crypto"));
+var import_crypto2 = __toESM(require("crypto"));
 var conversationEngine = new ConversationEngine();
 var AiController = class {
   static async health(req, res) {
@@ -8475,8 +8684,8 @@ var AiController = class {
       res.status(400).json({ status: "error", message: "Query (or message) is required and must be a string" });
       return;
     }
-    const sessionId = reqSessionId || threadId || import_crypto.default.randomUUID();
-    const requestId = import_crypto.default.randomUUID();
+    const sessionId = reqSessionId || threadId || import_crypto2.default.randomUUID();
+    const requestId = import_crypto2.default.randomUUID();
     if (!req.user) {
       res.status(401).json({ status: "error", message: "Unauthorized" });
       return;
@@ -8610,23 +8819,23 @@ aiRouter.get("/health", authenticateMiddleware, requireRoles("SUPER_ADMIN", "INS
 aiRouter.post("/query", authenticateMiddleware, requireRoles("SUPER_ADMIN", "INSPECTOR", "CRIME_ANALYST"), AiController.query);
 
 // src/app/routes.ts
-function registerRoutes(app) {
-  app.use("/health", healthRouter);
-  app.use(`${env.API_PREFIX}/health`, healthRouter);
-  app.use(`${env.API_PREFIX}/docs`, docsRouter);
-  app.use(`${env.API_PREFIX}/auth`, authRouter);
-  app.use(`${env.API_PREFIX}/cases`, casesRouter);
-  app.use(`${env.API_PREFIX}/victims`, victimsRouter);
-  app.use(`${env.API_PREFIX}/legal`, legalRouter);
-  app.use(`${env.API_PREFIX}/acts`, actsRouter);
-  app.use(`${env.API_PREFIX}/ipc`, ipcRouter);
-  app.use(`${env.API_PREFIX}/analytics`, analyticsRouter);
-  app.use(`${env.API_PREFIX}/dashboard`, dashboardRouter);
-  app.use(`${env.API_PREFIX}/hotspots`, hotspotRouter);
-  app.use(`${env.API_PREFIX}/recommendations`, recommendationsRouter);
-  app.use(`${env.API_PREFIX}/graph`, graphRouter);
-  app.use(`${env.API_PREFIX}/chat`, chatRouter);
-  app.use(`${env.API_PREFIX}/copilot`, aiRouter);
+function registerRoutes(app2) {
+  app2.use("/health", healthRouter);
+  app2.use(`${env.API_PREFIX}/health`, healthRouter);
+  app2.use(`${env.API_PREFIX}/docs`, docsRouter);
+  app2.use(`${env.API_PREFIX}/auth`, authRouter);
+  app2.use(`${env.API_PREFIX}/cases`, casesRouter);
+  app2.use(`${env.API_PREFIX}/victims`, victimsRouter);
+  app2.use(`${env.API_PREFIX}/legal`, legalRouter);
+  app2.use(`${env.API_PREFIX}/acts`, actsRouter);
+  app2.use(`${env.API_PREFIX}/ipc`, ipcRouter);
+  app2.use(`${env.API_PREFIX}/analytics`, analyticsRouter);
+  app2.use(`${env.API_PREFIX}/dashboard`, dashboardRouter);
+  app2.use(`${env.API_PREFIX}/hotspots`, hotspotRouter);
+  app2.use(`${env.API_PREFIX}/recommendations`, recommendationsRouter);
+  app2.use(`${env.API_PREFIX}/graph`, graphRouter);
+  app2.use(`${env.API_PREFIX}/chat`, chatRouter);
+  app2.use(`${env.API_PREFIX}/copilot`, aiRouter);
 }
 function createModuleRouter() {
   return (0, import_express13.Router)();
@@ -8634,42 +8843,52 @@ function createModuleRouter() {
 
 // src/app/create-app.ts
 function createApp() {
-  const app = (0, import_express14.default)();
-  app.disable("x-powered-by");
-  app.set("trust proxy", 1);
-  app.use(requestIdMiddleware);
-  app.use(
+  const app2 = (0, import_express14.default)();
+  app2.disable("x-powered-by");
+  app2.set("trust proxy", 1);
+  app2.use(requestIdMiddleware);
+  app2.use(
     (0, import_pino_http.default)({
       logger,
       customProps: (req) => ({ requestId: req.id })
     })
   );
-  app.use((0, import_helmet.default)());
-  app.use(
+  app2.use((0, import_helmet.default)());
+  app2.use(
     (0, import_cors.default)({
       origin: env.CORS_ORIGIN,
       credentials: true
     })
   );
-  app.use((0, import_compression.default)());
-  app.use(import_express14.default.json({ limit: "2mb" }));
-  app.use(import_express14.default.urlencoded({ extended: true, limit: "2mb" }));
-  app.use((0, import_cookie_parser.default)());
-  app.use(rateLimitMiddleware);
-  registerRoutes(app);
+  app2.use((0, import_compression.default)());
+  app2.use(import_express14.default.json({ limit: "2mb" }));
+  app2.use(import_express14.default.urlencoded({ extended: true, limit: "2mb" }));
+  app2.use((0, import_cookie_parser.default)());
+  app2.use(rateLimitMiddleware);
+  registerRoutes(app2);
   if (env.NODE_ENV === "production") {
-    const frontendDist = import_node_path.default.join(__dirname, "../../../frontend/dist");
-    app.use(import_express14.default.static(frontendDist));
-    app.get("*", (req, res, next) => {
-      if (req.path.startsWith(env.API_PREFIX)) {
-        return next();
-      }
-      res.sendFile(import_node_path.default.join(frontendDist, "index.html"));
-    });
+    const fs2 = require("fs");
+    let frontendDist = import_node_path.default.join(process.cwd(), "frontend", "dist");
+    if (!fs2.existsSync(frontendDist)) {
+      frontendDist = import_node_path.default.join(process.cwd(), "..", "frontend", "dist");
+    }
+    console.log("Frontend path:", frontendDist);
+    console.log("Exists:", fs2.existsSync(frontendDist));
+    if (fs2.existsSync(frontendDist)) {
+      app2.use(import_express14.default.static(frontendDist));
+      app2.get("*", (req, res, next) => {
+        if (req.path.startsWith(env.API_PREFIX)) {
+          return next();
+        }
+        res.sendFile(import_node_path.default.join(frontendDist, "index.html"));
+      });
+    } else {
+      console.warn("Frontend build not found:", frontendDist);
+    }
   }
-  app.use(notFoundMiddleware);
-  app.use(errorMiddleware);
-  return app;
+  app2.use(notFoundMiddleware);
+  app2.use(errorMiddleware);
+  return app2;
 }
 
 // src/core/cache/redis.ts
@@ -8683,8 +8902,8 @@ redis.on("error", (error) => logger.warn({ error }, "Redis connection error"));
 
 // src/server.ts
 async function bootstrap() {
-  const app = createApp();
-  const server = (0, import_node_http.createServer)(app);
+  const app2 = createApp();
+  const server = (0, import_node_http.createServer)(app2);
   server.listen(env.PORT, () => {
     logger.info({ port: env.PORT, env: env.NODE_ENV }, "KSP Intelligence OS backend started");
   });

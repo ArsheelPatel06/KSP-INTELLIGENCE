@@ -16,7 +16,7 @@ export async function confidenceScoringNode(state: typeof AiGraphState.State): P
     return { overallConfidence: 0 };
   }
 
-  const llm = new OllamaProvider();
+  const llm = getProvider();
   const evidenceText = state.evidence.map(e => `Agent: ${e.sourceAgent}\nFacts: ${e.facts.join(', ')}\nCitations: ${e.citations.length}`).join('\n\n');
   const conflictsText = state.resolvedConflicts?.join('\n') || 'None';
 

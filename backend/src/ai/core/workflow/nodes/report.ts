@@ -5,7 +5,7 @@ import { promptManager } from '../../../prompts/prompt-manager';
 
 export async function reportAgentNode(state: typeofAiGraphState): Promise<Partial<typeofAiGraphState>> {
   aiLogger.info('Executing Report Agent to generate PDF-ready Markdown', state.context);
-  const provider = new OllamaProvider();
+  const provider = getProvider();
 
   const queryMessage = state.messages && state.messages.length > 0 ? state.messages[state.messages.length - 1]?.content || '' : '';
 

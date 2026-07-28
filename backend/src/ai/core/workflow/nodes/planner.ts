@@ -15,7 +15,7 @@ const plannerSchema = z.object({
  * The Planner Node examines the incoming query and decides which agents need to execute.
  */
 export async function plannerNode(state: typeofAiGraphState): Promise<Partial<typeofAiGraphState>> {
-  const provider = new OllamaProvider();
+  const provider = getProvider();
   
   const lastMessage = state.messages[state.messages.length - 1];
   const query = lastMessage?.content?.toString() || '';

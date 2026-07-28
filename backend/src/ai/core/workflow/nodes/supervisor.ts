@@ -14,7 +14,7 @@ const SupervisorPlanSchema = z.object({
 });
 
 export async function supervisorNode(state: typeof AiGraphState.State): Promise<Partial<typeof AiGraphState.State>> {
-  const llm = new OllamaProvider();
+  const llm = getProvider();
   const userQuery = state.messages[state.messages.length - 1]?.content.toString() || '';
   
   // Combine context for the supervisor

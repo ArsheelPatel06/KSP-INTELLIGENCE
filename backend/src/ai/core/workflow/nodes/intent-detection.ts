@@ -19,7 +19,7 @@ const IntentSchema = z.object({
 });
 
 export async function intentDetectionNode(state: typeof AiGraphState.State): Promise<Partial<typeof AiGraphState.State>> {
-  const llm = new OllamaProvider();
+  const llm = getProvider();
   const userQuery = state.messages[state.messages.length - 1]?.content.toString() || '';
 
   try {

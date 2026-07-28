@@ -42,7 +42,6 @@ export class AuthService {
     await this.repository.createUser({
       kgid: input.kgid,
       firstName: input.firstName,
-      lastName: input.lastName,
       email: input.email,
       passwordHash,
       role: input.role,
