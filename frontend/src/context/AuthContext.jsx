@@ -40,36 +40,35 @@ export const AuthProvider = ({ children }) => {
       
       // Initialize Zoho Catalyst Session via Custom JWT Token
       if (window.catalyst && window.catalyst.auth) {
-        const getCustomTokenCallback = async () => {
-          try {
-            const customToken = await authService.getCatalystToken();
-            return {
-              client_id: customToken.client_id,
-              scopes: customToken.scopes,
-              jwt_token: customToken.jwt_token
-            };
-          } catch (e) {
-            console.warn("Could not fetch Catalyst custom token:", e);
-            throw e;
-          }
-        };
-        
         try {
-          await window.catalyst.auth.signinWithJwt(getCustomTokenCallback);
-          console.log("Catalyst Custom Auth Session Established");
-          
-          // Enable Push Notifications
-          if (window.catalyst.notification) {
-            window.catalyst.notification.enableNotification().then((resp) => {
-              console.log("Catalyst notifications enabled:", resp);
-              window.catalyst.notification.messageHandler = (msg) => {
-                console.log("Received Catalyst Notification:", msg);
-                // Dispatch a custom event so AppContext can pick it up
-                window.dispatchEvent(new CustomEvent('catalyst-notification', { detail: msg }));
+          const customToken = await authService.getCatalystToken();
+          if (customToken.custom_token === "MOCK_TOKEN") {
+            console.log("Catalyst is disabled in backend, skipping Web SDK init.");
+          } else {
+            const getCustomTokenCallback = async () => {
+              return {
+                client_id: customToken.client_id,
+                scopes: customToken.scopes,
+                jwt_token: customToken.custom_token || customToken.jwt_token
               };
-            }).catch(err => {
-              console.error("Failed to enable Catalyst notifications:", err);
-            });
+            };
+            
+            await window.catalyst.auth.signinWithJwt(getCustomTokenCallback);
+            console.log("Catalyst Custom Auth Session Established");
+            
+            // Enable Push Notifications
+            if (window.catalyst.notification) {
+              window.catalyst.notification.enableNotification().then((resp) => {
+                console.log("Catalyst notifications enabled:", resp);
+                window.catalyst.notification.messageHandler = (msg) => {
+                  console.log("Received Catalyst Notification:", msg);
+                  // Dispatch a custom event so AppContext can pick it up
+                  window.dispatchEvent(new CustomEvent('catalyst-notification', { detail: msg }));
+                };
+              }).catch(err => {
+                console.error("Failed to enable Catalyst notifications:", err);
+              });
+            }
           }
         } catch (catalystErr) {
           console.error("Catalyst authentication failed:", catalystErr);
