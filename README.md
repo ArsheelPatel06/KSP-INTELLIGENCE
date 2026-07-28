@@ -1,5 +1,7 @@
 # Sentinel: Intelligent Conversational AI & Crime Analytics Platform 🛡️
 
+**Live Preview:** [https://ksp-intelligence.onslate.com](https://ksp-intelligence.onslate.com)
+
 ![Sentinel Dashboard](frontend/public/gallery/Screenshot%202026-07-28%20at%204.42.48%20pm.png)
 
 ## The Challenge
