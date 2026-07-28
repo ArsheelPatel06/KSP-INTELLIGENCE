@@ -7,8 +7,23 @@ export const AiChatArea = ({ onSendMessage, onToggleWorkspace, workspaceOpen }) 
   const { messages, status, activeAgents, currentContext, setActiveTab } = useInvestigation();
   const [inputMessage, setInputMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [attachments, setAttachments] = useState([]);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const handleFileChange = (e) => {
+    if (e.target.files) {
+      setAttachments(prev => [...prev, ...Array.from(e.target.files)]);
+    }
+    // reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const removeAttachment = (index) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleViewClick = (type) => {
     const typeMap = {
@@ -47,6 +62,7 @@ export const AiChatArea = ({ onSendMessage, onToggleWorkspace, workspaceOpen }) 
     const classifiedIntent = IntentEngine.classify(inputMessage, currentContext);
     onSendMessage(inputMessage, classifiedIntent);
     setInputMessage('');
+    setAttachments([]);
   };
 
   const getSuggestions = () => {
@@ -243,6 +259,21 @@ export const AiChatArea = ({ onSendMessage, onToggleWorkspace, workspaceOpen }) 
         {/* Premium Input Bar */}
         <div className="rounded-[18px] border border-gray-200 bg-slate-50 focus-within:bg-white focus-within:shadow-[0_4px_20px_rgba(37,99,235,0.08)] focus-within:border-blue-300 transition-all">
           <form onSubmit={handleSend} className="flex flex-col">
+            {attachments.length > 0 && (
+              <div className="flex gap-2 px-4 pt-4 overflow-x-auto">
+                {attachments.map((file, i) => (
+                  <div key={i} className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-1.5 shrink-0 shadow-sm relative group">
+                    <div className="w-6 h-6 rounded bg-slate-100 flex items-center justify-center shrink-0">
+                      {file.type.startsWith('image/') ? <ImageIcon size={12} className="text-blue-500" /> : <FileText size={12} className="text-slate-500" />}
+                    </div>
+                    <div className="text-[12px] font-medium text-slate-700 truncate max-w-[120px]">{file.name}</div>
+                    <button type="button" onClick={() => removeAttachment(i)} className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      &times;
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <input 
               type="text" 
               value={inputMessage}
@@ -255,12 +286,12 @@ export const AiChatArea = ({ onSendMessage, onToggleWorkspace, workspaceOpen }) 
             <div className="flex items-center justify-between px-2 pb-1 pt-1">
               {/* Left Icons */}
               <div className="flex items-center gap-1.5">
-                <input type="file" ref={fileInputRef} multiple className="hidden" />
-                <button type="button" className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Attach Image"><ImageIcon size={18} /></button>
-                <button type="button" className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Attach PDF"><FileText size={18} /></button>
-                <button type="button" className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Attach Audio"><Mic size={18} /></button>
-                <button type="button" className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Attach Video"><Video size={18} /></button>
-                <button type="button" className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Use Camera"><Camera size={18} /></button>
+                <input type="file" ref={fileInputRef} multiple className="hidden" onChange={handleFileChange} />
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Attach Image"><ImageIcon size={18} /></button>
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Attach PDF"><FileText size={18} /></button>
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Attach Audio"><Mic size={18} /></button>
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Attach Video"><Video size={18} /></button>
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Use Camera"><Camera size={18} /></button>
               </div>
               
               {/* Right Action */}
