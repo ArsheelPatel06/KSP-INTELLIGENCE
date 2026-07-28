@@ -5,9 +5,14 @@ import * as catalyst from 'zcatalyst-sdk-node';
 let app: catalyst.CatalystApp | null = null;
 try {
   if (process.env.ZOHO_PROJECT_ID && process.env.ZOHO_CLIENT_ID) {
-    // Force India region for SDK because the project 96563000000018001 is physically located in India
-    process.env.X_ZOHO_CATALYST_ACCOUNTS_URL = 'https://accounts.zoho.in';
-    process.env.X_ZOHO_CATALYST_CONSOLE_URL = 'https://api.catalyst.zoho.in';
+    // Automatically configure region endpoints if the client ID belongs to India (.IN)
+    if (process.env.ZOHO_CLIENT_ID.includes('.IN')) {
+      process.env.X_ZOHO_CATALYST_ACCOUNTS_URL = 'https://accounts.zoho.in';
+      process.env.X_ZOHO_CATALYST_CONSOLE_URL = 'https://api.catalyst.zoho.in';
+    } else if (process.env.ZOHO_CLIENT_ID.includes('.EU')) {
+      process.env.X_ZOHO_CATALYST_ACCOUNTS_URL = 'https://accounts.zoho.eu';
+      process.env.X_ZOHO_CATALYST_CONSOLE_URL = 'https://api.catalyst.zoho.eu';
+    }
 
     app = catalyst.initializeApp({
       project_id: process.env.ZOHO_PROJECT_ID,
