@@ -20,3 +20,4 @@ authRouter.post(
   asyncHandler(authController.refresh),
 );
 authRouter.get('/me', authenticateMiddleware, asyncHandler(authController.me));
+authRouter.post('/logout', asyncHandler(authController.logout));

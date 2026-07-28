@@ -17,7 +17,7 @@ export class GroqProvider implements AiProvider {
 
   constructor() {
     this.client = new Groq({
-      apiKey: aiConfig.groq.apiKey,
+      apiKey: aiConfig.groq.apiKey || 'missing_key_fallback',
     });
   }
 

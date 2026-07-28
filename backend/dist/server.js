@@ -282,6 +282,9 @@ function refreshCookieOptions() {
 function setRefreshCookie(res, refreshToken) {
   res.cookie(env.AUTH_COOKIE_NAME, refreshToken, refreshCookieOptions());
 }
+function clearRefreshCookie(res) {
+  res.clearCookie(env.AUTH_COOKIE_NAME, refreshCookieOptions());
+}
 
 // src/modules/auth/controllers/auth.controller.ts
 var AuthController = class {
@@ -341,6 +344,10 @@ var AuthController = class {
       ...input.deliveryMode === "body" ? { refreshToken: result.tokens.refreshToken } : {},
       user: result.user
     });
+  };
+  logout = async (req, res) => {
+    clearRefreshCookie(res);
+    return ok(res, { message: "Logged out successfully" });
   };
   me = async (req, res) => {
     return ok(res, req.user);
@@ -1064,6 +1071,7 @@ authRouter.post(
   asyncHandler(authController.refresh)
 );
 authRouter.get("/me", authenticateMiddleware, asyncHandler(authController.me));
+authRouter.post("/logout", asyncHandler(authController.logout));
 
 // src/modules/cases/routes/cases.routes.ts
 var import_express4 = require("express");
@@ -6818,7 +6826,7 @@ var GroqProvider = class {
   client;
   constructor() {
     this.client = new import_groq_sdk.default({
-      apiKey: aiConfig.groq.apiKey
+      apiKey: aiConfig.groq.apiKey || "missing_key_fallback"
     });
   }
   async generateText(messages, options, context) {
@@ -6968,7 +6976,7 @@ function getProvider() {
   if (aiConfig.provider === "groq") {
     providerInstance = new GroqProvider();
   } else {
-    providerInstance = getProvider();
+    providerInstance = new OllamaProvider();
   }
   return providerInstance;
 }

@@ -9,7 +9,7 @@ export function getProvider() {
   if (aiConfig.provider === 'groq') {
     providerInstance = new GroqProvider();
   } else {
-    providerInstance = getProvider();
+    providerInstance = new OllamaProvider();
   }
   return providerInstance;
 }

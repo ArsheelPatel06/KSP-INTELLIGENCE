@@ -40,16 +40,20 @@ export function App() {
           <Route element={<RouteGuard />}>
             <Route path="/" element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
-            <Route path="ai-assistant" element={<AiAssistantPage />} />
-            <Route path="cases" element={<SearchCasesPage />} />
-            <Route path="cases/:id" element={<CaseDetailPage />} />
-            <Route path="analytics" element={<CrimeAnalyticsPage />} />
-            <Route path="map" element={<CrimeMapPage />} />
-            <Route path="network" element={<CriminalNetworkPage />} />
-            <Route path="reports" element={<ReportsPage />} />
-            <Route path="notifications" element={<NotificationsPage />} />
-            <Route path="admin" element={<AdminPanelPage />} />
+              <Route path="ai-assistant" element={<AiAssistantPage />} />
+              <Route path="cases" element={<SearchCasesPage />} />
+              <Route path="cases/:id" element={<CaseDetailPage />} />
+              <Route path="analytics" element={<CrimeAnalyticsPage />} />
+              <Route path="map" element={<CrimeMapPage />} />
+              <Route path="network" element={<CriminalNetworkPage />} />
+              <Route path="reports" element={<ReportsPage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
               <Route path="settings" element={<SettingsPage />} />
+              
+              {/* Admin Only Route */}
+              <Route element={<RouteGuard allowedRoles={['SUPER_ADMIN']} />}>
+                <Route path="admin" element={<AdminPanelPage />} />
+              </Route>
             </Route>
           </Route>
 

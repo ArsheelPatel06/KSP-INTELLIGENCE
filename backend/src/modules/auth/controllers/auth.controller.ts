@@ -4,7 +4,7 @@ import { AppError } from '../../../core/exceptions/app-error';
 import { ok } from '../../../core/response/api-response';
 import type { LoginRequestDto, RefreshTokenRequestDto } from '../dto/auth.dto';
 import type { AuthService } from '../services/auth.service';
-import { setRefreshCookie } from '../utils/cookie';
+import { setRefreshCookie, clearRefreshCookie } from '../utils/cookie';
 
 import type { CatalystService } from '../services/catalyst.service';
 
@@ -76,6 +76,12 @@ export class AuthController {
       ...(input.deliveryMode === 'body' ? { refreshToken: result.tokens.refreshToken } : {}),
       user: result.user,
     });
+  };
+
+  logout = async (req: Request, res: Response): Promise<Response> => {
+    // Optionally revoke the token in the DB here if needed
+    clearRefreshCookie(res);
+    return ok(res, { message: 'Logged out successfully' });
   };
 
   me = async (req: Request, res: Response): Promise<Response> => {

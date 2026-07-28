@@ -39,7 +39,7 @@ export const LoginPage = () => {
         {/* Demo Credentials Notice */}
         <div style={{ padding: '1rem 2rem 0 2rem' }}>
           <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '0.5rem', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: '#1E40AF', textAlign: 'center' }}>Hackathon Judges Login</p>
+            <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: '#1E40AF', textAlign: 'center' }}>Judges Login</p>
             <p style={{ margin: 0, fontSize: '0.875rem', color: '#1E3A8A', textAlign: 'center' }}>Username: <strong>admin</strong></p>
             <p style={{ margin: 0, fontSize: '0.875rem', color: '#1E3A8A', textAlign: 'center' }}>Password: <strong>Password123!</strong></p>
           </div>
