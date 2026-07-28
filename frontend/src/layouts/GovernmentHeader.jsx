@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Bell, Menu, Moon, Sun, Clock, FileText, User, Settings, LogOut, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export function GovernmentHeader() {
   const { isDarkMode, toggleDarkMode, sidebarCollapsed, setSidebarCollapsed, notifications, currentUser, markNotificationRead } = useApp();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
@@ -190,7 +192,7 @@ export function GovernmentHeader() {
                   <div onClick={() => { navigate('/settings'); setShowProfileDropdown(false); }} style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.875rem', color: 'var(--t-text-primary)' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'var(--t-bg-card-alt)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                     <Settings size={16} color="var(--t-text-secondary)" /> System Settings
                   </div>
-                  <div onClick={() => { navigate('/'); setShowProfileDropdown(false); }} style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.875rem', color: '#EF4444' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'var(--t-bg-card-alt)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <div onClick={() => { logout(); setShowProfileDropdown(false); }} style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.875rem', color: '#EF4444' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'var(--t-bg-card-alt)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                     <LogOut size={16} /> Secure Sign Out
                   </div>
                 </div>

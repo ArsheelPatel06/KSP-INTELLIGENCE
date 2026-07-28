@@ -3,12 +3,14 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { GovernmentHeader } from './GovernmentHeader';
 import { IntelligenceSidebar } from './IntelligenceSidebar';
 import { CommandPalette } from '../components/CommandPalette';
+import { useApp } from '../context/AppContext';
 
 // AppLayout uses CSS custom properties from index.css — no isDarkMode needed here
 // The <html data-theme> attribute set in AppContext drives all colours via var(--t-*)
 export function AppLayout() {
   const location = useLocation();
   const [showCopilot, setShowCopilot] = useState(false);
+  const { sidebarCollapsed } = useApp();
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: 'var(--t-bg-root)' }}>
@@ -23,9 +25,11 @@ export function AppLayout() {
       <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
         {/* Sidebar — scrolls internally */}
-        <div style={{ flexShrink: 0, height: '100%', overflowY: 'auto' }}>
-          <IntelligenceSidebar />
-        </div>
+        {!sidebarCollapsed && (
+          <div style={{ flexShrink: 0, height: '100%', overflowY: 'auto' }}>
+            <IntelligenceSidebar />
+          </div>
+        )}
 
         {/* Main content — scrolls internally */}
         <main style={{

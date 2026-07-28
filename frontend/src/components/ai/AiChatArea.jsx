@@ -117,7 +117,7 @@ export const AiChatArea = ({ onSendMessage, onToggleWorkspace, workspaceOpen }) 
                 { title: "Track KA01MX9234", desc: "Vehicle location tracking", icon: Car },
                 { title: "Find IMEI Activity", desc: "Device network analysis", icon: Network }
               ].map((ex, i) => (
-                <button key={i} onClick={() => setInputMessage(ex.title)} className="flex items-start gap-3 p-4 rounded-[16px] bg-white border border-gray-200 hover:border-blue-300 hover:shadow-[0_4px_12px_rgba(37,99,235,0.06)] transition-all text-left group">
+                <button key={i} onClick={() => { setInputMessage(''); onSendMessage(ex.title, IntentEngine.classify(ex.title)); }} className="flex items-start gap-3 p-4 rounded-[16px] bg-white border border-gray-200 hover:border-blue-300 hover:shadow-[0_4px_12px_rgba(37,99,235,0.06)] transition-all text-left group">
                    <div className="p-2 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-100 transition-colors">
                      <ex.icon size={16} />
                    </div>

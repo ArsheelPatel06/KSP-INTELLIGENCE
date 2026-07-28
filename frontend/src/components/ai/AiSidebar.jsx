@@ -1,14 +1,7 @@
 import React from 'react';
 import { Plus, Network, FileText, Clock, Car, ShieldAlert, ChevronLeft, ChevronRight, MessageSquare, Bot } from 'lucide-react';
 
-const smartTemplates = [
-  { label: "Find Mastermind", icon: Network },
-  { label: "Generate Timeline", icon: Clock },
-  { label: "Track Vehicle", icon: Car },
-  { label: "Generate Report", icon: FileText },
-  { label: "Show Network", icon: Network },
-  { label: "IPC Analysis", icon: ShieldAlert },
-];
+
 
 const history = [
   { id: "Cyber Fraud Cluster", msgs: 14, time: "3 mins ago", officer: "DCP Rathore", active: true },
@@ -49,11 +42,6 @@ export const AiSidebar = ({ isOpen, onToggle, onNewInvestigation, onHistoryClick
           <button onClick={onNewInvestigation} className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white hover:bg-blue-700 transition-colors" title="New Investigation">
             <Plus size={16} />
           </button>
-          {smartTemplates.slice(0, 5).map((t, i) => (
-            <button key={i} onClick={() => onTemplateClick(t.label)} className="w-8 h-8 rounded-lg bg-slate-50 border border-gray-200 flex items-center justify-center text-blue-500 hover:bg-blue-50 hover:border-blue-300 transition-colors" title={t.label}>
-              <t.icon size={14} />
-            </button>
-          ))}
         </div>
       )}
 
@@ -75,25 +63,6 @@ export const AiSidebar = ({ isOpen, onToggle, onNewInvestigation, onHistoryClick
                 <div className="text-[10px] text-blue-200 mt-0.5">FIR • Person • Vehicle</div>
               </div>
             </button>
-          </div>
-
-          {/* Smart Templates */}
-          <div className="p-3 border-b border-gray-100">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 px-1">Templates</div>
-            <div className="flex flex-col gap-1">
-              {smartTemplates.map((t, i) => (
-                <button
-                  key={i}
-                  onClick={() => onTemplateClick(t.label)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-[10px] hover:bg-blue-50 hover:text-blue-700 text-slate-600 text-[13px] font-medium transition-all group text-left"
-                >
-                  <div className="w-6 h-6 rounded-lg bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center shrink-0 transition-colors">
-                    <t.icon size={12} className="text-blue-500" />
-                  </div>
-                  {t.label}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* History */}
