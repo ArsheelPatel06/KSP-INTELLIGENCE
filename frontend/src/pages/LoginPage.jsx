@@ -8,7 +8,7 @@ export const LoginPage = () => {
   const navigate = useNavigate();
 
   const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('Password123!');
+  const [password, setPassword] = useState('Admin@123');
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState('Admin');
 
@@ -41,7 +41,7 @@ export const LoginPage = () => {
           <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '0.5rem', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: '#1E40AF', textAlign: 'center' }}>Judges Login</p>
             <p style={{ margin: 0, fontSize: '0.875rem', color: '#1E3A8A', textAlign: 'center' }}>Username: <strong>admin</strong></p>
-            <p style={{ margin: 0, fontSize: '0.875rem', color: '#1E3A8A', textAlign: 'center' }}>Password: <strong>Password123!</strong></p>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: '#1E3A8A', textAlign: 'center' }}>Password: <strong>Admin@123</strong></p>
           </div>
         </div>
 

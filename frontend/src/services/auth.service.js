@@ -49,11 +49,12 @@ export const authService = {
   logout: async () => {
     try {
       await api.post('/auth/logout');
+    } catch (error) {
+      console.error(error);
+    } finally {
       localStorage.removeItem('ksp_access_token');
       localStorage.removeItem('ksp_refresh_token');
       window.location.href = '/login';
-    } catch (error) {
-      console.error(error);
     }
   },
 
