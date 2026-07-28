@@ -4,14 +4,19 @@ import * as catalyst from 'zcatalyst-sdk-node';
 // Since it is running on Railway, it needs standard Catalyst credentials via env.
 let app: catalyst.CatalystApp | null = null;
 try {
-  app = catalyst.initialize({
-    type: catalyst.type.advancedio,
-    project_id: process.env.ZOHO_PROJECT_ID,
-    client_id: process.env.ZOHO_CLIENT_ID,
-    client_secret: process.env.ZOHO_CLIENT_SECRET,
-    refresh_token: process.env.ZOHO_REFRESH_TOKEN
-  });
-} catch (e) {
+  if (process.env.ZOHO_PROJECT_ID && process.env.ZOHO_CLIENT_ID) {
+    app = catalyst.initializeApp({
+      project_id: process.env.ZOHO_PROJECT_ID,
+      project_key: process.env.ZOHO_PROJECT_KEY || 'dummy_key',
+      environment: 'Development',
+      credential: catalyst.credential.refreshToken({
+        client_id: process.env.ZOHO_CLIENT_ID,
+        client_secret: process.env.ZOHO_CLIENT_SECRET,
+        refresh_token: process.env.ZOHO_REFRESH_TOKEN
+      })
+    });
+  }
+} catch (e: any) {
   console.warn("Catalyst SDK could not initialize. Please ensure ZOHO_* environment variables are set in Railway.", e);
 }
 
